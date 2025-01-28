@@ -98,7 +98,7 @@
             <td>Tertiary</td>
             <td>
                 Hard to Kill: <font class="buff">450 -> 600</font> Incap Health <br>
-                Extreme Conditioning: <font class="buff">10% -> 12%</font> bonus speed
+                Extreme Conditioning: <font class="buff">10% -> 14%</font> bonus speed
             </td>
             <td><font class="nerf">Remove</font> Little Leaguer: Spawn a baseball bat</td>
             <td></td>
