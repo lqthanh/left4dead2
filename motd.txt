@@ -15,6 +15,9 @@
         table {
             border-collapse: collapse;
         }
+        th, td {
+            padding: 8px;
+        }
         tr, th, td {
             border: 1px solid #dddddd;
         }
@@ -69,14 +72,25 @@
         </tr>
         <tr>
             <td>Secondary</td>
-            <td></td>
+            <td>
+                Unbreakable: <font class="buff">20 -> 40</font> bonus HP <br>
+                Spirit (self-reviving): <br>
+                + Cooldown: <font class="buff">60 -> 40</font> second <br>
+                + Bonus health buffer: <font class="buff">10 -> 50</font> <br>
+                Helping Hand: <br>
+                + Revive: <font class="buff">3 -> 2</font> second <br>
+                + Bonus health buffer: <font class="buff">15 -> 25</font> <br>
+            </td>
             <td></td>
             <td></td>
         </tr>
         <tr>
             <td>Tertiary</td>
-            <td></td>
-            <td></td>
+            <td>
+                Hard to Kill: <font class="buff">450 -> 600</font> Incap Health <br>
+                Extreme Conditioning: <font class="buff">10% -> 12%</font> bonus speed
+            </td>
+            <td><font class="nerf">Remove</font> Little Leaguer: Spawn a baseball bat</td>
             <td></td>
         </tr>
         <tr>
@@ -112,7 +126,7 @@
                 Tank HP: <font class="buff">8000 All Difficult</font>
             </td>
             <td>
-                HP Increase<font class="nerf">25% -> 12%</font> per extra player
+                HP Increase <font class="nerf">25% -> 12%</font> per extra player
             </td>
             <td>
                 Add <font class="adjs">Mutants Tank</font>
