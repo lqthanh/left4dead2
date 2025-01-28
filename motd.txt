@@ -31,6 +31,7 @@
             color: orange;
         }
     </style>
+    <h1>Patch 1.0:<img style="vertical-align: -15px;" height="80px" src="https://res.cloudinary.com/dslzbnfu8/image/upload/v1694625155/samples/image/KasumizawaMiyuFasterNoBg.gif"></h1>
     <table>
         <tr>
             <th colspan="2">Category</th>
