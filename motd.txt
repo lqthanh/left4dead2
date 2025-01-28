@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MOTD</title>
+</head>
+<body>
+    <style>
+        body {
+            background-color: black; 
+            color: white; 
+            font-family: sans-serif;
+        }
+        table {
+            border-collapse: collapse;
+        }
+        tr, th, td {
+            border: 1px solid #dddddd;
+        }
+        .buff {
+            color: green;
+        }
+        .nerf {
+            color: red;
+        }
+        .adjs {
+            color: orange;
+        }
+    </style>
+    <table>
+        <tr>
+            <th colspan="2">Category</th>
+            <th><font class="buff">▲ Buff</font></th>
+            <th><font class="nerf">▼ Nerf</font></th>
+            <th><font class="adjs">↻ Adjust</font></th>
+        </tr>
+        <tr>
+            <td colspan="2">Survivor</td>
+            <td>
+                Incap Health: <font class="buff">300 -> 450</font> <br>
+                Revive Health: <font class="buff">30 -> 50</font> <br>
+                First aid kit use duration: <font class="buff">5 -> 3</font> (second) <br>
+                First aid kit heal <font class="buff">full HP</font> <br>
+                Enable <font class="buff">Crawling</font>
+            </td>
+            <td></td>
+            <td>
+                Add <font class="adjs">Custom Weapon Base</font> <br>
+                Add <font class="adjs">Custom Weapon Lab</font> <br>
+                Friendly Fire <font class="adjs">All Difficult: 20% Weapon DMG</font> <br>
+                Burn Factor <font class="adjs">All Difficult: 30% Burn DMG</font>
+            </td>
+        </tr>
+        <tr>
+            <td rowspan="3">Perks</td>
+            <td>Primary</td>
+            <td>
+                Stopping Power: <font class="buff">25% -> 30%</font> bonus damage (except melee weapons)
+            </td>
+            <td>
+                <font class="nerf">Remove</font> Sleight of Hand: 75% bonus reload speed
+            </td>
+            <td>
+                Double Tap: <br>
+                + <font class="buff">50% -> 75%</font> shoot speed (SEMI-auto only) <br>
+                + <font class="nerf">25% -> 0%</font> bonus reload speed
+            </td>
+        </tr>
+        <tr>
+            <td>Secondary</td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Tertiary</td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td rowspan="3">Infected</td>
+            <td>Common</td>
+            <td>
+                Common HP: <font class="buff">50 -> 60</font>
+            </td>
+            <td>
+                Spawn Rate Increase <font class="nerf">25% -> 12%</font> per extra player
+            </td>
+            <td>
+                Add <font class="adjs">Mutants Infected</font>
+            </td>
+        </tr>
+        <tr>
+            <td>Special</td>
+            <td>
+                Spitter HP: <font class="buff">100 -> 150</font>
+            </td>
+            <td>
+                Charger HP: <font class="nerf">600 -> 450</font> <br>
+                Jockey HP: <font class="nerf">325 -> 300</font> <br>
+                Smoker HP: <font class="nerf">250 -> 220</font>
+            </td>
+            <td>
+                Spawn <font class="adjs">1 more per extra player</font>
+            </td>
+        </tr>
+        <tr>
+            <td>Tank</td>
+            <td>
+                Tank HP: <font class="buff">8000 All Difficult</font>
+            </td>
+            <td>
+                HP Increase<font class="nerf">25% -> 12%</font> per extra player
+            </td>
+            <td>
+                Add <font class="adjs">Mutants Tank</font>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
