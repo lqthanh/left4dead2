@@ -68,6 +68,35 @@
             <td></td>
             <td></td>
         </tr>
+        <tr>
+            <td rowspan="3">Infected</td>
+            <td>Common</td>
+            <td></td>
+            <td>
+                Spawn Rate Increase <font class="nerf">12% -> 10%</font> per extra player
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Special</td>
+            <td>
+                Hunter HP: <font class="buff">250 -> 275</font> <br>
+                Spitter HP: <font class="buff">150 -> 175</font> 
+            </td>
+            <td>
+                Jockey HP: <font class="nerf">300 -> 275</font> <br>
+                Smoker HP: <font class="nerf">220 -> 200</font>
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Tank</td>
+            <td></td>
+            <td>
+                HP Increase <font class="nerf">12% -> 10%</font> per extra player
+            </td>
+            <td></td>
+        </tr>
     </table>
     <hr>
     <h1>
