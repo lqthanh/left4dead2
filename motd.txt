@@ -31,7 +31,49 @@
             color: orange;
         }
     </style>
-    <h1>Patch 1.0:<img style="vertical-align: -15px;" height="80px" src="https://res.cloudinary.com/dslzbnfu8/image/upload/v1694625155/samples/image/KasumizawaMiyuFasterNoBg.gif"></h1>
+    <hr>
+    <h1>
+        Patch 1.1:
+        <img style="vertical-align: -15px;" height="80px" src="https://res.cloudinary.com/dslzbnfu8/image/upload/v1694625155/samples/image/KasumizawaMiyuFasterNoBg.gif">
+    </h1>
+    <table>
+        <tr>
+            <th colspan="2">Category</th>
+            <th><font class="buff">▲ Buff</font></th>
+            <th><font class="nerf">▼ Nerf</font></th>
+            <th><font class="adjs">↻ Adjust</font></th>
+        </tr>
+        <tr>
+            <td rowspan="3">Perks</td>
+            <td>1. Primary</td>
+            <td>
+                1. Stopping Power: <font class="buff">25% -> 30%</font> bonus damage (except melee weapons)
+            </td>
+            <td></td>
+            <td></td>
+        </tr>
+            <td>2. Secondary</td>
+            <td>
+                1. Unbreakable: <font class="buff">20 -> 40</font> bonus HP <br>
+                2. Spirit (self-reviving): Cooldown <font class="buff">60 -> 40</font> second <br>
+                4. Martial Artist: <font class="buff">Remove Shove Cooldown</font>
+            </td>
+            <td></td>
+            <td></td>
+        <tr>
+            <td>3. Tertiary</td>
+            <td>
+                4. Extreme Conditioning: <font class="buff">12% -> 15%</font> bonus speed
+            </td>
+            <td></td>
+            <td></td>
+        </tr>
+    </table>
+    <hr>
+    <h1>
+        Patch 1.0:
+        <img style="vertical-align: -15px;" height="80px" src="https://res.cloudinary.com/dslzbnfu8/image/upload/v1694625155/samples/image/KasumizawaMiyuFasterNoBg.gif">
+    </h1>
     <table>
         <tr>
             <th colspan="2">Category</th>
@@ -58,7 +100,9 @@
             <td colspan="2">Weapon</td>
             <td>
                 M60 and Grenade Laucher <font class="buff">ammo refillable</font> <br>
-                M60 reverse ammo <font class="buff">0 -> 210</font>
+                M60 reverse ammo <font class="buff">0 -> 210</font> <br>
+		        Grenade Laucher reverse ammo <font class="buff">30 -> 36</font> <br>
+		        <font class="adjs">Not effect by Perk - Tertiary.Pack Rat(Carry more ammo)</font>
             </td>
             <td></td>
             <td>
@@ -68,40 +112,35 @@
         </tr>
         <tr>
             <td rowspan="3">Perks</td>
-            <td>Primary</td>
+            <td>1. Primary</td>
+            <td></td>
             <td>
-                Stopping Power: <font class="buff">25% -> 30%</font> bonus damage (except melee weapons)
+                <font class="nerf">Remove</font> 3. Sleight of Hand: 75% bonus reload speed
             </td>
             <td>
-                <font class="nerf">Remove</font> Sleight of Hand: 75% bonus reload speed
-            </td>
-            <td>
-                Double Tap: <br>
+                2. Double Tap: <br>
                 + <font class="buff">50% -> 75%</font> shoot speed (SEMI-auto only) <br>
                 + <font class="nerf">25% -> 0%</font> bonus reload speed
             </td>
         </tr>
         <tr>
-            <td>Secondary</td>
+            <td>2. Secondary</td>
             <td>
-                Unbreakable: <font class="buff">20 -> 40</font> bonus HP <br>
-                Spirit (self-reviving): <br>
-                + Cooldown: <font class="buff">60 -> 40</font> second <br>
-                + Bonus health buffer: <font class="buff">10 -> 50</font> <br>
-                Helping Hand: <br>
+                2. Spirit (self-reviving): Bonus health buffer <font class="buff">10 -> 50</font> <br>
+                3. Helping Hand: <br>
                 + Revive: <font class="buff">3 -> 2</font> second <br>
-                + Bonus health buffer: <font class="buff">15 -> 25</font> <br>
+                + Bonus health buffer: <font class="buff">15 -> 25</font>
             </td>
             <td></td>
             <td></td>
         </tr>
         <tr>
-            <td>Tertiary</td>
+            <td>3. Tertiary</td>
             <td>
-                Hard to Kill: <font class="buff">450 -> 600</font> Incap Health <br>
-                Extreme Conditioning: <font class="buff">10% -> 15%</font> bonus speed
+                3. Hard to Kill: <font class="buff">450 -> 600</font> Incap Health <br>
+                4. Extreme Conditioning: <font class="buff">10% -> 12%</font> bonus speed
             </td>
-            <td><font class="nerf">Remove</font> Little Leaguer: Spawn a baseball bat</td>
+            <td><font class="nerf">Remove</font> 5. Little Leaguer: Spawn a baseball bat</td>
             <td></td>
         </tr>
         <tr>
