@@ -54,7 +54,7 @@
         </tr>
             <td>2. Secondary</td>
             <td>
-                1. Unbreakable: <font class="buff">20 -> 40</font> bonus HP <br>
+                1. Unbreakable: <font class="buff">20 -> 40</font> bonus Max HP <br>
                 2. Spirit (self-reviving): Cooldown <font class="buff">60 -> 40</font> second <br>
                 4. Martial Artist: <font class="buff">Remove Shove Cooldown</font>
             </td>
