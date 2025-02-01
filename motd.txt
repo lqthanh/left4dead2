@@ -63,6 +63,7 @@
         <tr>
             <td>3. Tertiary</td>
             <td>
+                1. Pack Rat: <font class="buff">25% -> 40%</font> bonus ammo when pick weapon<br>
                 4. Extreme Conditioning: <font class="buff">12% -> 15%</font> bonus speed
             </td>
             <td></td>
@@ -93,7 +94,8 @@
             <td>Tank</td>
             <td></td>
             <td>
-                HP Increase <font class="nerf">12% -> 10%</font> per extra player
+                HP Increase <font class="nerf">12% -> 10%</font> per extra player <br>
+		        Tank HP: <font class="nerf">8000 -> 7000</font> All Difficult
             </td>
             <td></td>
         </tr>
