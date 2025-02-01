@@ -95,7 +95,6 @@
             <td></td>
             <td>
                 HP Increase <font class="nerf">12% -> 10%</font> per extra player <br>
-		        Tank HP: <font class="nerf">8000 -> 7000</font> All Difficult
             </td>
             <td></td>
         </tr>
