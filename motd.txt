@@ -11,6 +11,7 @@
             background-color: black; 
             color: white; 
             font-family: sans-serif;
+            font-size: 13px;
         }
         table {
             border-collapse: collapse;
@@ -31,78 +32,8 @@
             color: orange;
         }
     </style>
-    <hr>
     <h1>
-        Patch 1.1:
-        <img style="vertical-align: -15px;" height="80px" src="https://res.cloudinary.com/dslzbnfu8/image/upload/v1694625155/samples/image/KasumizawaMiyuFasterNoBg.gif">
-    </h1>
-    <table>
-        <tr>
-            <th colspan="2">Category</th>
-            <th><font class="buff">▲ Buff</font></th>
-            <th><font class="nerf">▼ Nerf</font></th>
-            <th><font class="adjs">↻ Adjust</font></th>
-        </tr>
-        <tr>
-            <td rowspan="3">Perks</td>
-            <td>1. Primary</td>
-            <td>
-                1. Stopping Power: <font class="buff">25% -> 30%</font> bonus damage (except melee weapons)
-            </td>
-            <td></td>
-            <td></td>
-        </tr>
-            <td>2. Secondary</td>
-            <td>
-                1. Unbreakable: <font class="buff">20 -> 40</font> bonus Max HP <br>
-                2. Spirit (self-reviving): Cooldown <font class="buff">60 -> 40</font> second <br>
-                4. Martial Artist: <font class="buff">Remove Shove Cooldown</font>
-            </td>
-            <td></td>
-            <td></td>
-        <tr>
-            <td>3. Tertiary</td>
-            <td>
-                1. Pack Rat: <font class="buff">25% -> 40%</font> bonus ammo when pick weapon<br>
-                4. Extreme Conditioning: <font class="buff">12% -> 15%</font> bonus speed
-            </td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td rowspan="3">Infected</td>
-            <td>Common</td>
-            <td></td>
-            <td>
-                Spawn Rate Increase <font class="nerf">12% -> 10%</font> per extra player
-            </td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>Special</td>
-            <td>
-                Hunter HP: <font class="buff">250 -> 275</font> <br>
-                Spitter HP: <font class="buff">150 -> 175</font> 
-            </td>
-            <td>
-                Jockey HP: <font class="nerf">300 -> 275</font> <br>
-                Smoker HP: <font class="nerf">220 -> 200</font>
-            </td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>Tank</td>
-            <td></td>
-            <td>
-                HP Increase <font class="nerf">12% -> 10%</font> per extra player <br>
-            </td>
-            <td></td>
-        </tr>
-    </table>
-    <hr>
-    <h1>
-        Patch 1.0:
-        <img style="vertical-align: -15px;" height="80px" src="https://res.cloudinary.com/dslzbnfu8/image/upload/v1694625155/samples/image/KasumizawaMiyuFasterNoBg.gif">
+        Patch <img style="vertical-align: -15px;" height="80px" src="https://res.cloudinary.com/dslzbnfu8/image/upload/v1694625155/samples/image/KasumizawaMiyuFasterNoBg.gif"> :
     </h1>
     <table>
         <tr>
@@ -143,23 +74,26 @@
         <tr>
             <td rowspan="3">Perks</td>
             <td>1. Primary</td>
-            <td></td>
+            <td>
+                1. Stopping Power: <font class="buff">25% -> 30%</font> bonus damage (except melee weapons)
+            </td>
             <td>
                 <font class="nerf">Remove</font> 3. Sleight of Hand: 75% bonus reload speed
             </td>
             <td>
-                2. Double Tap: <br>
-                + <font class="buff">50% -> 75%</font> shoot speed (SEMI-auto only) <br>
-                + <font class="nerf">25% -> 0%</font> bonus reload speed
+                2. Double Tap: <font class="buff">50% -> 75%</font> shoot speed (SEMI-auto only) <br>
+                2. Double Tap: <font class="nerf">25% -> 0%</font> bonus reload speed
             </td>
         </tr>
         <tr>
             <td>2. Secondary</td>
             <td>
+                1. Unbreakable: <font class="buff">20 -> 40</font> bonus Max HP <br>
+                2. Spirit (self-reviving): Cooldown <font class="buff">60 -> 40</font> second <br>
                 2. Spirit (self-reviving): Bonus health buffer <font class="buff">10 -> 50</font> <br>
-                3. Helping Hand: <br>
-                + Revive: <font class="buff">3 -> 2</font> second <br>
-                + Bonus health buffer: <font class="buff">15 -> 25</font>
+                3. Helping Hand: Revive <font class="buff">3 -> 2</font> second <br>
+                3. Helping Hand: Bonus health buffer <font class="buff">15 -> 25</font> <br>
+                4. Martial Artist: <font class="buff">Remove Shove Cooldown</font>
             </td>
             <td></td>
             <td></td>
@@ -167,8 +101,9 @@
         <tr>
             <td>3. Tertiary</td>
             <td>
+                1. Pack Rat: <font class="buff">25% -> 40%</font> bonus ammo when pick weapon<br>
                 3. Hard to Kill: <font class="buff">450 -> 600</font> Incap Health <br>
-                4. Extreme Conditioning: <font class="buff">10% -> 12%</font> bonus speed
+                4. Extreme Conditioning: <font class="buff">10% -> 15%</font> bonus speed
             </td>
             <td><font class="nerf">Remove</font> 5. Little Leaguer: Spawn a baseball bat</td>
             <td></td>
@@ -179,22 +114,22 @@
             <td>
                 Common HP: <font class="buff">50 -> 60</font>
             </td>
+            <td></td>
             <td>
-                Spawn Rate Increase <font class="nerf">25% -> 12%</font> per extra player
-            </td>
-            <td>
+                Spawn Rate <font class="adjs">Increase <font class="nerf">25% -> 18%</font> per extra player</font> <br>
                 Add <font class="adjs">Mutants Infected</font>
             </td>
         </tr>
         <tr>
             <td>Special</td>
             <td>
-                Spitter HP: <font class="buff">100 -> 150</font>
+                Hunter HP: <font class="buff">250 -> 275</font> <br>
+                Spitter HP: <font class="buff">100 -> 175</font>
             </td>
             <td>
                 Charger HP: <font class="nerf">600 -> 450</font> <br>
-                Jockey HP: <font class="nerf">325 -> 300</font> <br>
-                Smoker HP: <font class="nerf">250 -> 220</font>
+                Jockey HP: <font class="nerf">325 -> 275</font> <br>
+                Smoker HP: <font class="nerf">250 -> 200</font>
             </td>
             <td>
                 Spawn <font class="adjs">1 more per extra player</font>
@@ -205,10 +140,9 @@
             <td>
                 Tank HP: <font class="buff">8000 All Difficult</font>
             </td>
+            <td></td>
             <td>
-                HP Increase <font class="nerf">25% -> 12%</font> per extra player
-            </td>
-            <td>
+                HP <font class="adjs">Increase <font class="nerf">25% -> 18%</font> per extra player</font> <br>
                 Add <font class="adjs">Mutants Tank</font>
             </td>
         </tr>
