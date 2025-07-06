@@ -41,6 +41,8 @@
         <li><a href="#patch.1.0">Patch 1.0</a></li>
     </ul>
 
+    <hr>
+
     <h1 id="patch.1.1">Patch 1.1:</h1>
     <table>
         <tr>
@@ -82,7 +84,7 @@
         </tr>
     </table>
 
-    <hr>
+    <br><hr>
 
     <h1  id="patch.1.0">Patch 1.0:</h1>
     <table>
