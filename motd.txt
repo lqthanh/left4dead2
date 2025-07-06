@@ -13,6 +13,9 @@
             font-family: sans-serif;
             font-size: 13px;
         }
+        a {
+            color: white; 
+        }
         table {
             border-collapse: collapse;
         }
@@ -23,7 +26,7 @@
             border: 1px solid #dddddd;
         }
         .buff {
-            color: green;
+            color: #00ff00;
         }
         .nerf {
             color: red;
@@ -32,9 +35,56 @@
             color: orange;
         }
     </style>
-    <h1>
-        Patch <img style="vertical-align: -15px;" height="80px" src="https://res.cloudinary.com/dslzbnfu8/image/upload/v1694625155/samples/image/KasumizawaMiyuFasterNoBg.gif"> :
-    </h1>
+
+    <ul>
+        <li><a href="#patch.1.1">Patch 1.1</a></li>
+        <li><a href="#patch.1.0">Patch 1.0</a></li>
+    </ul>
+
+    <h1 id="patch.1.1">Patch 1.1:</h1>
+    <table>
+        <tr>
+            <th colspan="2">Category</th>
+            <th><font class="buff">▲ Buff</font></th>
+            <th><font class="nerf">▼ Nerf</font></th>
+            <th><font class="adjs">↻ Adjust</font></th>
+        </tr>
+        <tr>
+            <td colspan="2">Survivor</td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td colspan="2">Weapon</td>
+            <td>SCAR <font class="buff">auto mode</font></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td rowspan="3">Perks</td>
+            <td>1. Primary</td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>2. Secondary</td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>3. Tertiary</td>
+            <td>1. Pack Rat: <font class="buff">fix not get bonus ammo when pick from Ammunition piles</font></td>
+            <td></td>
+            <td></td>
+        </tr>
+    </table>
+
+    <hr>
+
+    <h1  id="patch.1.0">Patch 1.0:</h1>
     <table>
         <tr>
             <th colspan="2">Category</th>
@@ -75,24 +125,19 @@
             <td rowspan="3">Perks</td>
             <td>1. Primary</td>
             <td>
-                1. Stopping Power: <font class="buff">25% -> 30%</font> bonus damage (except melee weapons)
+                1. Stopping Power: <font class="buff">25% -> 30%</font> bonus damage (except melee weapons) <br>
+                2. Double Tap: <font class="buff">50% -> 70%</font> shoot speed (SEMI-auto only), <font class="buff">25% -> 30%</font> bonus reload speed <br>
+                3. Sleight of Hand: <font class="buff">75% -> 80%</font> bonus reload speed
             </td>
-            <td>
-                <font class="nerf">Remove</font> 3. Sleight of Hand: 75% bonus reload speed
-            </td>
-            <td>
-                2. Double Tap: <font class="buff">50% -> 75%</font> shoot speed (SEMI-auto only) <br>
-                2. Double Tap: <font class="nerf">25% -> 0%</font> bonus reload speed
-            </td>
+            <td></td>
+            <td></td>
         </tr>
         <tr>
             <td>2. Secondary</td>
             <td>
                 1. Unbreakable: <font class="buff">20 -> 40</font> bonus Max HP <br>
-                2. Spirit (self-reviving): Cooldown <font class="buff">60 -> 40</font> second <br>
-                2. Spirit (self-reviving): Bonus health buffer <font class="buff">10 -> 50</font> <br>
-                3. Helping Hand: Revive <font class="buff">3 -> 2</font> second <br>
-                3. Helping Hand: Bonus health buffer <font class="buff">15 -> 25</font> <br>
+                2. Spirit (self-reviving): Cooldown <font class="buff">60 -> 40</font> second, Bonus health buffer <font class="buff">10 -> 50</font> <br>
+                3. Helping Hand: Revive <font class="buff">3 -> 2</font> second, Bonus health buffer <font class="buff">15 -> 25</font> <br>
                 4. Martial Artist: <font class="buff">Remove Shove Cooldown</font>
             </td>
             <td></td>
@@ -116,7 +161,7 @@
             </td>
             <td></td>
             <td>
-                Spawn Rate <font class="adjs">Increase <font class="nerf">25% -> 18%</font> per extra player</font> <br>
+                Spawn Rate <font class="adjs">Increase <font class="nerf">25% -> 20%</font> per extra player</font> <br>
                 Add <font class="adjs">Mutants Infected</font>
             </td>
         </tr>
@@ -142,7 +187,7 @@
             </td>
             <td></td>
             <td>
-                HP <font class="adjs">Increase <font class="nerf">25% -> 18%</font> per extra player</font> <br>
+                HP <font class="adjs">Increase <font class="nerf">25% -> 20%</font> per extra player</font> <br>
                 Add <font class="adjs">Mutants Tank</font>
             </td>
         </tr>
