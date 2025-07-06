@@ -78,7 +78,10 @@
         </tr>
         <tr>
             <td>3. Tertiary</td>
-            <td>1. Pack Rat: <font class="buff">fix not get bonus ammo when pick from Ammunition piles</font></td>
+            <td>
+                1. Pack Rat: <font class="buff">fix not get bonus ammo when pick from Ammunition piles</font> <br>
+                2. Chem Reliant: Bonus health when taking pills <font class="buff">10 -> 40</font>
+            </td>
             <td></td>
             <td></td>
         </tr>
@@ -113,14 +116,12 @@
             <td colspan="2">Weapon</td>
             <td>
                 M60 and Grenade Laucher <font class="buff">ammo refillable</font> <br>
-                M60 reverse ammo <font class="buff">0 -> 210</font> <br>
-		        Grenade Laucher reverse ammo <font class="buff">30 -> 36</font> <br>
-		        <font class="adjs">Not effect by Perk - Tertiary.Pack Rat(Carry more ammo)</font>
+                M60 reverse ammo <font class="buff">0 -> 210 <font class="adjs">(Not effect by Pack Rat)</font></font> <br>
+		        Grenade Laucher reverse ammo <font class="buff">30 -> 36 <font class="adjs">(Not effect by Pack Rat)</font></font> <br>
             </td>
             <td></td>
             <td>
                 Add <font class="adjs">Custom Weapon Base (Secondary Weapon)</font> <br>
-                Add <font class="adjs">Custom Weapon Lab (Primary Weapon)</font>
             </td>
         </tr>
         <tr>
