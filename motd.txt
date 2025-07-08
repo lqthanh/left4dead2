@@ -7,14 +7,18 @@
 </head>
 <body>
     <style>
+        html {
+            scroll-behavior: smooth;
+        }
         body {
             background-color: black; 
             color: white; 
             font-family: sans-serif;
-            font-size: 13px;
+            font-size: 12px;
         }
         a {
             color: white; 
+            font-size: 20px;
         }
         table {
             border-collapse: collapse;
@@ -25,6 +29,13 @@
         tr, th, td {
             border: 1px solid #dddddd;
         }
+        ul {
+            margin-block: 4px;
+            padding-inline: 14px;
+        }
+        ul > ul {
+            margin-block: 0px;
+        }
         .buff {
             color: #00ff00;
         }
@@ -33,6 +44,12 @@
         }
         .adjs {
             color: orange;
+        }
+        .add {
+            color: yellow;
+        }
+        .add-plus {
+            font-size: 14px
         }
     </style>
 
@@ -50,16 +67,23 @@
             <th><font class="buff">▲ Buff</font></th>
             <th><font class="nerf">▼ Nerf</font></th>
             <th><font class="adjs">↻ Adjust</font></th>
+            <th><font class="add"><font class="add-plus">+</font> Add</font></th>
         </tr>
         <tr>
             <td colspan="2">Survivor</td>
             <td></td>
             <td></td>
             <td></td>
+            <td></td>
         </tr>
         <tr>
             <td colspan="2">Weapon</td>
-            <td>SCAR <font class="buff">auto mode</font></td>
+            <td>
+                <ul>
+                    <li>SCAR <font class="buff">auto mode</font></li>
+                </ul>
+            </td>
+            <td></td>
             <td></td>
             <td></td>
         </tr>
@@ -69,9 +93,11 @@
             <td></td>
             <td></td>
             <td></td>
+            <td></td>
         </tr>
         <tr>
             <td>2. Secondary</td>
+            <td></td>
             <td></td>
             <td></td>
             <td></td>
@@ -79,10 +105,21 @@
         <tr>
             <td>3. Tertiary</td>
             <td>
-                1. Pack Rat: <font class="buff">fix not get bonus ammo when pick from Ammunition piles</font> <br>
-                2. Chem Reliant: Bonus health when taking pills <font class="buff">10 -> 40</font>
+                <ul>
+                    <li>1. Pack Rat: <font class="buff">fix not get bonus ammo when pick from Ammunition piles</font></li>
+                    <li>2. Chem Reliant: Bonus health when taking pills <font class="buff">10 -> 40</font></li>
+                </ul>
             </td>
             <td></td>
+            <td>
+                <ul>
+                    <li>5. Little Leaguer:</li>
+                    <ul>
+                        <li><font class="adjs">Recover</font></li>
+                        <li>Spawn a baseball bat</li>
+                    </ul>
+                </ul>
+            </td>
             <td></td>
         </tr>
     </table>
@@ -96,102 +133,161 @@
             <th><font class="buff">▲ Buff</font></th>
             <th><font class="nerf">▼ Nerf</font></th>
             <th><font class="adjs">↻ Adjust</font></th>
+            <th><font class="add"><font class="add-plus">+</font> Add</font></th>
         </tr>
         <tr>
             <td colspan="2">Survivor</td>
             <td>
-                Incap Health: <font class="buff">300 -> 450</font> <br>
-                Revive Health: <font class="buff">30 -> 50</font> <br>
-                First aid kit use duration: <font class="buff">5 -> 3</font> (second) <br>
-                First aid kit heal <font class="buff">full HP</font> <br>
-                Enable <font class="buff">Crawling</font>
+                <ul>
+                    <li>Incap Health: <font class="buff">300 -> 450</font></li>
+                    <li>Revive Health: <font class="buff">30 -> 50</font></li>
+                    <li>First aid kit use duration: <font class="buff">5 -> 3</font> (second)</li>
+                    <li>First aid kit heal <font class="buff">full HP</font></li>
+                    <li>Enable <font class="buff">Crawling</font></li>
+                </ul>
             </td>
             <td></td>
             <td>
-                Friendly Fire <font class="adjs">All Difficult: 20% Weapon DMG</font> <br>
-                Burn Factor <font class="adjs">All Difficult: 30% Burn DMG</font>
+                <ul>
+                    <li>Friendly Fire <font class="adjs">All Difficult: 20% Weapon DMG</font></li>
+                    <li>Burn Factor <font class="adjs">All Difficult: 30% Burn DMG</font></li>
+                </ul>
             </td>
+            <td></td>
         </tr>
         <tr>
             <td colspan="2">Weapon</td>
             <td>
-                M60 and Grenade Laucher <font class="buff">ammo refillable</font> <br>
-                M60 reverse ammo <font class="buff">0 -> 210 <font class="adjs">(Not effect by Pack Rat)</font></font> <br>
-		        Grenade Laucher reverse ammo <font class="buff">30 -> 36 <font class="adjs">(Not effect by Pack Rat)</font></font> <br>
+                <ul>
+                    <li>M60 and Grenade Laucher <font class="buff">ammo refillable</font></li>
+                    <li>M60 reverse ammo <font class="buff">0 -> 210 <font class="adjs">(Not effect by Pack Rat)</font></font></li>
+		            <li>Grenade Laucher reverse ammo <font class="buff">30 -> 36 <font class="adjs">(Not effect by Pack Rat)</font></font></li>
+                </ul>
             </td>
             <td></td>
+            <td></td>
             <td>
-                Add <font class="adjs">Custom Weapon Base (Secondary Weapon)</font> <br>
+                <ul>
+                    <li>Add <font class="add">Custom Weapon Base (Secondary Weapon)</font></li>
+                </ul>
             </td>
         </tr>
         <tr>
             <td rowspan="3">Perks</td>
             <td>1. Primary</td>
             <td>
-                1. Stopping Power: <font class="buff">25% -> 30%</font> bonus damage (except melee weapons) <br>
-                2. Double Tap: <font class="buff">50% -> 70%</font> shoot speed (SEMI-auto only), <font class="buff">25% -> 30%</font> bonus reload speed <br>
-                3. Sleight of Hand: <font class="buff">75% -> 80%</font> bonus reload speed
+                <ul>
+                    <li>1. Stopping Power: <font class="buff">25% -> 30%</font> bonus damage (except melee weapons)</li>
+                    <li>2. Double Tap:</li>
+                    <ul>
+                        <li><font class="buff">50% -> 70%</font> shoot speed (SEMI-auto only)</li>
+                        <li><font class="buff">25% -> 30%</font> bonus reload speed</li>
+                    </ul>
+                    <li>3. Sleight of Hand: <font class="buff">75% -> 80%</font> bonus reload speed</li>
+                </ul>
             </td>
+            <td></td>
             <td></td>
             <td></td>
         </tr>
         <tr>
             <td>2. Secondary</td>
             <td>
-                1. Unbreakable: <font class="buff">20 -> 40</font> bonus Max HP <br>
-                2. Spirit (self-reviving): Cooldown <font class="buff">60 -> 40</font> second, Bonus health buffer <font class="buff">10 -> 50</font> <br>
-                3. Helping Hand: Revive <font class="buff">3 -> 2</font> second, Bonus health buffer <font class="buff">15 -> 25</font> <br>
-                4. Martial Artist: <font class="buff">Remove Shove Cooldown</font>
+                <ul>
+                    <li>1. Unbreakable: <font class="buff">20 -> 40</font> bonus Max HP</li>
+                    <li>2. Spirit (self-reviving):</li>
+                    <ul>
+                        <li>Cooldown <font class="buff">60 -> 40</font> second</li>
+                        <li>Bonus health buffer <font class="buff">10 -> 50</font></li>
+                    </ul>
+                    <li>3. Helping Hand:</li>
+                    <ul>
+                        <li>Revive <font class="buff">3 -> 2</font> second</li>
+                        <li>Bonus health buffer <font class="buff">15 -> 25</font></li>
+                    </ul>
+                    <li>4. Martial Artist: <font class="buff">Remove Shove Cooldown</font></li>
+                </ul>
             </td>
+            <td></td>
             <td></td>
             <td></td>
         </tr>
         <tr>
             <td>3. Tertiary</td>
             <td>
-                1. Pack Rat: <font class="buff">25% -> 40%</font> bonus ammo when pick weapon<br>
-                3. Hard to Kill: <font class="buff">450 -> 600</font> Incap Health <br>
-                4. Extreme Conditioning: <font class="buff">10% -> 15%</font> bonus speed
+                <ul>
+                    <li>1. Pack Rat: <font class="buff">25% -> 40%</font> bonus ammo when pick weapon</li>
+                    <li>3. Hard to Kill: <font class="buff">450 -> 600</font> Incap Health</li>
+                    <li>4. Extreme Conditioning: <font class="buff">10% -> 15%</font> bonus speed</li>
+                </ul>
             </td>
-            <td><font class="nerf">Remove</font> 5. Little Leaguer: Spawn a baseball bat</td>
+            <td>
+                <ul>
+                    <li><font class="nerf">Remove</font> 5. Little Leaguer: Spawn a baseball bat</li>
+                </ul>
+            </td>
+            <td></td>
             <td></td>
         </tr>
         <tr>
             <td rowspan="3">Infected</td>
             <td>Common</td>
             <td>
-                Common HP: <font class="buff">50 -> 60</font>
+                <ul>
+                    <li>Common HP: <font class="buff">50 -> 60</font></li>
+                </ul>
             </td>
             <td></td>
             <td>
-                Spawn Rate <font class="adjs">Increase <font class="nerf">25% -> 20%</font> per extra player</font> <br>
-                Add <font class="adjs">Mutants Infected</font>
+                <ul>
+                    <li>Spawn Rate <font class="adjs">Increase 25% per extra player</font></li>
+                </ul>
+            </td>
+            <td>
+                <ul>
+                    <li>Add <font class="add">Mutants Infected</font></li>
+                </ul>
             </td>
         </tr>
         <tr>
             <td>Special</td>
             <td>
-                Hunter HP: <font class="buff">250 -> 275</font> <br>
-                Spitter HP: <font class="buff">100 -> 175</font>
+                <ul>
+                    <li>Hunter HP: <font class="buff">250 -> 275</font></li>
+                    <li>Spitter HP: <font class="buff">100 -> 175</font></li>
+                </ul>
             </td>
             <td>
-                Charger HP: <font class="nerf">600 -> 450</font> <br>
-                Jockey HP: <font class="nerf">325 -> 275</font> <br>
-                Smoker HP: <font class="nerf">250 -> 200</font>
+                <ul>
+                    <li>Charger HP: <font class="nerf">600 -> 450</font></li>
+                    <li>Jockey HP: <font class="nerf">325 -> 275</font></li>
+                    <li>Smoker HP: <font class="nerf">250 -> 200</font></li>
+                </ul>
             </td>
             <td>
-                Spawn <font class="adjs">1 more per extra player</font>
+                <ul>
+                    <li>Spawn <font class="adjs">1 more per extra player</font></li>
+                </ul>
             </td>
+            <td></td>
         </tr>
         <tr>
             <td>Tank</td>
             <td>
-                Tank HP: <font class="buff">8000 All Difficult</font>
+                <ul>
+                    <li>Tank HP: <font class="buff">8000 All Difficult</font></li>
+                </ul>
             </td>
             <td></td>
             <td>
-                HP <font class="adjs">Increase <font class="nerf">25% -> 20%</font> per extra player</font> <br>
-                Add <font class="adjs">Mutants Tank</font>
+                <ul>
+                    <li>HP <font class="adjs">Increase 25% per extra player</font></li>
+                </ul>
+            </td>
+            <td>
+                <ul>
+                    <li>Add <font class="add">Mutants Tank</font></li>
+                </ul>
             </td>
         </tr>
     </table>
