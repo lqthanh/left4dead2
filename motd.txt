@@ -81,6 +81,7 @@
             <td>
                 <ul>
                     <li>SCAR <font class="buff">auto mode</font></li>
+		    <li>SCAR <font class="buff">auto mode</font></li>
                 </ul>
             </td>
             <td></td>
@@ -116,7 +117,7 @@
                     <li>5. Little Leaguer:</li>
                     <ul>
                         <li><font class="adjs">Recover</font></li>
-                        <li>Spawn a baseball bat</li>
+                        <li>Spawn a <font class="adjs">baseball bat -> katana</font></li>
                     </ul>
                 </ul>
             </td>
