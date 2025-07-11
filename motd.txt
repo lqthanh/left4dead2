@@ -106,7 +106,7 @@
             <td>3. Tertiary</td>
             <td>
                 <ul>
-                    <li>1. Pack Rat: <font class="buff">fix not get bonus ammo when pick from Ammunition piles</font></li>
+                    <li>1. Pack Rat: <font class="buff">fixed not receiving bonus ammo when picking from Ammunition piles</font></li>
                     <li>2. Chem Reliant: Bonus health when taking pills <font class="buff">10 -> 40</font></li>
                 </ul>
             </td>
