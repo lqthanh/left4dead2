@@ -81,9 +81,18 @@
             <td>
                 <ul>
                     <li>SCAR <font class="buff">auto mode</font></li>
+                    <li>Magnum <font class="buff">shove will set target on fire</font></li>
+                    <ul>
+                        <li><font class="adjs">Consumes ammo per target hit</font></li>
+                        <li><font class="adjs">Inactive when no ammo is consumed</font></li>
+                    </ul>
                 </ul>
             </td>
-            <td></td>
+            <td>
+                <ul>
+                    <li>Add recoil (screen shake randomly when shoting)z_gun_kick</li>
+                </ul>
+            </td>
             <td></td>
             <td></td>
         </tr>
@@ -107,7 +116,7 @@
             <td>
                 <ul>
                     <li>1. Pack Rat: <font class="buff">fixed not receiving bonus ammo when picking from Ammunition piles</font></li>
-                    <li>2. Chem Reliant: Bonus health when taking pills <font class="buff">10 -> 40</font></li>
+                    <li>2. Chem Reliant: Bonus health when taking pills <font class="buff">25 -> 40</font></li>
                 </ul>
             </td>
             <td></td>
@@ -120,6 +129,32 @@
                     </ul>
                 </ul>
             </td>
+            <td></td>
+        </tr>
+                <tr>
+            <td rowspan="3">Infected</td>
+            <td>Common</td>
+            <td>
+                <ul>
+                    <li>Common HP: <font class="buff">60 -> 80</font></li>
+                </ul>
+            </td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Special</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Tank</td>
+            <td></td>
+            <td></td>
+            <td></td>
             <td></td>
         </tr>
     </table>
