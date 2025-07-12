@@ -90,7 +90,10 @@
             </td>
             <td>
                 <ul>
-                    <li>Add recoil (screen shake randomly when shoting)z_gun_kick</li>
+                    <li>Add recoil (screen shake randomly when shoting)</li>
+                    <ul>
+                        <li>z_gun_kick: <font class="nerf">0 -> 0.2</font></li>
+                    </ul>
                 </ul>
             </td>
             <td></td>
