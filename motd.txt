@@ -74,7 +74,17 @@
             <td></td>
             <td></td>
             <td></td>
-            <td></td>
+            <td>
+                <ul>
+                    <li><font class="add">Shoveable Survivor (inprogress)</font></li>
+                    <li>Add <font class="add">Shove ability (inprogress)</font> while holding grenade</li>
+                    <ul>
+                        <li>Molotov: <font class="add">...</font></li>
+                        <li>Pipe bomb: <font class="add">...</font></li>
+                        <li>Boomer bile: <font class="add">...</font></li>
+                    </ul>
+                </ul>
+            </td>
         </tr>
         <tr>
             <td colspan="2">Weapon</td>
