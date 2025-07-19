@@ -8,7 +8,6 @@
 #include <sdkhooks>
 
 #define CVAR_FLAGS			FCVAR_NOTIFY
-#define	MODEL_GASCAN		"models/props_junk/gascan001a.mdl"
 
 ConVar g_hCvarAllow, g_hCvarMPGameMode, g_hCvarModes, g_hCvarModesOff, g_hCvarModesTog, g_hCvarInfected, g_hCvarKeys, g_hCvarTimed, g_hCvarTimeout;
 int g_iCvarInfected, g_iCvarKeys, g_iCvarTimed, g_iClassTank;
@@ -187,7 +186,7 @@ void OnGamemode(const char[] output, int caller, int activator, float delay)
 
 public void OnMapStart()
 {
-	PrecacheModel(MODEL_GASCAN);
+	
 }
 
 public void OnMapEnd()
