@@ -22,7 +22,7 @@ float g_fCvarTimeout;
 public Plugin myinfo =
 {
 	name = "[L4D & L4D2] Magnum Shove Fire",
-	author = "",
+	author = "lqthanh",
 	description = "Ignites infected when shoved by players holding magnum.",
 	version = PLUGIN_VERSION,
 	url = ""
@@ -207,6 +207,29 @@ void Event_RoundEnd(Event event, const char[] name, bool dontBroadcast)
 	ResetPlugin();
 }
 
+public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon)
+{
+	if (!g_bCvarAllow || !IsClientInGame(client) || !IsPlayerAlive(client))
+		return;
+
+	if (GetClientTeam(client) != 2 || !CheckWeapon(client))
+		return;
+
+	if (IsReloading(client))
+		return;
+
+	static bool lastPressed[MAXPLAYERS + 1];
+
+	bool nowPressed = (buttons & IN_ATTACK2) != 0;
+
+	if (nowPressed && !lastPressed[client])
+	{
+		DecreaseAmmo(client);
+	}
+
+	lastPressed[client] = nowPressed;
+}
+
 void Event_EntityShoved(Event event, const char[] name, bool dontBroadcast)
 {
 	int infected = g_iCvarInfected & (1<<0);
@@ -227,12 +250,10 @@ void Event_EntityShoved(Event event, const char[] name, bool dontBroadcast)
 				if( infected && strcmp(sTemp, "infected") == 0 )
 				{
 					HurtPlayer(target, client, 0);
-					DecreaseAmmo(client);
 				}
 				else if( witch && strcmp(sTemp, "witch") == 0 )
 				{
 					HurtPlayer(target, client, g_iCvarTimed == 1 || g_iCvarTimed & (1<<1));
-					DecreaseAmmo(client);
 				}
 			}
 		}
@@ -253,7 +274,6 @@ void Event_PlayerShoved(Event event, const char[] name, bool dontBroadcast)
 			if( g_iCvarInfected & (1 << class) )
 			{
 				HurtPlayer(target, client, class);
-				DecreaseAmmo(client);
 			}
 		}
 	}
@@ -307,27 +327,6 @@ bool CheckWeapon(int client)
 	return false;
 }
 
-void DecreaseAmmo(int client)
-{
-	if( client <= 0 || !IsClientInGame(client) || !IsPlayerAlive(client) )
-		return;
-
-	int weapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-	if( weapon <= 0 || !IsValidEntity(weapon) )
-		return;
-
-	char classname[64];
-	GetEntityClassname(weapon, classname, sizeof(classname));
-	if( StrContains(classname, "pistol_magnum") != -1 )
-	{
-		int ammo = GetEntProp(weapon, Prop_Send, "m_iClip1");
-		if( ammo > 0 )
-		{
-			SetEntProp(weapon, Prop_Send, "m_iClip1", ammo - 1);
-		}
-	}
-}
-
 bool IsReloading(int client)
 {
 	if( client <= 0 || !IsClientInGame(client) || !IsPlayerAlive(client) )
@@ -342,4 +341,25 @@ bool IsReloading(int client)
 	int isEmptyClip = GetEntProp(weapon, Prop_Send, "m_iClip1") == 0;
 
 	return isReloading || isEmptyClip;
+}
+
+void DecreaseAmmo(int client)
+{
+	if( client <= 0 || !IsClientInGame(client) || !IsPlayerAlive(client) )
+		return;
+
+	int weapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	if( weapon <= 0 || !IsValidEntity(weapon) )
+		return;
+
+	char classname[64];
+	GetEntityClassname(weapon, classname, sizeof(classname));
+	if( StrContains(classname, "pistol_magnum") != -1 )
+	{
+		int ammo = GetEntProp(weapon, Prop_Send, "m_iClip1");
+		if( ammo > 1 )
+		{
+			SetEntProp(weapon, Prop_Send, "m_iClip1", ammo - 2);
+		}
+	}
 }

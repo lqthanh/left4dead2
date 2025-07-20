@@ -94,7 +94,7 @@
                     <li>SCAR <font class="buff">auto mode</font></li>
                     <li>Magnum <font class="buff">shove will set target on fire</font></li>
                     <ul>
-                        <li><font class="adjs">Consumes ammo per target hit</font></li>
+                        <li><font class="adjs">Active consumes 2 ammo</font></li>
                         <li><font class="adjs">Inactive when no ammo is consumed</font></li>
                     </ul>
                 </ul>
