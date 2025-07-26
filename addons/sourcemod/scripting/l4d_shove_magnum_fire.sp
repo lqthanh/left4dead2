@@ -9,6 +9,16 @@
 
 #define CVAR_FLAGS			FCVAR_NOTIFY
 
+#define ATTACHMENT_BONE			"weapon_bone"
+#define ATTACHMENT_EYES			"eyes"
+#define ATTACHMENT_PRIMARY		"primary"
+#define ATTACHMENT_ARM			"armR_T"
+
+#define PARTICLE_FIRE1			"fire_jet_01_flame"
+#define PARTICLE_FIRE2			"fire_small_02"
+#define SOUND_FIRE_L4D1			"ambient/Spacial_Loops/CarFire_Loop.wav"
+#define SOUND_FIRE_L4D2			"ambient/fire/interior_fire02_stereo.wav"
+
 ConVar g_hCvarAllow, g_hCvarMPGameMode, g_hCvarModes, g_hCvarModesOff, g_hCvarModesTog, g_hCvarInfected, g_hCvarKeys, g_hCvarTimed, g_hCvarTimeout;
 int g_iCvarInfected, g_iCvarKeys, g_iCvarTimed, g_iClassTank;
 bool g_bCvarAllow, g_bLeft4Dead2;
@@ -186,6 +196,12 @@ void OnGamemode(const char[] output, int caller, int activator, float delay)
 
 public void OnMapStart()
 {
+	PrecacheParticle(PARTICLE_FIRE1);
+	PrecacheParticle(PARTICLE_FIRE2);
+	if( g_bLeft4Dead2 )
+		PrecacheSound(SOUND_FIRE_L4D2, true);
+	else
+		PrecacheSound(SOUND_FIRE_L4D1, true);
 	
 }
 
@@ -207,29 +223,6 @@ void Event_RoundEnd(Event event, const char[] name, bool dontBroadcast)
 	ResetPlugin();
 }
 
-public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon)
-{
-	if (!g_bCvarAllow || !IsClientInGame(client) || !IsPlayerAlive(client))
-		return;
-
-	if (GetClientTeam(client) != 2 || !CheckWeapon(client))
-		return;
-
-	if (IsReloading(client))
-		return;
-
-	static bool lastPressed[MAXPLAYERS + 1];
-
-	bool nowPressed = (buttons & IN_ATTACK2) != 0;
-
-	if (nowPressed && !lastPressed[client])
-	{
-		DecreaseAmmo(client);
-	}
-
-	lastPressed[client] = nowPressed;
-}
-
 void Event_EntityShoved(Event event, const char[] name, bool dontBroadcast)
 {
 	int infected = g_iCvarInfected & (1<<0);
@@ -237,6 +230,7 @@ void Event_EntityShoved(Event event, const char[] name, bool dontBroadcast)
 	if( infected || witch )
 	{
 		int client = GetClientOfUserId(event.GetInt("attacker"));
+		CreateEffects(client);
 
 		if( g_iCvarKeys == 1 || GetClientButtons(client) & IN_RELOAD )
 		{
@@ -250,10 +244,12 @@ void Event_EntityShoved(Event event, const char[] name, bool dontBroadcast)
 				if( infected && strcmp(sTemp, "infected") == 0 )
 				{
 					HurtPlayer(target, client, 0);
+					DecreaseAmmo(client);
 				}
 				else if( witch && strcmp(sTemp, "witch") == 0 )
 				{
 					HurtPlayer(target, client, g_iCvarTimed == 1 || g_iCvarTimed & (1<<1));
+					DecreaseAmmo(client);
 				}
 			}
 		}
@@ -263,6 +259,7 @@ void Event_EntityShoved(Event event, const char[] name, bool dontBroadcast)
 void Event_PlayerShoved(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("attacker"));
+	CreateEffects(client);
 
 	if( g_iCvarKeys == 1 || GetClientButtons(client) & IN_RELOAD )
 	{
@@ -274,6 +271,7 @@ void Event_PlayerShoved(Event event, const char[] name, bool dontBroadcast)
 			if( g_iCvarInfected & (1 << class) )
 			{
 				HurtPlayer(target, client, class);
+				DecreaseAmmo(client);
 			}
 		}
 	}
@@ -357,9 +355,105 @@ void DecreaseAmmo(int client)
 	if( StrContains(classname, "pistol_magnum") != -1 )
 	{
 		int ammo = GetEntProp(weapon, Prop_Send, "m_iClip1");
-		if( ammo > 1 )
+		if( ammo > 0 )
 		{
-			SetEntProp(weapon, Prop_Send, "m_iClip1", ammo - 2);
+			SetEntProp(weapon, Prop_Send, "m_iClip1", ammo - 1);
 		}
+	}
+}
+
+void CreateEffects(int client)
+{
+	float vPos[3], vAng[3];
+
+	int particle = CreateEntityByName("info_particle_system");
+
+	DispatchKeyValue(particle, "effect_name", PARTICLE_FIRE2);
+	DispatchSpawn(particle);
+	ActivateEntity(particle);
+	AcceptEntityInput(particle, "Start");
+
+	SetVariantString("!activator");
+	AcceptEntityInput(particle, "SetParent", client);
+
+	int bone = GetSurvivorType(client);
+	if( bone == 0 )
+	{
+		SetVariantString(ATTACHMENT_BONE);
+		
+		vPos[1] = 7.0;
+		vPos[2] = 25.0;
+	}
+	else
+	{
+		SetVariantString(ATTACHMENT_ARM);
+
+		vAng[1] = 90.0;
+		vPos[0] = -5.0;
+		vPos[1] = 45.0;
+	}
+
+	AcceptEntityInput(particle, "SetParentAttachment");
+	TeleportEntity(particle, vPos, vAng, NULL_VECTOR);
+
+	EmitSoundToAll(g_bLeft4Dead2 ? SOUND_FIRE_L4D2 : SOUND_FIRE_L4D1, client, SNDCHAN_AUTO, SNDLEVEL_NORMAL, SND_NOFLAGS, SNDVOL_NORMAL, SNDPITCH_NORMAL, -1, NULL_VECTOR, NULL_VECTOR, true, 0.0);
+
+	DataPack pack = new DataPack();
+	pack.WriteCell(EntIndexToEntRef(particle)); // entRef
+	pack.WriteCell(client);
+
+	CreateTimer(0.3, Timer_RemoveParticle, pack);
+}
+
+public Action Timer_RemoveParticle(Handle timer, any data)
+{
+	DataPack pack = view_as<DataPack>(data);
+	pack.Reset();
+
+	int entRef = pack.ReadCell();
+	int client = pack.ReadCell();
+
+	int ent = EntRefToEntIndex(entRef);
+	if (ent != INVALID_ENT_REFERENCE && IsValidEntity(ent))
+	{
+		StopSound(client, SNDCHAN_AUTO, g_bLeft4Dead2 ? SOUND_FIRE_L4D2 : SOUND_FIRE_L4D1);
+		RemoveEdict(ent);
+	}
+
+	delete pack;
+	return Plugin_Stop;
+}
+
+void PrecacheParticle(const char[] sEffectName)
+{
+	static int table = INVALID_STRING_TABLE;
+	if( table == INVALID_STRING_TABLE )
+	{
+		table = FindStringTable("ParticleEffectNames");
+	}
+
+	if( FindStringIndex(table, sEffectName) == INVALID_STRING_INDEX )
+	{
+		bool save = LockStringTables(false);
+		AddToStringTable(table, sEffectName);
+		LockStringTables(save);
+	}
+}
+
+int GetSurvivorType(int client)
+{
+	if( !g_bLeft4Dead2 )
+		return 1; // All models should use the "louis" position, since L4D1 models have no weapon_bone attachment.
+
+	char sModel[32];
+	GetEntPropString(client, Prop_Data, "m_ModelName", sModel, sizeof(sModel));
+
+	switch( sModel[29] )
+	{
+		case 'n':		return 1;		// n = Teenangst
+		case 'e':		return 1;		// e = Francis
+		case 'a':		return 1;		// a = Louis
+		case 'c':		return 1;		// c = Coach
+		default:		return 0;
 	}
 }
