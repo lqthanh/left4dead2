@@ -12,23 +12,48 @@
 !/cfg/sourcemod/
 /cfg/sourcemod/*
 
-!/cfg/sourcemod/perkmod.cfg
-!/cfg/sourcemod/l4d_shove_magnum_fire.cfg
-
 !/addons/
 /addons/*
 
 !/addons/sourcemod/
 /addons/sourcemod/*
 
+!/addons/sourcemod/bin/
+/addons/sourcemod/bin/*
+
+!/addons/sourcemod/configs/
+/addons/sourcemod/configs/*
+
+!/addons/sourcemod/data/
+/addons/sourcemod/data/*
+
+!/addons/sourcemod/extensions/
+/addons/sourcemod/extensions/*
+
+!/addons/sourcemod/gamedata/
+/addons/sourcemod/gamedata/*
+
+!/addons/sourcemod/logs/
+/addons/sourcemod/logs/*
+
 !/addons/sourcemod/plugins/
 /addons/sourcemod/plugins/*
-
-!/addons/sourcemod/plugins/perkmod2.smx
-!/addons/sourcemod/plugins/l4d_shove_magnum_fire.smx
 
 !/addons/sourcemod/scripting/
 /addons/sourcemod/scripting/*
 
+!/addons/sourcemod/translations/
+/addons/sourcemod/translations/*
+
+!/cfg/sourcemod/perkmod.cfg
+!/addons/sourcemod/plugins/perkmod2.smx
 !/addons/sourcemod/scripting/perkmod2.sp
+!/addons/sourcemod/translations/
+
+!/cfg/sourcemod/l4d_shove_magnum_fire.cfg
+!/addons/sourcemod/plugins/l4d_shove_magnum_fire.smx
 !/addons/sourcemod/scripting/l4d_shove_magnum_fire.sp
+
+!/cfg/sourcemod/l4d2_wskin_rng.cfg
+!/addons/sourcemod/plugins/l4d2_wskin_rng.smx
+!/addons/sourcemod/scripting/l4d2_wskin_rng.sp
