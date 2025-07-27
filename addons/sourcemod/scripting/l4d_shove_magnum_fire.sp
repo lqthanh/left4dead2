@@ -230,7 +230,6 @@ void Event_EntityShoved(Event event, const char[] name, bool dontBroadcast)
 	if( infected || witch )
 	{
 		int client = GetClientOfUserId(event.GetInt("attacker"));
-		CreateEffects(client);
 
 		if( g_iCvarKeys == 1 || GetClientButtons(client) & IN_RELOAD )
 		{
@@ -244,11 +243,13 @@ void Event_EntityShoved(Event event, const char[] name, bool dontBroadcast)
 				if( infected && strcmp(sTemp, "infected") == 0 )
 				{
 					HurtPlayer(target, client, 0);
+					CreateEffects(client);
 					DecreaseAmmo(client);
 				}
 				else if( witch && strcmp(sTemp, "witch") == 0 )
 				{
 					HurtPlayer(target, client, g_iCvarTimed == 1 || g_iCvarTimed & (1<<1));
+					CreateEffects(client);
 					DecreaseAmmo(client);
 				}
 			}
@@ -259,19 +260,28 @@ void Event_EntityShoved(Event event, const char[] name, bool dontBroadcast)
 void Event_PlayerShoved(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("attacker"));
-	CreateEffects(client);
 
 	if( g_iCvarKeys == 1 || GetClientButtons(client) & IN_RELOAD )
 	{
 		int target = GetClientOfUserId(event.GetInt("userid"));
-		if( GetClientTeam(target) == 3 && CheckWeapon(client) && !IsReloading(client))
+		if(CheckWeapon(client) && !IsReloading(client))
 		{
-			int class = GetEntProp(target, Prop_Send, "m_zombieClass") + 1;
-			if( class == g_iClassTank ) class = 8;
-			if( g_iCvarInfected & (1 << class) )
+			if (GetClientTeam(target) == 2)
 			{
-				HurtPlayer(target, client, class);
+				HurtPlayer(target, client, 0);
+				CreateEffects(client);
 				DecreaseAmmo(client);
+			}
+			if (GetClientTeam(target) == 3)
+			{
+				int class = GetEntProp(target, Prop_Send, "m_zombieClass") + 1;
+				if( class == g_iClassTank ) class = 8;
+				if( g_iCvarInfected & (1 << class) )
+				{
+					HurtPlayer(target, client, class);
+					CreateEffects(client);
+					DecreaseAmmo(client);
+				}
 			}
 		}
 	}
@@ -291,6 +301,11 @@ void HurtPlayer(int target, int client, int class)
 	}
 
 	SDKHooks_TakeDamage(target, client, client, 0.0, DMG_BURN);
+
+	if (class == 0)
+	{
+		SDKHooks_TakeDamage(target, client, client, 3.0, DMG_BURN);
+	}
 
 	if( g_fCvarTimeout && g_iCvarTimed && class )
 	{
@@ -402,7 +417,7 @@ void CreateEffects(int client)
 	pack.WriteCell(EntIndexToEntRef(particle)); // entRef
 	pack.WriteCell(client);
 
-	CreateTimer(0.3, Timer_RemoveParticle, pack);
+	CreateTimer(0.4, Timer_RemoveParticle, pack);
 }
 
 public Action Timer_RemoveParticle(Handle timer, any data)

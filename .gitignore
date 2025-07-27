@@ -15,6 +15,15 @@
 !/addons/
 /addons/*
 
+!/addons/cwb.vpk
+!/addons/cwb_ammo.vpk
+!/addons/cwb_barnacle.vpk
+!/addons/cwb_flame.vpk
+!/addons/cwb_sentry.vpk
+!/addons/cwb_syringe.vpk
+!/addons/malorian167.vpk
+!/addons/ping_system.vpk
+
 !/addons/sourcemod/
 /addons/sourcemod/*
 
