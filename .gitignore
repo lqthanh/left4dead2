@@ -48,7 +48,13 @@
 !/cfg/sourcemod/perkmod.cfg
 !/addons/sourcemod/plugins/perkmod2.smx
 !/addons/sourcemod/scripting/perkmod2.sp
-!/addons/sourcemod/translations/
+!/addons/sourcemod/translations/plugin.perkmod.txt
+!/addons/sourcemod/translations/plugin.perkmod - all langs 1 file.txt
+
+!/cfg/sourcemod/l4d_mutants.cfg
+!/addons/sourcemod/data/l4d_mutants.cfg
+!/addons/sourcemod/plugins/l4d_mutant_zombies.smx
+!/addons/sourcemod/scripting/l4d_mutant_zombies.sp
 
 !/cfg/sourcemod/l4d_shove_magnum_fire.cfg
 !/addons/sourcemod/plugins/l4d_shove_magnum_fire.smx
