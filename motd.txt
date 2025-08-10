@@ -14,7 +14,7 @@
             background-color: black; 
             color: white; 
             font-family: sans-serif;
-            font-size: 12px;
+            font-size: 16px;
         }
         a {
             color: white; 
@@ -30,13 +30,28 @@
         tr, th, td {
             border: 1px solid #dddddd;
         }
-        ul {
-            margin-block: 4px;
-            padding-inline: 14px;
+
+        ol > li::marker {
+            font-size: 2em; /* h1 size */
+            font-weight: bold;
         }
-        ul > ul {
-            margin-block: 0px;
+        ol > ol > li::marker {
+            font-size: 1.5em; /* h2 size */
+            font-weight: bold;
         }
+        ol > ol > ol > li::marker {
+            font-size: 1.17em; /* h3 size */
+            font-weight: bold;
+        }
+
+        ul > li:has(h3)::marker {
+            content: '';
+        }
+
+        /*ul > li::marker {
+            content: '●  ';
+        }*/
+
         .buff {
             color: #00ff00;
         }
@@ -46,147 +61,12 @@
         .adjs {
             color: orange;
         }
-        .add {
-            color: yellow;
-        }
-        .add-plus {
-            font-size: 14px
-        }
     </style>
 
-    <ul>
-        <li><a href="#patch.1.1">Patch 1.1</a></li>
-        <li><a href="#patch.1.0">Patch 1.0</a></li>
-    </ul>
-
-    <hr>
-
-    <h1 id="patch.1.1">Patch 1.1:</h1>
-    <table>
-        <tr>
-            <th colspan="2">Category</th>
-            <th><font class="buff">▲ Buff</font></th>
-            <th><font class="nerf">▼ Nerf</font></th>
-            <th><font class="adjs">↻ Adjust</font></th>
-            <th><font class="add"><font class="add-plus">+</font> Add</font></th>
-        </tr>
-        <tr>
-            <td colspan="2">Survivor</td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td>
-                <ul>
-                    <li><font class="add">Shoveable Survivor (inprogress)</font></li>
-                    <li>Add <font class="add">Shove ability (inprogress)</font> while holding grenade</li>
-                    <ul>
-                        <li>Molotov: <font class="add">...</font></li>
-                        <li>Pipe bomb: <font class="add">...</font></li>
-                        <li>Boomer bile: <font class="add">...</font></li>
-                    </ul>
-                </ul>
-            </td>
-        </tr>
-        <tr>
-            <td colspan="2">Weapon</td>
-            <td>
-                <ul>
-                    <li>SCAR <font class="buff">auto mode</font></li>
-                    <li>Magnum <font class="buff">shove will set target on fire</font></li>
-                    <ul>
-                        <li><font class="adjs">Active consumes 1 ammo/target</font></li>
-                        <li><font class="adjs">Inactive when no ammo is consumed</font></li>
-                    </ul>
-                </ul>
-            </td>
-            <td>
-                <ul>
-                    <li>Add recoil (screen shake randomly when shoting)</li>
-                    <ul>
-                        <li>z_gun_kick: <font class="nerf">0 -> 0.2</font></li>
-                    </ul>
-                </ul>
-            </td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td rowspan="3">Perks</td>
-            <td>1. Primary</td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>2. Secondary</td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>3. Tertiary</td>
-            <td>
-                <ul>
-                    <li>1. Pack Rat: <font class="buff">fixed not receiving bonus ammo when picking from Ammunition piles</font></li>
-                    <li>2. Chem Reliant: Bonus health when taking pills <font class="buff">25 -> 40</font></li>
-                </ul>
-            </td>
-            <td></td>
-            <td>
-                <ul>
-                    <li>5. Little Leaguer:</li>
-                    <ul>
-                        <li><font class="adjs">Recover</font></li>
-                        <li>Spawn a <font class="adjs">baseball bat -> katana</font></li>
-                    </ul>
-                </ul>
-            </td>
-            <td></td>
-        </tr>
-                <tr>
-            <td rowspan="3">Infected</td>
-            <td>Common</td>
-            <td>
-                <ul>
-                    <li>Common HP: <font class="buff">60 -> 80</font></li>
-                </ul>
-            </td>
-            <td></td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>Special</td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>Tank</td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-        </tr>
-    </table>
-
-    <br><hr>
-
-    <h1  id="patch.1.0">Patch 1.0:</h1>
-    <table>
-        <tr>
-            <th colspan="2">Category</th>
-            <th><font class="buff">▲ Buff</font></th>
-            <th><font class="nerf">▼ Nerf</font></th>
-            <th><font class="adjs">↻ Adjust</font></th>
-            <th><font class="add"><font class="add-plus">+</font> Add</font></th>
-        </tr>
-        <tr>
-            <td colspan="2">Survivor</td>
-            <td>
+    <ol>
+        <li id="Survivor"><h1>Survivor</h1>
+            <ul>
+                <li><h3><font class="category buff">▲ Buff</font></h3></li>
                 <ul>
                     <li>Incap Health: <font class="buff">300 -> 450</font></li>
                     <li>Revive Health: <font class="buff">30 -> 50</font></li>
@@ -194,32 +74,81 @@
                     <li>First aid kit heal <font class="buff">full HP</font></li>
                     <li>Enable <font class="buff">Crawling</font></li>
                 </ul>
-            </td>
-            <td></td>
-            <td>
-                <ul>
-                    <li>Friendly Fire <font class="adjs">All Difficult: 20% Weapon DMG</font></li>
-                    <li>Burn Factor <font class="adjs">All Difficult: 30% Burn DMG</font></li>
-                </ul>
-            </td>
-            <td></td>
-        </tr>
-        <tr>
-            <td colspan="2">Weapon</td>
-            <td>
+            </ul>
+        </li>
+        
+        <li id="Weapon"><h1>Weapon</h1>
+            <ul>
+                <li><h3><font class="category buff">▲ Buff</font></h3></li>
                 <ul>
                     <li>M60 and Grenade Laucher <font class="buff">ammo refillable</font></li>
-                    <li>M60 reverse ammo <font class="buff">0 -> 210 <font class="adjs">(Not effect by Pack Rat)</font></font></li>
+                    <li>M60 reverse ammo <font class="buff">0 -> 150 <font class="adjs">(Not effect by Pack Rat)</font></font></li>
 		            <li>Grenade Laucher reverse ammo <font class="buff">30 -> 36 <font class="adjs">(Not effect by Pack Rat)</font></font></li>
                 </ul>
-            </td>
-            <td></td>
-            <td></td>
-            <td>
                 <ul>
-                    <li>Add <font class="add">Custom Weapon Base (Secondary Weapon)</font></li>
+                    <li>SCAR <font class="buff">auto mode</font></li>
+                    <li>Magnum <font class="buff">shove will set target on fire <font class="adjs">(Active consumes 1 ammo/target, Inactive when no ammo is consumed)</font></font></li>
                 </ul>
-            </td>
+                <li><h3><font class="nerf">▼ Nerf</font></h3></li>
+                <ul>
+                    <li>Add recoil: z_gun_kick: <font class="nerf">0 -> 0.2</font></li>
+                </ul>
+            </ul>
+        </li>
+
+        <li id="Infected"><h1>Infected</h1>
+            <ol>
+                <li id="Infected-Common"><h2>Common</h2>
+                    <ul>
+                        <li><h3><font class="category buff">▲ Buff</font></h3></li>
+                        <ul>
+                            <li>Common HP: <font class="buff">50 -> 80</font></li>
+                        </ul>
+                        <li><h3><font class="adjs">↻ Adjust</font></h3></li>
+                        <ul>
+                            <li>Spawn Rate <font class="adjs">Increase 25% per extra player</font></li>
+                        </ul>
+                    </ul>
+                </li>
+
+                <li id="Infected-Special"><h2>Special</h2>
+                    <ul>
+                        <li><h3><font class="category buff">▲ Buff</font></h3></li>
+                        <ul>
+                            <li>Hunter HP: <font class="buff">250 -> 300</font></li>
+                            <li>Spitter HP: <font class="buff">100 -> 175</font></li>
+                        </ul>
+                        <li><h3><font class="nerf">▼ Nerf</font></h3></li>
+                        <ul>
+                            <li>Charger HP: <font class="nerf">600 -> 500</font></li>
+                            <li>Jockey HP: <font class="nerf">325 -> 275</font></li>
+                            <li>Smoker HP: <font class="nerf">250 -> 200</font></li>
+                        </ul>
+                        <li><h3><font class="adjs">↻ Adjust</font></h3></li>
+                        <ul>
+                            <li>Spawn <font class="adjs">1 more per extra player</font></li>
+                        </ul>
+                    </ul>
+                </li>
+
+                <li id="Infected-Tank"><h2>Tank</h2>
+                    <ul>
+                        <li><h3><font class="adjs">↻ Adjust</font></h3></li>
+                        <ul>
+                            <li>Tank HP: <font class="buff">8000 All Difficult</font></li>
+                            <li>HP <font class="adjs">Increase 25% per extra player</font></li>
+                        </ul>
+                    </ul>
+                </li>
+            </ol>
+        </li>
+    </ol>
+
+    <table>
+        <tr>
+            <th colspan="2">Category</th>
+            <th><font class="buff">▲ Buff</font></th>
+            <th><font class="adjs">↻ Adjust</font></th>
         </tr>
         <tr>
             <td rowspan="3">Perks</td>
@@ -235,8 +164,6 @@
                     <li>3. Sleight of Hand: <font class="buff">75% -> 80%</font> bonus reload speed</li>
                 </ul>
             </td>
-            <td></td>
-            <td></td>
             <td></td>
         </tr>
         <tr>
@@ -258,84 +185,24 @@
                 </ul>
             </td>
             <td></td>
-            <td></td>
-            <td></td>
         </tr>
         <tr>
             <td>3. Tertiary</td>
             <td>
                 <ul>
                     <li>1. Pack Rat: <font class="buff">25% -> 40%</font> bonus ammo when pick weapon</li>
+                    <li>1. Pack Rat: <font class="buff">fixed not receiving bonus ammo when picking from Ammunition piles</font></li>
+                    <li>2. Chem Reliant: Bonus health when taking pills <font class="buff">25 -> 40</font></li>
                     <li>3. Hard to Kill: <font class="buff">450 -> 600</font> Incap Health</li>
                     <li>4. Extreme Conditioning: <font class="buff">10% -> 15%</font> bonus speed</li>
                 </ul>
             </td>
             <td>
                 <ul>
-                    <li><font class="nerf">Remove</font> 5. Little Leaguer: Spawn a baseball bat</li>
-                </ul>
-            </td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td rowspan="3">Infected</td>
-            <td>Common</td>
-            <td>
-                <ul>
-                    <li>Common HP: <font class="buff">50 -> 60</font></li>
-                </ul>
-            </td>
-            <td></td>
-            <td>
-                <ul>
-                    <li>Spawn Rate <font class="adjs">Increase 25% per extra player</font></li>
-                </ul>
-            </td>
-            <td>
-                <ul>
-                    <li>Add <font class="add">Mutants Infected</font></li>
-                </ul>
-            </td>
-        </tr>
-        <tr>
-            <td>Special</td>
-            <td>
-                <ul>
-                    <li>Hunter HP: <font class="buff">250 -> 275</font></li>
-                    <li>Spitter HP: <font class="buff">100 -> 175</font></li>
-                </ul>
-            </td>
-            <td>
-                <ul>
-                    <li>Charger HP: <font class="nerf">600 -> 450</font></li>
-                    <li>Jockey HP: <font class="nerf">325 -> 275</font></li>
-                    <li>Smoker HP: <font class="nerf">250 -> 200</font></li>
-                </ul>
-            </td>
-            <td>
-                <ul>
-                    <li>Spawn <font class="adjs">1 more per extra player</font></li>
-                </ul>
-            </td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>Tank</td>
-            <td>
-                <ul>
-                    <li>Tank HP: <font class="buff">8000 All Difficult</font></li>
-                </ul>
-            </td>
-            <td></td>
-            <td>
-                <ul>
-                    <li>HP <font class="adjs">Increase 25% per extra player</font></li>
-                </ul>
-            </td>
-            <td>
-                <ul>
-                    <li>Add <font class="add">Mutants Tank</font></li>
+                    <li>5. Little Leaguer:</li>
+                    <ul>
+                        <li>Spawn a <font class="adjs">baseball bat -> katana</font></li>
+                    </ul>
                 </ul>
             </td>
         </tr>
