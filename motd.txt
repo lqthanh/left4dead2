@@ -82,7 +82,7 @@
                 <li><h3><font class="category buff">▲ Buff</font></h3></li>
                 <ul>
                     <li>M60 and Grenade Laucher <font class="buff">ammo refillable</font></li>
-                    <li>M60 reverse ammo <font class="buff">0 -> 150 <font class="adjs">(Not effect by Pack Rat)</font></font></li>
+                    <li>M60 reverse ammo <font class="buff">0 -> 180 <font class="adjs">(Not effect by Pack Rat)</font></font></li>
 		            <li>Grenade Laucher reverse ammo <font class="buff">30 -> 36 <font class="adjs">(Not effect by Pack Rat)</font></font></li>
                 </ul>
                 <ul>
