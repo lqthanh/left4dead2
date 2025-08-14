@@ -31,15 +31,15 @@
             border: 1px solid #dddddd;
         }
 
-        ol > li::marker {
+        ol > li:has(h1)::marker {
             font-size: 2em; /* h1 size */
             font-weight: bold;
         }
-        ol > ol > li::marker {
+        ol > li > ol > li:has(h2)::marker {
             font-size: 1.5em; /* h2 size */
             font-weight: bold;
         }
-        ol > ol > ol > li::marker {
+        ol > li > ol > li > ol > li:has(h3)::marker {
             font-size: 1.17em; /* h3 size */
             font-weight: bold;
         }
@@ -98,7 +98,7 @@
 
         <li id="Infected"><h1>Infected</h1>
             <ol>
-                <li id="Infected-Common"><h2>Common</h2>
+                <li><h2>Common</h2>
                     <ul>
                         <li><h3><font class="category buff">▲ Buff</font></h3></li>
                         <ul>
@@ -111,7 +111,7 @@
                     </ul>
                 </li>
 
-                <li id="Infected-Special"><h2>Special</h2>
+                <li><h2>Special</h2>
                     <ul>
                         <li><h3><font class="category buff">▲ Buff</font></h3></li>
                         <ul>
@@ -131,7 +131,7 @@
                     </ul>
                 </li>
 
-                <li id="Infected-Tank"><h2>Tank</h2>
+                <li><h2>Tank</h2>
                     <ul>
                         <li><h3><font class="adjs">↻ Adjust</font></h3></li>
                         <ul>
@@ -139,6 +139,36 @@
                             <li>HP <font class="adjs">Increase 25% per extra player</font></li>
                         </ul>
                     </ul>
+                </li>
+            </ol>
+        </li>
+
+        <li id="Perks"><h1>Perks</h1>
+            <ol>
+                <li><h2>Primary</h2>
+                    <ol>
+                        <li><h3>Stopping Power</h3></li>
+                        <li><h3>Double Tap</h3></li>
+                        <li><h3>Sleight of Hand</h3></li>
+                        <li><h3>Pyrotechnician</h3></li>
+                    </ol>
+                </li>
+                <li><h2>Secondary</h2>
+                    <ol>
+                        <li><h3>Unbreakable</h3></li>
+                        <li><h3>Spirit</h3></li>
+                        <li><h3>Helping Hand</h3></li>
+                        <li><h3>Martial Artist</h3></li>
+                    </ol>
+                </li>
+                <li><h2>Tertiary</h2>
+                    <ol>
+                        <li><h3>Pack Rat</h3></li>
+                        <li><h3>Chem Reliant</h3></li>
+                        <li><h3>Hard to Kill</h3></li>
+                        <li><h3>Extreme Conditioning</h3></li>
+                        <li><h3>Little Leaguer</h3></li>
+                    </ol>
                 </li>
             </ol>
         </li>
