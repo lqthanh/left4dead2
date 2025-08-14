@@ -147,17 +147,18 @@
                 </ul>
                 <li><h3>Double Tap</h3></li>
                 <ul>
-                    <li>Increase <font class="buff">70% Rate of fire (SEMI-auto only)</font></li>
+                    <li>Increase <font class="buff">50% Rate of fire (SEMI-auto only)</font></li>
                     <li>Increase <font class="buff">30% Reload speed</font></li>
                 </ul>
                 <li><h3>Sleight of Hand</h3></li>
                 <ul>
-                    <li>Increase <font class="buff">80% Reload speed</font></li>
+                    <li>Increase <font class="buff">75% Reload speed</font></li>
                 </ul>
                 <li><h3>Pyrotechnician</h3></li>
                 <ul>
-                    <li></li>
-                    <li></li>
+                    <li>Picking up a grenade <font class="buff">gives two of that type</font></li>
+                    <li><font class="buff">Start the round with random grenade</font></li>
+                    <li>Gain <font class="buff">a random grenade after 90s</font> if not carrying any</li>
                 </ul>
             </ol>
             
@@ -175,12 +176,12 @@
                 <li><h3>Helping Hand</h3></li>
                 <ul>
                     <li>Reduce Revive duration <font class="buff">3s -> 2s</font></li>
-                    <li>Bonus <font class="buff">25 Buffer HP</font> to both Survivor</li>
+                    <li>Bonus <font class="buff">15 Buffer HP</font> to both Survivor</li>
                 </ul>
                 <li><h3>Martial Artist</h3></li>
                 <ul>
-                    <li></li>
-                    <li>Remove Shove Cooldown</li>
+                    <li>Allows melee weapons to <font class="buff">strike twice in a single swing</font></li>
+                    <li><font class="buff">Remove Shove Cooldown</font></li>
                 </ul>
             </ol>
             
@@ -197,11 +198,11 @@
                 </ul>
                 <li><h3>Hard to Kill</h3></li>
                 <ul>
-                    <li>Increase <font class="buff">450 -> 600 Incap HP</font></li>
+                    <li>Increase <font class="buff">450 -> 750 Incap HP</font></li>
                 </ul>
                 <li><h3>Extreme Conditioning</h3></li>
                 <ul>
-                    <li>Increase <font class="buff">15% Speed</font></li>
+                    <li>Increase <font class="buff">16% Speed</font></li>
                 </ul>
                 <li><h3>Little Leaguer</h3></li>
                 <ul>
