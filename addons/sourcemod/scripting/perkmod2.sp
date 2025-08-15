@@ -7631,7 +7631,21 @@ Pyro_Timer()
 		{
 			new iflags=GetCommandFlags("give");
 			SetCommandFlags("give", iflags & ~FCVAR_CHEAT);
-			FakeClientCommand(iCid, "give pipe_bomb");
+
+			decl iMax;
+			if (g_iL4D_12 == 2)
+				iMax = 2;
+			else if (g_iL4D_12 == 1)
+				iMax = 1;
+
+			new iI=GetRandomInt(0,iMax);
+			if (iI==0)
+				FakeClientCommand(iCid, "give pipe_bomb");
+			else if (iI==1)
+				FakeClientCommand(iCid, "give molotov");
+			else if (iI==2)
+				FakeClientCommand(iCid, "give vomitjar");
+			
 			SetCommandFlags("give", iflags);
 
 			g_iPyroTicks[iCid] = 0;
