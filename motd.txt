@@ -1,0 +1,210 @@
+<style>
+    html {
+        scroll-behavior: smooth;
+    }
+    body {
+        background-color: black; 
+        color: white; 
+        font-family: sans-serif;
+        font-size: 16px;
+    }
+    a {
+        color: white; 
+        font-size: 20px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th, td {
+        padding: 8px;
+    }
+    tr, th, td {
+        border: 1px solid #dddddd;
+    }
+
+    ol > li:has(h1)::marker {
+        font-size: 2em; /* h1 size */
+        font-weight: bold;
+    }
+    ol > ol > li:has(h2)::marker {
+        font-size: 1.5em; /* h2 size */
+        font-weight: bold;
+    }
+    ol > ol > ol > li:has(h3)::marker {
+        font-size: 1.17em; /* h3 size */
+        font-weight: bold;
+    }
+
+    ul > li:has(h3)::marker {
+        content: '';
+    }
+
+    /*ul > li::marker {
+        content: '●  ';
+    }*/
+
+    .buff {
+        color: #00ff00;
+    }
+    .nerf {
+        color: red;
+    }
+    .adjs {
+        color: orange;
+    }
+</style>
+
+<ol>
+    <li id="Survivor"><h1>Survivor</h1></li>
+    <ul>
+        <li><h3><font class="category buff">▲ Buff</font></h3></li>
+        <ul>
+            <li>Incap Health: <font class="buff">300 -> 450</font></li>
+            <li>Revive Health: <font class="buff">30 -> 50</font></li>
+            <li>First aid kit use duration: <font class="buff">5 -> 3</font> (second)</li>
+            <li>First aid kit heal <font class="buff">full HP</font></li>
+            <li>Enable <font class="buff">Crawling</font></li>
+        </ul>
+    </ul>
+    
+    <li id="Weapon"><h1>Weapon</h1></li>
+    <ul>
+        <li><h3><font class="category buff">▲ Buff</font></h3></li>
+        <ul>
+            <li>M60 and Grenade Laucher <font class="buff">ammo refillable</font></li>
+            <ul>
+                <li>M60 reverse ammo <font class="buff">0 -> 180 <font class="adjs">(Not effect by Pack Rat)</font></font></li>
+                <li>Grenade Laucher reverse ammo <font class="buff">30 -> 36 <font class="adjs">(Not effect by Pack Rat)</font></font></li>
+            </ul>
+            <li>SCAR <font class="buff">auto mode</font></li>
+            <li>Magnum <font class="buff">shove will set target on fire <font class="adjs">(Active consumes 1 ammo/target, Inactive when no ammo is consumed)</font></font></li>
+            <li>Grenade <font class="buff">shove ability</font>:</li>
+            <ul>
+                <li>Pipe Bomb: <font class="buff">Attach Pipe Bomb on the target</font></li>
+                <li>Molotov & Boomer bile: <font class="buff">Inflict adaptive effect on the target,</font> <font class="adjs">break after 3 shoves and spread the effect to all entities within range</font></li>
+            </ul>
+        </ul>
+        <li><h3><font class="nerf">▼ Nerf</font></h3></li>
+        <ul>
+            <li>Add recoil: z_gun_kick: <font class="nerf">0 -> 0.2</font></li>
+        </ul>
+    </ul>
+
+    <li id="Infected"><h1>Infected</h1></li>
+    <ol>
+        <li><h2>Common</h2></li>
+        <ul>
+            <li><h3><font class="category buff">▲ Buff</font></h3></li>
+            <ul>
+                <li>Common HP: <font class="buff">50 -> 80</font></li>
+            </ul>
+            <li><h3><font class="adjs">↻ Adjust</font></h3></li>
+            <ul>
+                <li>Spawn Rate <font class="adjs">Increase 25% per extra player</font></li>
+            </ul>
+        </ul>
+        
+        <li><h2>Special</h2></li>
+        <ul>
+            <li><h3><font class="category buff">▲ Buff</font></h3></li>
+            <ul>
+                <li>Hunter HP: <font class="buff">250 -> 300</font></li>
+                <li>Spitter HP: <font class="buff">100 -> 175</font></li>
+            </ul>
+            <li><h3><font class="nerf">▼ Nerf</font></h3></li>
+            <ul>
+                <li>Charger HP: <font class="nerf">600 -> 500</font></li>
+                <li>Jockey HP: <font class="nerf">325 -> 275</font></li>
+                <li>Smoker HP: <font class="nerf">250 -> 200</font></li>
+            </ul>
+            <li><h3><font class="adjs">↻ Adjust</font></h3></li>
+            <ul>
+                <li>Spawn <font class="adjs">1 more per extra player</font></li>
+            </ul>
+        </ul>
+
+        <li><h2>Tank</h2></li>
+        <ul>
+            <li><h3><font class="adjs">↻ Adjust</font></h3></li>
+            <ul>
+                <li>Tank HP: <font class="buff">8000 All Difficult</font></li>
+                <li>HP <font class="adjs">Increase 25% per extra player</font></li>
+            </ul>
+        </ul>
+    </ol>
+
+    <li id="Perks"><h1>Perks</h1></li>
+    <ol>
+        <li><h2>Primary</h2></li>
+        <ol>
+            <li><h3>Stopping Power</h3></li>
+            <ul>
+                <li>Increase <font class="buff">30% DMG</font></li>
+            </ul>
+            <li><h3>Double Tap</h3></li>
+            <ul>
+                <li>Increase <font class="buff">50% Rate of fire (SEMI-auto only)</font></li>
+                <li>Increase <font class="buff">30% Reload speed</font></li>
+            </ul>
+            <li><h3>Sleight of Hand</h3></li>
+            <ul>
+                <li>Increase <font class="buff">75% Reload speed</font></li>
+            </ul>
+            <li><h3>Pyrotechnician</h3></li>
+            <ul>
+                <li>Picking up a grenade <font class="buff">gives two of that type</font></li>
+                <li><font class="buff">Start the round with random grenade</font></li>
+                <li>Gain <font class="buff">a random grenade after 90s</font> if not carrying any</li>
+            </ul>
+        </ol>
+        
+        <li><h2>Secondary</h2></li>
+        <ol>
+            <li><h3>Unbreakable</h3></li>
+            <ul>
+                <li>Increase <font class="buff">40 Max HP</font></li>
+            </ul>
+            <li><h3>Spirit</h3></li>
+            <ul>
+                <li>Cooldown <font class="buff">40s</font></li>
+                <li>Bonus <font class="buff">50 Buffer HP</font></li>
+            </ul>
+            <li><h3>Helping Hand</h3></li>
+            <ul>
+                <li>Reduce Revive duration <font class="buff">3s -> 2s</font></li>
+                <li>Bonus <font class="buff">15 Buffer HP</font> to both Survivor</li>
+            </ul>
+            <li><h3>Martial Artist</h3></li>
+            <ul>
+                <li>Allows melee weapons to <font class="buff">strike twice in a single swing</font></li>
+                <li><font class="buff">Remove Shove Cooldown</font></li>
+            </ul>
+        </ol>
+        
+        <li><h2>Tertiary</h2></li>
+        <ol>
+            <li><h3>Pack Rat</h3></li>
+            <ul>
+                <li>Increase <font class="buff">40% Ammo</font></li>
+            </ul>
+            <li><h3>Chem Reliant</h3></li>
+            <ul>
+                <li><font class="buff">Start the round with pills/adrenaline</font></li>
+                <li>Bonus <font class="buff">40 Buffer HP</font> when taking pills/adrenaline</li>
+            </ul>
+            <li><h3>Hard to Kill</h3></li>
+            <ul>
+                <li>Increase <font class="buff">450 -> 750 Incap HP</font></li>
+            </ul>
+            <li><h3>Extreme Conditioning</h3></li>
+            <ul>
+                <li>Increase <font class="buff">16% Speed</font></li>
+            </ul>
+            <li><h3>Little Leaguer</h3></li>
+            <ul>
+                <li>Spawn a <font class="buff">Katana</font></li>
+            </ul>
+        </ol>
+    </ol>
+</ol>

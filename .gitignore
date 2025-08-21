@@ -1,0 +1,12 @@
+*
+!.gitignore
+
+!host.html
+!motd.txt
+!index.html
+
+!/addons/
+!/addons/**
+
+!/cfg/
+!/cfg/**
