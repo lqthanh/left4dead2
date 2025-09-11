@@ -257,10 +257,11 @@
 - version 2.2.2
 		Another quick hotfix, this time the ability cooldown perks shouldn't be broken with every patch.
 - version 2.2.3.tlq
-		Change Little Leaguer: gives a ( baseball bat -> katana )
 		Change Pyrotechnician: 
 			For a set amount of time, you will be given a ( pipe bomb -> random type )
 			Add Native_Pyro_OnWeaponFire
+		Change Unbreakable: heal full HP
+		Change Little Leaguer: gives a ( baseball bat -> katana )
 
 ==========================================================================
 ========================================================================*/
@@ -8077,7 +8078,7 @@ MA_OnGameFrame()
 // Sur2: Unbreakable
 //=============================
 
-//on heal; gives 80% of bonus hp
+//on heal; gives 100% of bonus hp
 Unbreakable_OnHeal (iCid)
 {
 	//check if perk is enabled
@@ -8090,7 +8091,7 @@ Unbreakable_OnHeal (iCid)
 	if (g_iSur2[iCid]==1)
 	{
 		CreateTimer(0.5,Unbreakable_Delayed_Heal,iCid);
-		//SetEntProp(iCid,Prop_Data,"m_iHealth", GetEntProp(iCid,Prop_Data,"m_iHealth")+(g_iUnbreak_hp*8/10) );
+		//SetEntProp(iCid,Prop_Data,"m_iHealth", GetEntProp(iCid,Prop_Data,"m_iHealth")+(g_iUnbreak_hp) );
 
 		//run a check to see if for whatever reason
 		//the player's health is above 200
