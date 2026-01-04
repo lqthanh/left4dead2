@@ -8,5 +8,8 @@
 !/addons/
 !/addons/**
 
+/addons/sourcemod/data/sqlite/
+/addons/sourcemod/logs/
+
 !/cfg/
 !/cfg/**
