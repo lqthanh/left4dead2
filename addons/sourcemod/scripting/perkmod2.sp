@@ -257,10 +257,12 @@
 - version 2.2.2
 		Another quick hotfix, this time the ability cooldown perks shouldn't be broken with every patch.
 - version 2.2.3.tlq
-		Change Little Leaguer: gives a ( baseball bat -> katana )
 		Change Pyrotechnician: 
 			For a set amount of time, you will be given a ( pipe bomb -> random type )
 			Add Native_Pyro_OnWeaponFire
+		Change Unbreakable: heal full HP
+		Change Little Leaguer: gives a ( baseball bat -> katana )
+		Update Start Menu
 
 ==========================================================================
 ========================================================================*/
@@ -8077,7 +8079,7 @@ MA_OnGameFrame()
 // Sur2: Unbreakable
 //=============================
 
-//on heal; gives 80% of bonus hp
+//on heal; gives 100% of bonus hp
 Unbreakable_OnHeal (iCid)
 {
 	//check if perk is enabled
@@ -8090,7 +8092,7 @@ Unbreakable_OnHeal (iCid)
 	if (g_iSur2[iCid]==1)
 	{
 		CreateTimer(0.5,Unbreakable_Delayed_Heal,iCid);
-		//SetEntProp(iCid,Prop_Data,"m_iHealth", GetEntProp(iCid,Prop_Data,"m_iHealth")+(g_iUnbreak_hp*8/10) );
+		//SetEntProp(iCid,Prop_Data,"m_iHealth", GetEntProp(iCid,Prop_Data,"m_iHealth")+(g_iUnbreak_hp) );
 
 		//run a check to see if for whatever reason
 		//the player's health is above 200
@@ -11378,6 +11380,12 @@ public Handle:Menu_Initial (iCid)
 	decl String:stPanel[128];
 	SetPanelTitle(menu, "tPoncho's Perkmod");
 
+	DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
+	DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
+	DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
+	DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
+	DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
+
 	//"This server is using Perkmod"
 	Format(stPanel, 128, "%t", "InitialMenuPanel1");
 	DrawPanelText(menu, stPanel);
@@ -11429,14 +11437,14 @@ public Menu_ChooseInit (Handle:topmenu, MenuAction:action, param1, param2)
 	{
 		switch(param2)
 		{
-			case 1:
+			case 6:
 				SendPanelToClient(Menu_Top(param1),param1,Menu_ChooseSubMenu,MENU_TIME_FOREVER);
-			case 2:
+			case 7:
 				{
 					AssignRandomPerks(param1);
 					PrintHintText(param1,"Perkmod: %t", "ThanksForChoosingMessage");
 				}
-			case 3:
+			case 8:
 				{
 					g_iConfirm[param1]=1;
 					Event_Confirm_Unbreakable(param1);
@@ -11451,15 +11459,14 @@ public Menu_ChooseInit (Handle:topmenu, MenuAction:action, param1, param2)
 			default:
 				{
 					if (IsClientInGame(param1)==true)
-						SendPanelToClient(Menu_Top(param1),param1,Menu_ChooseSubMenu,MENU_TIME_FOREVER);
+						SendPanelToClient(Menu_Initial(param1),param1,Menu_ChooseInit,MENU_TIME_FOREVER);
 				}
 		}
 	}
-
 	else
 	{
 		if (IsClientInGame(param1)==true)
-			SendPanelToClient(Menu_Top(param1),param1,Menu_ChooseSubMenu,MENU_TIME_FOREVER);
+			SendPanelToClient(Menu_Initial(param1),param1,Menu_ChooseInit,MENU_TIME_FOREVER);
 	}
 }
 
@@ -11470,14 +11477,14 @@ public Menu_ChooseInit_Inf (Handle:topmenu, MenuAction:action, param1, param2)
 	{
 		switch(param2)
 		{
-			case 1:
+			case 6:
 				SendPanelToClient(Menu_Top_Inf(param1),param1,Menu_ChooseSubMenu_Inf,MENU_TIME_FOREVER);
-			case 2:
+			case 7:
 				{
 					AssignRandomPerks(param1);
 					PrintHintText(param1,"Perkmod: %t", "ThanksForChoosingMessage");
 				}
-			case 3:
+			case 8:
 				{
 					g_iConfirm[param1]=1;
 					PrintHintText(param1,"Perkmod: %t", "ThanksForChoosingMessage");
@@ -11485,15 +11492,14 @@ public Menu_ChooseInit_Inf (Handle:topmenu, MenuAction:action, param1, param2)
 			default:
 				{
 					if (IsClientInGame(param1)==true)
-						SendPanelToClient(Menu_Top_Inf(param1),param1,Menu_ChooseSubMenu_Inf,MENU_TIME_FOREVER);
+						SendPanelToClient(Menu_Initial(param1),param1,Menu_ChooseInit_Inf,MENU_TIME_FOREVER);
 				}
 		}
 	}
-
 	else
 	{
 		if (IsClientInGame(param1)==true)
-			SendPanelToClient(Menu_Top_Inf(param1),param1,Menu_ChooseSubMenu_Inf,MENU_TIME_FOREVER);
+			SendPanelToClient(Menu_Initial(param1),param1,Menu_ChooseInit_Inf,MENU_TIME_FOREVER);
 	}
 }
 
