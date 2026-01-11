@@ -1,0 +1,15 @@
+"Phrases"
+{
+	"move"
+	{
+	"en"	"{olive}[{green}SM{olive}] {default}You can move the Minigun by {green}Aiming the minigun{default} and Pressing {green}Shift + Mouse Right Click {default}Button Together."
+	"ru"	"{olive}[{green}SM{olive}] {default}Вы можете переместить Миниган {green}Наведите на него прицел{default} и Нажмите {green}Shift + Mouse Right Click {default}Кнопки Вместе."
+	}
+	
+	"stayaway"
+	{
+	"en"	"{olive}[{green}SM{olive}] {default}You are too close to another {green}Мachine Gun{default}, stay away from it to deploy your machine gun %f/%f."
+	"ru"	"{olive}[{green}SM{olive}] {default}Вы слишком близко к другому {green}Минигану{default}, отойдите по дальше чтобы развернуть ваше орудие %f/%f."
+	}
+
+}
