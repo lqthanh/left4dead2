@@ -16,8 +16,6 @@
 
 #define PARTICLE_FIRE1			"fire_jet_01_flame"
 #define PARTICLE_FIRE2			"fire_small_02"
-#define SOUND_FIRE_L4D1			"ambient/Spacial_Loops/CarFire_Loop.wav"
-#define SOUND_FIRE_L4D2			"ambient/fire/interior_fire02_stereo.wav"
 
 ConVar g_hCvarAllow, g_hCvarMPGameMode, g_hCvarModes, g_hCvarModesOff, g_hCvarModesTog, g_hCvarInfected, g_hCvarKeys, g_hCvarTimed, g_hCvarTimeout;
 int g_iCvarInfected, g_iCvarKeys, g_iCvarTimed, g_iClassTank;
@@ -198,10 +196,6 @@ public void OnMapStart()
 {
 	PrecacheParticle(PARTICLE_FIRE1);
 	PrecacheParticle(PARTICLE_FIRE2);
-	if( g_bLeft4Dead2 )
-		PrecacheSound(SOUND_FIRE_L4D2, true);
-	else
-		PrecacheSound(SOUND_FIRE_L4D1, true);
 	
 }
 
@@ -300,11 +294,13 @@ void HurtPlayer(int target, int client, int class)
 		}
 	}
 
-	SDKHooks_TakeDamage(target, client, client, 0.0, DMG_BURN);
-
 	if (class == 0)
 	{
 		SDKHooks_TakeDamage(target, client, client, 3.0, DMG_BURN);
+	}
+	else 
+	{
+		SDKHooks_TakeDamage(target, client, client, 50.0, DMG_BURN);
 	}
 
 	if( g_fCvarTimeout && g_iCvarTimed && class )
@@ -411,8 +407,6 @@ void CreateEffects(int client)
 	AcceptEntityInput(particle, "SetParentAttachment");
 	TeleportEntity(particle, vPos, vAng, NULL_VECTOR);
 
-	EmitSoundToAll(g_bLeft4Dead2 ? SOUND_FIRE_L4D2 : SOUND_FIRE_L4D1, client, SNDCHAN_AUTO, SNDLEVEL_NORMAL, SND_NOFLAGS, SNDVOL_NORMAL, SNDPITCH_NORMAL, -1, NULL_VECTOR, NULL_VECTOR, true, 0.0);
-
 	DataPack pack = new DataPack();
 	pack.WriteCell(EntIndexToEntRef(particle)); // entRef
 	pack.WriteCell(client);
@@ -426,12 +420,10 @@ public Action Timer_RemoveParticle(Handle timer, any data)
 	pack.Reset();
 
 	int entRef = pack.ReadCell();
-	int client = pack.ReadCell();
 
 	int ent = EntRefToEntIndex(entRef);
 	if (ent != INVALID_ENT_REFERENCE && IsValidEntity(ent))
 	{
-		StopSound(client, SNDCHAN_AUTO, g_bLeft4Dead2 ? SOUND_FIRE_L4D2 : SOUND_FIRE_L4D1);
 		RemoveEdict(ent);
 	}
 
