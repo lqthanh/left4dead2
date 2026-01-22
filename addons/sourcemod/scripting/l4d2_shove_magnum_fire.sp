@@ -17,9 +17,9 @@
 #define PARTICLE_FIRE1			"fire_jet_01_flame"
 #define PARTICLE_FIRE2			"fire_small_02"
 
-ConVar g_hCvarAllow, g_hCvarMPGameMode, g_hCvarModes, g_hCvarModesOff, g_hCvarModesTog, g_hCvarInfected, g_hCvarKeys, g_hCvarTimed, g_hCvarTimeout;
-int g_iCvarInfected, g_iCvarKeys, g_iCvarTimed, g_iClassTank;
-bool g_bCvarAllow, g_bLeft4Dead2;
+ConVar g_hCvarAllow, g_hCvarMPGameMode, g_hCvarModes, g_hCvarModesOff, g_hCvarModesTog, g_hCvarInfected, g_hCvarKeys, g_hCvarTimed, g_hCvarTimeout, g_hCvarAmmoConsume, g_hCvarCheckEmpty, g_hCvarCheckReload;
+int g_iCvarInfected, g_iCvarKeys, g_iCvarTimed, g_iClassTank, g_iCvarAmmoConsume;
+bool g_bCvarAllow, g_bLeft4Dead2, g_bCvarCheckEmpty, g_bCvarCheckReload;
 float g_fCvarTimeout;
 
 
@@ -29,7 +29,7 @@ float g_fCvarTimeout;
 // ====================================================================================================
 public Plugin myinfo =
 {
-	name = "[L4D & L4D2] Magnum Shove Fire",
+	name = "[L4D2] Magnum Shove Fire",
 	author = "lqthanh",
 	description = "Ignites infected when shoved by players holding magnum.",
 	version = PLUGIN_VERSION,
@@ -39,28 +39,31 @@ public Plugin myinfo =
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
 	EngineVersion test = GetEngineVersion();
-	if( test == Engine_Left4Dead ) g_bLeft4Dead2 = false;
-	else if( test == Engine_Left4Dead2 ) g_bLeft4Dead2 = true;
-	else
+	if( test == Engine_Left4Dead2 )
 	{
-		strcopy(error, err_max, "Plugin only supports Left 4 Dead 1 & 2.");
-		return APLRes_SilentFailure;
+		g_bLeft4Dead2 = true;
+		return APLRes_Success;
 	}
-	return APLRes_Success;
+	
+	strcopy(error, err_max, "Plugin only supports Left 4 Dead 2.");
+	return APLRes_SilentFailure;
 }
 
 public void OnPluginStart()
 {
-	g_hCvarAllow = CreateConVar(		"l4d_shove_magnum_fire_allow",			"1",			"0=Plugin off, 1=Plugin on.", CVAR_FLAGS );
-	g_hCvarModes = CreateConVar(		"l4d_shove_magnum_fire_modes",			"",				"Turn on the plugin in these game modes, separate by commas (no spaces). (Empty = all).", CVAR_FLAGS );
-	g_hCvarModesOff = CreateConVar(		"l4d_shove_magnum_fire_modes_off",		"",				"Turn off the plugin in these game modes, separate by commas (no spaces). (Empty = none).", CVAR_FLAGS );
-	g_hCvarModesTog = CreateConVar(		"l4d_shove_magnum_fire_modes_tog",		"0",			"Turn on the plugin in these game modes. 0=All, 1=Coop, 2=Survival, 4=Versus, 8=Scavenge. Add numbers together.", CVAR_FLAGS );
-	g_hCvarInfected = CreateConVar(		"l4d_shove_magnum_fire_infected",		"511",			"Which infected to affect: 1=Common, 2=Witch, 4=Smoker, 8=Boomer, 16=Hunter, 32=Spitter, 64=Jockey, 128=Charger, 256=Tank, 511=All.", CVAR_FLAGS );
-	g_hCvarKeys = CreateConVar(			"l4d_shove_magnum_fire_keys",			"1",			"Which key combination to use when shoving: 1=Shove key. 2=Reload + Shove keys.", CVAR_FLAGS );
-	g_hCvarTimed = CreateConVar(		"l4d_shove_magnum_fire_timed",			"256",			"These infected use l4d_shove_magnum_fire_timeout, otherwise they burn forever. 0=None, 1=All, 2=Witch, 4=Smoker, 8=Boomer, 16=Hunter, 32=Spitter, 64=Jockey, 128=Charger, 256=Tank.", CVAR_FLAGS );
-	g_hCvarTimeout = CreateConVar(		"l4d_shove_magnum_fire_timeout",		"10.0",			"0=Forever. How long should the infected be ignited for?", CVAR_FLAGS );
-	CreateConVar(						"l4d_shove_magnum_fire_version",		PLUGIN_VERSION,	"Molotov Shove plugin version.", FCVAR_NOTIFY|FCVAR_DONTRECORD);
-	AutoExecConfig(true,				"l4d_shove_magnum_fire");
+	g_hCvarAllow = CreateConVar(		"l4d2_shove_magnum_fire_allow",			"1",			"0=Plugin off, 1=Plugin on.", CVAR_FLAGS );
+	g_hCvarModes = CreateConVar(		"l4d2_shove_magnum_fire_modes",			"",				"Turn on the plugin in these game modes, separate by commas (no spaces). (Empty = all).", CVAR_FLAGS );
+	g_hCvarModesOff = CreateConVar(		"l4d2_shove_magnum_fire_modes_off",		"",				"Turn off the plugin in these game modes, separate by commas (no spaces). (Empty = none).", CVAR_FLAGS );
+	g_hCvarModesTog = CreateConVar(		"l4d2_shove_magnum_fire_modes_tog",		"0",			"Turn on the plugin in these game modes. 0=All, 1=Coop, 2=Survival, 4=Versus, 8=Scavenge. Add numbers together.", CVAR_FLAGS );
+	g_hCvarInfected = CreateConVar(		"l4d2_shove_magnum_fire_infected",		"511",			"Which infected to affect: 1=Common, 2=Witch, 4=Smoker, 8=Boomer, 16=Hunter, 32=Spitter, 64=Jockey, 128=Charger, 256=Tank, 511=All.", CVAR_FLAGS );
+	g_hCvarKeys = CreateConVar(			"l4d2_shove_magnum_fire_keys",			"1",			"Which key combination to use when shoving: 1=Shove key. 2=Reload + Shove keys.", CVAR_FLAGS );
+	g_hCvarTimed = CreateConVar(		"l4d2_shove_magnum_fire_timed",			"256",			"These infected use l4d2_shove_magnum_fire_timeout, otherwise they burn forever. 0=None, 1=All, 2=Witch, 4=Smoker, 8=Boomer, 16=Hunter, 32=Spitter, 64=Jockey, 128=Charger, 256=Tank.", CVAR_FLAGS );
+	g_hCvarTimeout = CreateConVar(		"l4d2_shove_magnum_fire_timeout",		"10.0",			"0=Forever. How long should the infected be ignited for?", CVAR_FLAGS );
+	g_hCvarAmmoConsume = CreateConVar(	"l4d2_shove_magnum_fire_ammo_consume",	"1",			"Amount of ammo to consume per shove fire. 0=No ammo cost.", CVAR_FLAGS );
+	g_hCvarCheckEmpty = CreateConVar(	"l4d2_shove_magnum_fire_check_empty",	"1",			"0=Allow shove fire regardless of ammo, 1=Require sufficient ammo (based on ammo_consume value).", CVAR_FLAGS );
+	g_hCvarCheckReload = CreateConVar(	"l4d2_shove_magnum_fire_check_reload",	"1",			"0=Allow shove fire while reloading, 1=Block shove fire during reload.", CVAR_FLAGS );
+	CreateConVar(						"l4d2_shove_magnum_fire_version",		PLUGIN_VERSION,	"Magnum Shove Fire plugin version.", FCVAR_NOTIFY|FCVAR_DONTRECORD);
+	AutoExecConfig(true,				"l4d2_shove_magnum_fire");
 
 	g_hCvarMPGameMode = FindConVar("mp_gamemode");
 	g_hCvarMPGameMode.AddChangeHook(ConVarChanged_Allow);
@@ -72,6 +75,9 @@ public void OnPluginStart()
 	g_hCvarKeys.AddChangeHook(ConVarChanged_Cvars);
 	g_hCvarTimed.AddChangeHook(ConVarChanged_Cvars);
 	g_hCvarTimeout.AddChangeHook(ConVarChanged_Cvars);
+	g_hCvarAmmoConsume.AddChangeHook(ConVarChanged_Cvars);
+	g_hCvarCheckEmpty.AddChangeHook(ConVarChanged_Cvars);
+	g_hCvarCheckReload.AddChangeHook(ConVarChanged_Cvars);
 
 	g_iClassTank = g_bLeft4Dead2 ? 9 : 6;
 }
@@ -100,6 +106,9 @@ void GetCvars()
 	g_iCvarKeys = g_hCvarKeys.IntValue;
 	g_iCvarTimed = g_hCvarTimed.IntValue;
 	g_fCvarTimeout = g_hCvarTimeout.FloatValue;
+	g_iCvarAmmoConsume = g_hCvarAmmoConsume.IntValue;
+	g_bCvarCheckEmpty = g_hCvarCheckEmpty.BoolValue;
+	g_bCvarCheckReload = g_hCvarCheckReload.BoolValue;
 }
 
 void IsAllowed()
@@ -345,15 +354,31 @@ bool IsReloading(int client)
 	if( weapon <= 0 || !IsValidEntity(weapon) )
 		return false;
 		
-	bool isReloading = GetEntProp(weapon, Prop_Send, "m_bInReload") != 0;
-		
-	int isEmptyClip = GetEntProp(weapon, Prop_Send, "m_iClip1") == 0;
+	// Check if reloading (if enabled)
+	if( g_bCvarCheckReload )
+	{
+		bool isReloading = GetEntProp(weapon, Prop_Send, "m_bInReload") != 0;
+		if( isReloading )
+			return true;
+	}
+	
+	// Check if not enough ammo (if enabled)
+	if( g_bCvarCheckEmpty )
+	{
+		int clip = GetEntProp(weapon, Prop_Send, "m_iClip1");
+		// Block if not enough ammo to consume
+		if( clip < g_iCvarAmmoConsume )
+			return true;
+	}
 
-	return isReloading || isEmptyClip;
+	return false;
 }
 
 void DecreaseAmmo(int client)
 {
+	if( g_iCvarAmmoConsume <= 0 )
+		return;
+	
 	if( client <= 0 || !IsClientInGame(client) || !IsPlayerAlive(client) )
 		return;
 
@@ -368,7 +393,9 @@ void DecreaseAmmo(int client)
 		int ammo = GetEntProp(weapon, Prop_Send, "m_iClip1");
 		if( ammo > 0 )
 		{
-			SetEntProp(weapon, Prop_Send, "m_iClip1", ammo - 1);
+			int newAmmo = ammo - g_iCvarAmmoConsume;
+			if( newAmmo < 0 ) newAmmo = 0;
+			SetEntProp(weapon, Prop_Send, "m_iClip1", newAmmo);
 		}
 	}
 }
