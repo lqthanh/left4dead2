@@ -31,6 +31,8 @@
 
 ========================================================================================
 	Change Log:
+1.17.LQT (24-Jan-2026)
+	- Add #tryinclude <perkmod2> and Native Func to compatible
 
 1.17 (21-Mar-2025)
 	- Fixed errors thrown by invalid clients. Thanks to "zuaLdakid05" for reporting.
@@ -155,24 +157,9 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	}
 
 	MarkNativeAsOptional("L4D_LaggedMovement");
+	MarkNativeAsOptional("perkmod2_Pyro_OnWeaponFire");
 
 	return APLRes_Success;
-}
-
-public void OnLibraryAdded(const char[] name)
-{
-	if( strcmp(name, "LaggedMovement") == 0 )
-	{
-		g_bLaggedMovement = true;
-	}
-}
-
-public void OnLibraryRemoved(const char[] name)
-{
-	if( strcmp(name, "LaggedMovement") == 0 )
-	{
-		g_bLaggedMovement = false;
-	}
 }
 
 public void OnPluginStart()
@@ -251,11 +238,6 @@ public void OnPluginEnd()
 	}
 }
 
-
-
-// ====================================================================================================
-//					CVARS
-// ====================================================================================================
 public void OnMapStart()
 {
 	g_bMapStarted = true;
@@ -266,6 +248,33 @@ public void OnMapEnd()
 	g_bMapStarted = false;
 }
 
+bool g_bAvailable_perkmod2;
+public void OnAllPluginsLoaded()
+{
+	g_bAvailable_perkmod2 = LibraryExists("perkmod2");
+}
+public void OnLibraryAdded(const char[] name)
+{
+	if( strcmp(name, "LaggedMovement") == 0 )
+	{
+		g_bLaggedMovement = true;
+	}
+	g_bAvailable_perkmod2 = LibraryExists("perkmod2");
+}
+public void OnLibraryRemoved(const char[] name)
+{
+	if( strcmp(name, "LaggedMovement") == 0 )
+	{
+		g_bLaggedMovement = false;
+	}
+	g_bAvailable_perkmod2 = LibraryExists("perkmod2");
+}
+
+
+
+// ====================================================================================================
+//					CVARS
+// ====================================================================================================
 public void OnConfigsExecuted()
 {
 	IsAllowed();
@@ -624,7 +633,9 @@ void AttachPipe(int target, int client, int weapon, int special)
 
 	RemovePlayerItem(client, weapon);
 	RemoveEntity(weapon);
+	if ( g_bAvailable_perkmod2 ) {
 	perkmod2_Pyro_OnWeaponFire(client, "pipe_bomb");
+	}
 
 	float vAng[3], vPos[3];
 	GetEntPropVector(target, Prop_Send, "m_vecOrigin", vPos);

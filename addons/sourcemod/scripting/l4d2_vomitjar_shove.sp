@@ -31,6 +31,8 @@
 
 ========================================================================================
 	Change Log:
+1.09.LQT (24-Jan-2026)
+	- Add #tryinclude <perkmod2> and Native Func to compatible
 
 1.9 (01-Nov-2022)
 	- Added cvar "l4d2_vomitjar_shove_keys" to optionally require holding "R" before shoving. Requested by "Iciaria".
@@ -125,6 +127,9 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 		strcopy(error, err_max, "Plugin only supports Left 4 Dead 2.");
 		return APLRes_SilentFailure;
 	}
+
+	MarkNativeAsOptional("perkmod2_Pyro_OnWeaponFire");
+
 	return APLRes_Success;
 }
 
@@ -203,6 +208,19 @@ public void OnMapEnd()
 	g_bMapStarted = false;
 }
 
+bool g_bAvailable_perkmod2;
+public void OnAllPluginsLoaded()
+{
+	g_bAvailable_perkmod2 = LibraryExists("perkmod2");
+}
+public void OnLibraryAdded(const char[] name)
+{
+	g_bAvailable_perkmod2 = LibraryExists("perkmod2");
+}
+public void OnLibraryRemoved(const char[] name)
+{
+	g_bAvailable_perkmod2 = LibraryExists("perkmod2");
+}
 
 
 
@@ -414,7 +432,9 @@ void DoRemove(int client, int weapon)
 	{
 		RemovePlayerItem(client, weapon);
 		RemoveEntity(weapon);
+		if ( g_bAvailable_perkmod2 ) {
 		perkmod2_Pyro_OnWeaponFire(client, "vomitjar");
+		}
 		EmitSoundToAll(SOUND_BREAK, client);
 
 		if( g_iCvarSplash > 0 )

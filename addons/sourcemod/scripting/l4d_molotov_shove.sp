@@ -31,6 +31,8 @@
 
 ========================================================================================
 	Change Log:
+1.10.LQT (24-Jan-2026)
+	- Add #tryinclude <perkmod2> and Native Func to compatible
 
 1.10 (01-Nov-2022)
 	- Added cvar "l4d_molotov_shove_keys" to optionally require holding "R" before shoving. Requested by "Iciaria".
@@ -127,6 +129,9 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 		strcopy(error, err_max, "Plugin only supports Left 4 Dead 1 & 2.");
 		return APLRes_SilentFailure;
 	}
+
+	MarkNativeAsOptional("perkmod2_Pyro_OnWeaponFire");
+
 	return APLRes_Success;
 }
 
@@ -161,6 +166,31 @@ public void OnPluginStart()
 	g_hCvarTimeout.AddChangeHook(ConVarChanged_Cvars);
 
 	g_iClassTank = g_bLeft4Dead2 ? 9 : 6;
+}
+
+public void OnMapStart()
+{
+	PrecacheModel(MODEL_GASCAN);
+	PrecacheSound(SOUND_BREAK);
+}
+
+public void OnMapEnd()
+{
+	ResetPlugin();
+}
+
+bool g_bAvailable_perkmod2;
+public void OnAllPluginsLoaded()
+{
+	g_bAvailable_perkmod2 = LibraryExists("perkmod2");
+}
+public void OnLibraryAdded(const char[] name)
+{
+	g_bAvailable_perkmod2 = LibraryExists("perkmod2");
+}
+public void OnLibraryRemoved(const char[] name)
+{
+	g_bAvailable_perkmod2 = LibraryExists("perkmod2");
 }
 
 
@@ -284,17 +314,6 @@ void OnGamemode(const char[] output, int caller, int activator, float delay)
 		g_iCurrentMode = 8;
 }
 
-public void OnMapStart()
-{
-	PrecacheModel(MODEL_GASCAN);
-	PrecacheSound(SOUND_BREAK);
-}
-
-public void OnMapEnd()
-{
-	ResetPlugin();
-}
-
 void ResetPlugin()
 {
 	for( int i = 1; i < 2048; i++ )
@@ -388,7 +407,9 @@ void LimitedFunc(int client)
 
 		RemovePlayerItem(client, weapon);
 		RemoveEntity(weapon);
+		if ( g_bAvailable_perkmod2 ) {
 		perkmod2_Pyro_OnWeaponFire(client, "molotov");
+		}
 		g_iLimited[weapon] = 0;
 
 		if( g_iCvarRemove == 2 )
