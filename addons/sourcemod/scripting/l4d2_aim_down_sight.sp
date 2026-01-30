@@ -42,11 +42,11 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 {
 	RegPluginLibrary("l4d2_aim_down_sight");
 	
-	CreateNative("L4D2_IsClientInADS", Native_IsClientInADS);
-	CreateNative("L4D2_ForceWeaponAnimation", Native_ForceWeaponAnimation);
-	CreateNative("L4D2_SetClientADSState", Native_SetClientADSState);
-	CreateNative("L4D2_PlayADSAnimation", Native_PlayADSAnimation);
-	CreateNative("L4D2_GetADSActivity", Native_GetADSActivity);
+	CreateNative("l4d2_aim_down_sight_IsClientInADS", Native_IsClientInADS);
+	CreateNative("l4d2_aim_down_sight_ForceWeaponAnimation", Native_ForceWeaponAnimation);
+	CreateNative("l4d2_aim_down_sight_SetClientADSState", Native_SetClientADSState);
+	CreateNative("l4d2_aim_down_sight_PlayADSAnimation", Native_PlayADSAnimation);
+	CreateNative("l4d2_aim_down_sight_GetADSActivity", Native_GetADSActivity);
 	
 	return APLRes_Success;
 }
