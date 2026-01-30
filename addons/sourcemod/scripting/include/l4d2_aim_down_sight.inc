@@ -1,7 +1,7 @@
-#if defined _l4d2_weapon_system_included_
+#if defined _l4d2_aim_down_sight_included_
 	#endinput
 #endif
-#define _l4d2_weapon_system_included_
+#define _l4d2_aim_down_sight_included_
 
 /**
  * Check if a client is currently in ADS (Aim Down Sight) mode.
@@ -53,10 +53,10 @@ native bool L4D2_PlayADSAnimation(int client, int weapon, int activity);
  */
 native int L4D2_GetADSActivity(int activity);
 
-public SharedPlugin __pl_l4d2_weapon_system = 
+public SharedPlugin __pl_l4d2_aim_down_sight = 
 {
-	name = "l4d2_weapon_system",
-	file = "l4d2_weapon_system.smx",
+	name = "l4d2_aim_down_sight",
+	file = "l4d2_aim_down_sight.smx",
 #if defined REQUIRE_PLUGIN
 	required = 1,
 #else
@@ -65,7 +65,7 @@ public SharedPlugin __pl_l4d2_weapon_system =
 };
 
 #if !defined REQUIRE_PLUGIN
-public void __pl_l4d2_weapon_system_SetNTVOptional()
+public void __pl_l4d2_aim_down_sight_SetNTVOptional()
 {
 	MarkNativeAsOptional("L4D2_IsClientInADS");
 	MarkNativeAsOptional("L4D2_ForceWeaponAnimation");

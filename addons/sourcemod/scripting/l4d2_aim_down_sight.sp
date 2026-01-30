@@ -40,7 +40,7 @@ public Plugin myinfo =
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
-	RegPluginLibrary("l4d2_weapon_system");
+	RegPluginLibrary("l4d2_aim_down_sight");
 	
 	CreateNative("L4D2_IsClientInADS", Native_IsClientInADS);
 	CreateNative("L4D2_ForceWeaponAnimation", Native_ForceWeaponAnimation);
@@ -55,9 +55,9 @@ public void OnPluginStart()
 {
 	PrintToServer("[ADS] Plugin starting...");
 	
-	GameData gamedata = LoadGameConfigFile("l4d2_weapon_system");
+	GameData gamedata = LoadGameConfigFile("l4d2_aim_down_sight");
 	if (!gamedata)
-		SetFailState("Can't load gamedata \"l4d2_weapon_system.txt\" or not found");
+		SetFailState("Can't load gamedata \"l4d2_aim_down_sight.txt\" or not found");
 	
 	PrintToServer("[ADS] GameData loaded successfully");
 	
@@ -108,7 +108,7 @@ public void OnPluginStart()
 	}
 	
 	// Register commands and events
-	RegServerCmd("ws_reload", Command_Reload);
+	RegServerCmd("ads_reload", Command_Reload);
 	RegAdminCmd("sm_ads_debug", Command_DebugToggle, ADMFLAG_ROOT, "Toggle ADS debug mode");
 	RegAdminCmd("sm_ads_test", Command_TestADS, ADMFLAG_ROOT, "Test ADS on current weapon");
 	LoadWeaponData();
@@ -140,7 +140,7 @@ public void OnPluginStart()
 	cvar.AddChangeHook(OnConVarChanged);
 	
 	LoadConVars();
-	AutoExecConfig(true, "l4d2_weapon_system");
+	AutoExecConfig(true, "l4d2_aim_down_sight");
 	PrintToServer("[ADS] Plugin loaded successfully!");
 	PrintToServer("[ADS] Use 'sm_ads_debug' to toggle debug mode");
 	PrintToServer("[ADS] Use 'sm_ads_test' to test ADS on your weapon");
@@ -218,7 +218,7 @@ void LoadWeaponData()
 	delete hWeaponData;
 	hWeaponData = new KeyValues("");
 	char buffer[PLATFORM_MAX_PATH];
-	BuildPath(Path_SM, buffer, sizeof(buffer), "data/weapon_system.txt");
+	BuildPath(Path_SM, buffer, sizeof(buffer), "data/l4d2_aim_down_sight.txt");
 	
 	if (g_bDebug)
 		PrintToServer("[ADS] Loading weapon data from: %s", buffer);
