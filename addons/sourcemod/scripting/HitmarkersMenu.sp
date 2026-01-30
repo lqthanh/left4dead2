@@ -45,13 +45,15 @@ public Plugin myinfo =
 bool 	g_bEnemies	[MAXPLAYERS+1],
 		g_bObjects	[MAXPLAYERS+1],
 		g_bHasSound	[MAXPLAYERS+1],
+		g_bDmgBurn	[MAXPLAYERS+1],
 		g_bLateLoad = false;
 
 Handle 	g_hEnemiesCookie 	= INVALID_HANDLE,
 		g_hObjectsCookie 	= INVALID_HANDLE,
 		g_hOverlayEnemies 	= INVALID_HANDLE,
 		g_hOverlayObjects 	= INVALID_HANDLE,
-		g_hHasSound 		= INVALID_HANDLE;
+		g_hHasSound 		= INVALID_HANDLE,
+		g_hDmgBurn 			= INVALID_HANDLE;
 
 int 	g_iOverlayEnemies	[MAXPLAYERS+1],
 		g_iOverlayObjects	[MAXPLAYERS+1];
@@ -64,6 +66,7 @@ public void OnPluginStart()
 	g_hEnemiesCookie 		= RegClientCookie("HM Enemies", 			"", CookieAccess_Protected);
 	g_hObjectsCookie 		= RegClientCookie("HM Objects", 			"", CookieAccess_Protected);
 	g_hHasSound 			= RegClientCookie("HM Soundfx", 			"", CookieAccess_Protected);
+	g_hDmgBurn 				= RegClientCookie("HM Burn Damage", 		"", CookieAccess_Protected);
 	g_hOverlayEnemies 		= RegClientCookie("HM Enemies Overlay",		"", CookieAccess_Protected);
 	g_hOverlayObjects 		= RegClientCookie("HM Objects Overlay", 	"", CookieAccess_Protected);
 	
@@ -188,6 +191,8 @@ void Cleanup(bool bPluginEnd = false)
 			CloseHandle(g_hObjectsCookie);
 		if (g_hHasSound != INVALID_HANDLE)
 			CloseHandle(g_hHasSound);
+		if (g_hDmgBurn != INVALID_HANDLE)
+			CloseHandle(g_hDmgBurn);
 		if (g_hOverlayEnemies != INVALID_HANDLE)
 			CloseHandle(g_hOverlayEnemies);
 		if (g_hOverlayObjects != INVALID_HANDLE)
@@ -208,6 +213,9 @@ void ReadClientCookies(int client)
 	GetClientCookie(client, g_hHasSound, sBuffer, sizeof(sBuffer));
 	g_bHasSound[client] = sBuffer[0] == '\0' ? true : view_as<bool>(StringToInt(sBuffer));
 
+	GetClientCookie(client, g_hDmgBurn, sBuffer, sizeof(sBuffer));
+	g_bDmgBurn[client] = sBuffer[0] == '\0' ? false : view_as<bool>(StringToInt(sBuffer));
+
 	GetClientCookie(client, g_hOverlayEnemies, sBuffer, sizeof(sBuffer));
 	g_iOverlayEnemies[client] = (sBuffer[0] == '\0' ? 0 : StringToInt(sBuffer));
 	
@@ -227,6 +235,9 @@ void SetClientCookies(int client)
 	
 	Format(sValue, sizeof(sValue), "%i", g_bHasSound[client]);
 	SetClientCookie(client, g_hHasSound, sValue);
+	
+	Format(sValue, sizeof(sValue), "%i", g_bDmgBurn[client]);
+	SetClientCookie(client, g_hDmgBurn, sValue);
 	
 	Format(sValue, sizeof(sValue), "%i", g_iOverlayEnemies[client]);
 	SetClientCookie(client, g_hOverlayEnemies, sValue);
@@ -330,6 +341,7 @@ public void HMMenu(int client)
 	AddMenuItem(menu, NULL_STRING, "Enemies");
 	AddMenuItem(menu, NULL_STRING, "Objects");
 	AddMenuItem(menu, NULL_STRING, "Sounds");
+	AddMenuItem(menu, NULL_STRING, "BurnDamage");
 	AddMenuItem(menu, NULL_STRING, "Overlay1");
 	AddMenuItem(menu, NULL_STRING, "Overlay2");
 	AddMenuItem(menu, NULL_STRING, "Exit");
@@ -366,6 +378,11 @@ public int MenuHandler_HMenu(Menu menu, MenuAction action, int client, int param
 				}	
 				case 3:	
 				{	
+					g_bDmgBurn[client] = !g_bDmgBurn[client];	
+					CPrintToChat(client, PREFIX, "BURN_DMG", g_bDmgBurn[client] ? "{blue}Enabled" : "{darkred}Disabled");	
+				}	
+				case 4:	
+				{	
 					if(g_iOverlayEnemies[client] >= 6)	
 					{	
 						g_iOverlayEnemies[client] = 0;	
@@ -376,7 +393,7 @@ public int MenuHandler_HMenu(Menu menu, MenuAction action, int client, int param
 					}	
 					CPrintToChat(client, PREFIX, "OVERLAY_1", g_iOverlayEnemies[client]);	
 				}	
-				case 4:	
+				case 5:	
 				{	
 					if(g_iOverlayObjects[client] >= 6)	
 					{	
@@ -411,13 +428,17 @@ public int MenuHandler_HMenu(Menu menu, MenuAction action, int client, int param
 				}	
 				case 3:	
 				{	
-					Format(sBuffer, sizeof(sBuffer), "%t", "LINE_4", g_iOverlayEnemies[client]);	
+					Format(sBuffer, sizeof(sBuffer), "%t", "LINE_4", g_bDmgBurn[client] ? "Enabled" : "Disabled");	
 				}	
 				case 4:	
 				{	
-					Format(sBuffer, sizeof(sBuffer), "%t", "LINE_5", g_iOverlayObjects[client]);	
+					Format(sBuffer, sizeof(sBuffer), "%t", "LINE_5", g_iOverlayEnemies[client]);	
 				}	
 				case 5:	
+				{	
+					Format(sBuffer, sizeof(sBuffer), "%t", "LINE_6", g_iOverlayObjects[client]);	
+				}	
+				case 6:	
 				{	
 					Format(sBuffer, sizeof(sBuffer), "Exit");	
 				}	
@@ -449,8 +470,21 @@ public void Event_PlayerHurt(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(GetEventInt(event, "userid"));
 	int attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
+	int damageType = GetEventInt(event, "type");
 	
 	if(!client || !attacker || !g_cEnemiesGlobal.BoolValue)
+	{
+		return;
+	}
+
+	// Ignore (DMG_POISON = 131072 = bit 17)
+	if((damageType & (1 << 17)))
+	{
+		return;
+	}
+
+	// Ignore (DMG_BURN = 8 = bit 3) if user disabled it
+	if((damageType & (1 << 3)) && !g_bDmgBurn[attacker])
 	{
 		return;
 	}
@@ -470,8 +504,21 @@ public void Event_PlayerHurt(Event event, const char[] name, bool dontBroadcast)
 public void Event_InfectedHurt(Event event, const char[] name, bool dontBroadcast)
 {
 	int attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
+	int damageType = GetEventInt(event, "type");	
 	
 	if(!attacker || !g_cEnemiesGlobal.BoolValue)
+	{
+		return;
+	}
+
+	// Ignore (DMG_POISON = 131072 = bit 17)
+	if((damageType & (1 << 17)))
+	{
+		return;
+	}
+	
+	// Ignore (DMG_BURN = 8 = bit 3) if user disabled it
+	if((damageType & (1 << 3)) && !g_bDmgBurn[attacker])
 	{
 		return;
 	}

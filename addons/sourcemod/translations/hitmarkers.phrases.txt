@@ -32,6 +32,13 @@
 		"en"		"You have {1}{default} the hitmarker {orange}sound effect."
 		"es"		"Has {1}{default} el {orange}efecto de sonido."
 	}
+
+	"BURN_DMG"
+	{
+		"#format"	"{1:s}"
+		"en"		"You have {1}{default} the hitmarker {orange}burn damage."
+		"es"		"Has {1}{default} el {orange}daño por quemadura."
+	}
 	
 	"OVERLAY_1"
 	{
@@ -69,12 +76,19 @@
 
 	"LINE_4"
 	{
+		"#format"	"{1:s}"
+		"en"		"Burn Damage: {1}"
+		"es"		"Daño por quemadura: {1}"
+	}
+
+	"LINE_5"
+	{
 		"#format"	"{1:i}"
 		"en"		"Skin for enemies: {1}"
 		"es"		"Hitmarker para enemigos: {1}"
 	}
 	
-	"LINE_5"
+	"LINE_6"
 	{
 		"#format"	"{1:i}"
 		"en"		"Skin for objects: {1}"
