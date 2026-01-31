@@ -23,16 +23,6 @@ native bool l4d2_aim_down_sight_IsClientInADS(int client);
 native bool l4d2_aim_down_sight_ForceWeaponAnimation(int weapon, int sequence);
 
 /**
- * Set a client's ADS state.
- *
- * @param client    Client index
- * @param adsState  True to enter ADS mode, false to exit
- * @return          True on success, false otherwise
- * @error           Invalid client index or client not in game
- */
-native bool l4d2_aim_down_sight_SetClientADSState(int client, bool adsState);
-
-/**
  * Play an ADS animation for a weapon.
  * This will automatically convert normal activities to ADS activities.
  *
@@ -44,14 +34,6 @@ native bool l4d2_aim_down_sight_SetClientADSState(int client, bool adsState);
  * @note            Client must be in ADS mode for this to work
  */
 native bool l4d2_aim_down_sight_PlayADSAnimation(int client, int weapon, int activity);
-
-/**
- * Get the ADS version of a normal activity.
- *
- * @param activity  Normal activity number
- * @return          Corresponding ADS activity number, or -1 if no mapping exists
- */
-native int l4d2_aim_down_sight_GetADSActivity(int activity);
 
 public SharedPlugin __pl_l4d2_aim_down_sight = 
 {
@@ -69,8 +51,6 @@ public void __pl_l4d2_aim_down_sight_SetNTVOptional()
 {
 	MarkNativeAsOptional("l4d2_aim_down_sight_IsClientInADS");
 	MarkNativeAsOptional("l4d2_aim_down_sight_ForceWeaponAnimation");
-	MarkNativeAsOptional("l4d2_aim_down_sight_SetClientADSState");
 	MarkNativeAsOptional("l4d2_aim_down_sight_PlayADSAnimation");
-	MarkNativeAsOptional("l4d2_aim_down_sight_GetADSActivity");
 }
 #endif

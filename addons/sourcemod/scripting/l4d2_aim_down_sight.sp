@@ -44,9 +44,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	
 	CreateNative("l4d2_aim_down_sight_IsClientInADS", Native_IsClientInADS);
 	CreateNative("l4d2_aim_down_sight_ForceWeaponAnimation", Native_ForceWeaponAnimation);
-	CreateNative("l4d2_aim_down_sight_SetClientADSState", Native_SetClientADSState);
 	CreateNative("l4d2_aim_down_sight_PlayADSAnimation", Native_PlayADSAnimation);
-	CreateNative("l4d2_aim_down_sight_GetADSActivity", Native_GetADSActivity);
 	
 	return APLRes_Success;
 }
@@ -737,22 +735,6 @@ public int Native_ForceWeaponAnimation(Handle plugin, int numParams)
 	return SendWeaponAnim(weapon, sequence);
 }
 
-public int Native_SetClientADSState(Handle plugin, int numParams)
-{
-	int client = GetNativeCell(1);
-	bool adsState = GetNativeCell(2);
-	
-	if (client < 1 || client > MaxClients || !IsClientInGame(client))
-		return false;
-	
-	int weapon = GetPlayerWeapon(client);
-	if (weapon == -1)
-		return false;
-	
-	SetupZoom(client, weapon, adsState);
-	return true;
-}
-
 public int Native_PlayADSAnimation(Handle plugin, int numParams)
 {
 	int client = GetNativeCell(1);
@@ -769,55 +751,18 @@ public int Native_PlayADSAnimation(Handle plugin, int numParams)
 	if (!bZoom[client])
 		return false;
 	
-	// Convert activity to ADS activity
-	int adsActivity = GetADSActivityForNormal(activity);
-	if (adsActivity == -1)
-		return false;
-	
 	if (g_bDebug)
-		PrintToServer("[ADS] PlayADSAnimation: Client %N, Activity %d -> ADS Activity %d", client, activity, adsActivity);
+		PrintToServer("[ADS] PlayADSAnimation: Client %N, Activity %d", client, activity);
 	
 	// Get sequence and play animation
-	int sequence = SelectWeightedSequence(weapon, adsActivity);
+	int sequence = SelectWeightedSequence(weapon, activity);
 	if (sequence != -1)
 	{
 		SetWeaponHelpingHandState(weapon, 6);
-		return SendWeaponAnim(weapon, adsActivity);
+		return SendWeaponAnim(weapon, activity);
 	}
 	
 	return false;
-}
-
-public int Native_GetADSActivity(Handle plugin, int numParams)
-{
-	int normalActivity = GetNativeCell(1);
-	return GetADSActivityForNormal(normalActivity);
-}
-
-int GetADSActivityForNormal(int activity)
-{
-	switch (activity)
-	{
-		case 193, 1264, 1403: // ACT_VM_RELOAD
-			return 1877; // ACT_PRIMARY_VM_RELOAD
-		
-		case 1250, 1254: // ACT_VM_MELEE / ACT_VM_SECONDARYATTACK
-			return 1876; // ACT_PRIMARY_VM_SECONDARYATTACK
-		
-		case 1252: // ACT_VM_PRIMARYATTACK
-			return 1875; // ACT_PRIMARY_VM_PRIMARYATTACK
-		
-		case 194: // ACT_VM_DRYFIRE
-			return 1878; // ACT_PRIMARY_VM_DRYFIRE
-		
-		case 183: // ACT_VM_IDLE
-			return 1873; // ACT_PRIMARY_VM_IDLE
-		
-		case 181: // ACT_VM_DRAW
-			return 1879; // ACT_PRIMARY_VM_IDLE_TO_LOWERED
-	}
-	
-	return -1;
 }
 
 
