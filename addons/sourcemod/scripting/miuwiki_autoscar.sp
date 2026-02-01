@@ -8,6 +8,10 @@
 #include <left4dhooks>
 #include <miuwiki_autoscar>
 
+#undef REQUIRE_PLUGIN
+#include <l4d2_aim_down_sight>
+#define REQUIRE_PLUGIN
+
 #define PLUGIN_VERSION "1.3h-2025/10/8"
 
 public Plugin myinfo =
@@ -69,6 +73,9 @@ Handle
 DynamicHook
 	g_DynamicHook_ItemPostFrame;
 
+StringMap
+	g_WeaponHookIds; // Map weapon entity index -> hookid
+
 ConVar
 	cvar_l4d2_scar_cycletime,
 	cvar_l4d2_scar_reloadtime,
@@ -113,8 +120,13 @@ float
 	g_fScarReloadTime,
 	g_fScarCycleTime;
 
+bool 
+	g_bADSPluginAvailable = false;
+
 public void OnPluginStart()
 {
+	g_WeaponHookIds = new StringMap();
+	g_bADSPluginAvailable = LibraryExists("l4d2_aim_down_sight");
 	LoadGameData();
 	cvar_l4d2_scar_cycletime    = CreateConVar("miuwiki_autoscar_cycletime", 	"0.11", 	"Scar full Auto cycle time. [min 0.03, 0=Same as Triple Tap default cycle time]", FCVAR_NOTIFY, true, 0.0);
 	cvar_l4d2_scar_reloadtime   = CreateConVar("miuwiki_autoscar_reloadtime", 	"0",    	"Scar full Auto reload time. [min 0.5, 0=Same as Triple Tap default reload time]", FCVAR_NOTIFY, true, 0.0);
@@ -152,13 +164,20 @@ void LateLoad()
         OnClientPutInServer(client);
     }
 
+    // Hook weapons for players already in auto mode
     int entity = INVALID_ENT_REFERENCE;
     while ((entity = FindEntityByClassname(entity, "weapon_rifle_desert")) != INVALID_ENT_REFERENCE)
     {
         if (!IsValidEntity(entity))
             continue;
 
-        g_DynamicHook_ItemPostFrame.HookEntity(Hook_Post, entity, DhookCallback_ItemPostFrame);
+        // g_DynamicHook_ItemPostFrame.HookEntity(Hook_Post, entity, DhookCallback_ItemPostFrame);
+
+        int owner = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
+        if (owner > 0 && owner <= MaxClients && IsClientInGame(owner) && player[owner].fullautomode)
+        {
+            HookScarWeapon(entity);
+        }
     }
 }
 
@@ -178,6 +197,33 @@ void GetCvars()
 	if(cvar.reloadtime > 0.0 && cvar.reloadtime < 0.5)
 	{
 		cvar.reloadtime = 0.5;
+	}
+}
+
+public void OnAllPluginsLoaded()
+{
+	g_bADSPluginAvailable = LibraryExists("l4d2_aim_down_sight");
+	if(g_bADSPluginAvailable)
+	{
+		PrintToServer("[AutoScar] ADS plugin detected - Enhanced animations enabled");
+	}
+}
+
+public void OnLibraryAdded(const char[] name)
+{
+	if(StrEqual(name, "l4d2_aim_down_sight"))
+	{
+		g_bADSPluginAvailable = true;
+		PrintToServer("[AutoScar] ADS plugin loaded");
+	}
+}
+
+public void OnLibraryRemoved(const char[] name)
+{
+	if(StrEqual(name, "l4d2_aim_down_sight"))
+	{
+		g_bADSPluginAvailable = false;
+		PrintToServer("[AutoScar] ADS plugin unloaded");
 	}
 }
 
@@ -260,10 +306,14 @@ void SDKCallback_SwitchDesert(int client, int weapon)
 	{
 		// since predict will cause sound problem and no ammo trace, we predict scar whatever which mode it use.
 		SetEntProp(client, Prop_Data, "m_bPredictWeapons", 0);
+		// Hook weapon when in auto mode
+		HookScarWeapon(weapon);
 	}
 	else
 	{
 		SetEntProp(client, Prop_Data, "m_bPredictWeapons", 1);
+		// Unhook weapon when in triple tap mode to reduce overhead
+		UnhookScarWeapon(weapon);
 	}
 
 	float currenttime = GetEngineTime();
@@ -418,6 +468,12 @@ MRESReturn DhookCallback_ItemPostFrame(int pThis)
 			player[client].secondaryattacktime = currenttime + DEFAULT_ATTACK2_TIME;
 			if( player[client].reloadendtime != NOT_IN_RELOAD )
 				player[client].shoveinreload = true;
+			
+			// Play ADS animation if in ADS mode
+			if(g_bADSPluginAvailable && l4d2_aim_down_sight_IsClientInADS(client))
+			{
+				l4d2_aim_down_sight_PlayADSAnimation(client, pThis, 1250); // ACT_VM_MELEE
+			}
 		}
 		return MRES_Ignored; // ignore in_attack and in_reload when pushing pushing.
 	}
@@ -435,6 +491,12 @@ MRESReturn DhookCallback_ItemPostFrame(int pThis)
 				player[client].primaryattacktime = currenttime + g_fScarCycleTime;
 			else
 				player[client].primaryattacktime = currenttime + cvar.cycletime;
+			
+			// Play ADS animation if in ADS mode
+			if(g_bADSPluginAvailable && l4d2_aim_down_sight_IsClientInADS(client))
+			{
+				l4d2_aim_down_sight_PlayADSAnimation(client, pThis, 1252); // ACT_VM_PRIMARYATTACK_LAYER
+			}
 		}
 		return MRES_Ignored; // ignore IN_RELOAD when pushing attack button.
 	}
@@ -461,6 +523,12 @@ MRESReturn DhookCallback_ItemPostFrame(int pThis)
 				player[client].reloadendtime = currenttime + cvar.reloadtime;
 			}
 			player[client].shoveinreload = false;
+			
+			// Play ADS reload animation if in ADS mode
+			if(g_bADSPluginAvailable && l4d2_aim_down_sight_IsClientInADS(client))
+			{
+				l4d2_aim_down_sight_PlayADSAnimation(client, pThis, 1877); // ACT_PRIMARY_VM_RELOAD
+			}
 
 			return MRES_Ignored; 
 		}
@@ -485,6 +553,12 @@ MRESReturn DhookCallback_ItemPostFrame(int pThis)
 				player[client].reloadendtime = currenttime + cvar.reloadtime;
 			}
 			player[client].shoveinreload = false;
+			
+			// Play ADS reload animation if in ADS mode
+			if(g_bADSPluginAvailable && l4d2_aim_down_sight_IsClientInADS(client))
+			{
+				l4d2_aim_down_sight_PlayADSAnimation(client, pThis, 1877); // ACT_PRIMARY_VM_RELOAD
+			}
 		}
 	}
 
@@ -601,9 +675,12 @@ public void OnEntityCreated(int entity, const char[] classname)
 	if (!IsValidEntityIndex(entity))
 		return;
 
+	// Don't auto-hook, only hook when player switches to auto mode
+	// This reduces overhead for Triple Tap mode
 	if( strcmp(classname, "weapon_rifle_desert") == 0 )
 	{
-		g_DynamicHook_ItemPostFrame.HookEntity(Hook_Post, entity, DhookCallback_ItemPostFrame);
+		// g_DynamicHook_ItemPostFrame.HookEntity(Hook_Post, entity, DhookCallback_ItemPostFrame);
+		// Hook will be added in SDKCallback_SwitchDesert if needed
 	}
 }
 
@@ -675,6 +752,8 @@ public void OnPlayerRunCmdPost(int client, int buttons)
 
 			SetEntProp(client, Prop_Data, "m_bPredictWeapons", 1);
 			player[client].lastAction = 0;
+			// Unhook to reduce server overhead
+			UnhookScarWeapon(active_weapon);
 		}
 		else
 		{
@@ -685,6 +764,8 @@ public void OnPlayerRunCmdPost(int client, int buttons)
 			player[client].needrelease = true;
 			player[client].switchendtime = GetGameTime() + 0.2;
 			player[client].reloadendtime = NOT_IN_RELOAD;
+			// Hook only when in auto mode
+			HookScarWeapon(active_weapon);
 		}
 	}
 	else
@@ -746,6 +827,41 @@ bool IsClientOnLadder(int client)
 bool IsValidEntityIndex(int entity)
 {
     return (MaxClients+1 <= entity <= GetMaxEntities());
+}
+
+void HookScarWeapon(int weapon)
+{
+	if (weapon < 1 || !IsValidEntity(weapon))
+		return;
+	
+	char key[16];
+	IntToString(weapon, key, sizeof(key));
+	
+	// Check if already hooked
+	int dummy;
+	if (g_WeaponHookIds.GetValue(key, dummy))
+		return;
+	
+	// Hook and store hookid
+	int hookid = g_DynamicHook_ItemPostFrame.HookEntity(Hook_Post, weapon, DhookCallback_ItemPostFrame);
+	g_WeaponHookIds.SetValue(key, hookid);
+}
+
+void UnhookScarWeapon(int weapon)
+{
+	if (weapon < 1 || !IsValidEntity(weapon))
+		return;
+	
+	char key[16];
+	IntToString(weapon, key, sizeof(key));
+	
+	int hookid;
+	if (g_WeaponHookIds.GetValue(key, hookid))
+	{
+		// Unhook and remove from map
+		DynamicHook.RemoveHook(hookid);
+		g_WeaponHookIds.Remove(key);
+	}
 }
 
 // Native
