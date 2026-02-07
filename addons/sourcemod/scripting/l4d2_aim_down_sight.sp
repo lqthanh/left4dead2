@@ -20,11 +20,7 @@ int iOS;
 int EntStore[2049];
 int onbutton[MAXPLAYERS + 1];
 bool bZoom[MAXPLAYERS + 1];
-bool ads_holding_key;
 int ads_key;
-float ads_recoil_modifier;
-float ads_spread_modifier;
-float ads_pellet_scatter_modifier;
 bool bPass;
 KeyValues hRestoreWeaponAttr = null;
 bool g_bDebug = false;
@@ -114,7 +110,6 @@ public void OnPluginStart()
 	
 	HookEvent("weapon_zoom", Event_WeaponZoom, EventHookMode_Post);
 	HookEvent("weapon_drop", Event_WeaponDrop, EventHookMode_Post);
-	HookEvent("weapon_fire", Event_WeaponFire, EventHookMode_Post);
 	PrintToServer("[ADS] Events hooked");
 	
 	// Create ConVars
@@ -122,19 +117,7 @@ public void OnPluginStart()
 	cvar = CreateConVar("ads_debug", "0", "Enable debug logging");
 	cvar.AddChangeHook(OnConVarChanged);
 	
-	cvar = CreateConVar("ads_holding_key", "0", "Enable in ads by holding the zoom key.");
-	cvar.AddChangeHook(OnConVarChanged);
-	
 	cvar = CreateConVar("ads_key", "0", "Key to activate ADS. 0 = Zoom key (MOUSE 3), 1 = Walk key (SHIFT), 2 = Duck key (CTRL)");
-	cvar.AddChangeHook(OnConVarChanged);
-	
-	cvar = CreateConVar("ads_recoil_modifier", "0.5", "Recoil modifier while in ads.");
-	cvar.AddChangeHook(OnConVarChanged);
-	
-	cvar = CreateConVar("ads_spread_modifier", "0.1", "Spread modifier while in ads.");
-	cvar.AddChangeHook(OnConVarChanged);
-	
-	cvar = CreateConVar("ads_pellet_scatter_modifier", "0.5", "Pellet scatter modifier while in ads.");
 	cvar.AddChangeHook(OnConVarChanged);
 	
 	LoadConVars();
@@ -147,19 +130,11 @@ public void OnPluginStart()
 void LoadConVars()
 {
 	g_bDebug = FindConVar("ads_debug").BoolValue;
-	ads_recoil_modifier = FindConVar("ads_recoil_modifier").FloatValue;
-	ads_spread_modifier = FindConVar("ads_spread_modifier").FloatValue;
-	ads_pellet_scatter_modifier = FindConVar("ads_pellet_scatter_modifier").FloatValue;
-	ads_holding_key = FindConVar("ads_holding_key").BoolValue;
 	ads_key = FindConVar("ads_key").IntValue;
 	
 	if (g_bDebug)
 	{
 		PrintToServer("[ADS] ConVars loaded:");
-		PrintToServer("[ADS] - Recoil modifier: %.2f", ads_recoil_modifier);
-		PrintToServer("[ADS] - Spread modifier: %.2f", ads_spread_modifier);
-		PrintToServer("[ADS] - Pellet scatter: %.2f", ads_pellet_scatter_modifier);
-		PrintToServer("[ADS] - Holding key: %d", ads_holding_key);
 		PrintToServer("[ADS] - ADS key: %d (0=Zoom, 1=Shift, 2=Ctrl)", ads_key);
 	}
 }
@@ -488,64 +463,6 @@ void Event_WeaponDrop(Event event, const char[] name, bool dontBroadcast)
 	EntStore[propid] = 0;
 }
 
-// Event: Weapon Fire
-void Event_WeaponFire(Event event, const char[] name, bool dontBroadcast)
-{
-	int weaponid = event.GetInt("weaponid");
-	
-	// Skip melee weapons
-	if (weaponid == 19 || weaponid == 20 || weaponid == 54)
-		return;
-	
-	int client = GetClientOfUserId(event.GetInt("userid"));
-	if (client <= 0 || GetClientTeam(client) != 2)
-		return;
-	
-	int weapon = GetPlayerWeapon(client);
-	if (weapon == -1)
-		return;
-	
-	int ammoType = GetEntProp(weapon, Prop_Data, "m_iPrimaryAmmoType");
-	
-	// Only process certain ammo types
-	switch (ammoType)
-	{
-		case 1, 2, 3, 5, 6, 7, 8, 9, 10, 17:
-		{
-			if (bZoom[client])
-			{
-				int weaponinfo = SDKCall(hGetWeaponInfoByID, weaponid);
-				char buffer[48];
-				FormatEx(buffer, sizeof(buffer), "%i", weaponinfo);
-				hRestoreWeaponAttr = new KeyValues(buffer);
-				
-				// Modify weapon attributes
-				SetToRestoreWeaponAttrFloat(weaponinfo, 3076, ads_recoil_modifier);
-				SetToRestoreWeaponAttrFloat(weaponinfo, 3080, ads_recoil_modifier);
-				SetToRestoreWeaponAttrFloat(weaponinfo, 3092, ads_spread_modifier);
-				SetToRestoreWeaponAttrFloat(weaponinfo, 3088, ads_spread_modifier);
-				SetToRestoreWeaponAttrFloat(weaponinfo, 3100, ads_spread_modifier);
-				SetToRestoreWeaponAttrFloat(weaponinfo, 3104, ads_spread_modifier);
-				SetToRestoreWeaponAttrFloat(weaponinfo, 3108, ads_spread_modifier);
-				SetToRestoreWeaponAttrFloat(weaponinfo, 3112, ads_spread_modifier);
-				SetToRestoreWeaponAttrFloat(weaponinfo, 3116, ads_pellet_scatter_modifier);
-				SetToRestoreWeaponAttrFloat(weaponinfo, 3120, ads_pellet_scatter_modifier);
-			}
-		}
-	}
-}
-
-void SetToRestoreWeaponAttrFloat(int weaponinfo, int offset, float modifier)
-{
-	Address addr = view_as<Address>(weaponinfo + offset);
-	char buffer[48];
-	FormatEx(buffer, sizeof(buffer), "%i", offset);
-	
-	float originalValue = view_as<float>(LoadFromAddress(addr, NumberType_Int32));
-	hRestoreWeaponAttr.SetFloat(buffer, originalValue);
-	StoreToAddress(addr, view_as<int>(originalValue * modifier), NumberType_Int32, true);
-}
-
 // Player command processing
 public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3], float angles[3], int& weapon, int& subtype, int& cmdnum, int& tickcount, int& seed, int mouse[2])
 {
@@ -596,12 +513,6 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 	else if (onbutton[client] & adsButton)
 	{
 		onbutton[client] &= ~adsButton;
-		if (ads_holding_key && bZoom[client])
-		{
-			if (g_bDebug)
-				PrintToServer("[ADS] Client %N released %s button (holding mode)", client, keyName);
-			SetupZoom(client, GetPlayerWeapon(client), false);
-		}
 	}
 	
 	return Plugin_Continue;
