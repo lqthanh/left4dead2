@@ -372,8 +372,22 @@ int GetCustomWeaponAnim(int weapon, int activity)
 public MRESReturn DH_OnGunHolsterPost(int weapon)
 {
 	int owner = GetWeaponOwner(weapon);
-	if (owner > 0)
+	if (owner > 0 && bZoom[owner])
+	{
 		bZoom[owner] = false;
+		// Reset the weapon animation to normal idle
+		int sequence = SelectWeightedSequence(weapon, 183); // ACT_VM_IDLE
+		if (sequence != -1)
+		{
+			int viewModel = GetEntPropEnt(owner, Prop_Send, "m_hViewModel");
+			if (viewModel > 0)
+			{
+				SetEntProp(viewModel, Prop_Send, "m_nSequence", sequence);
+			}
+		}
+		// Reset helping hand state
+		SetWeaponHelpingHandState(weapon, 0);
+	}
 	return MRES_Ignored;
 }
 
