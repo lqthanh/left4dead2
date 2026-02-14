@@ -8244,7 +8244,7 @@ public Action:Unbreakable_Delayed_Heal (Handle:timer, any:iCid)
 		&& IsValidEntity(iCid)==true
 		&& IsClientInGame(iCid)==true)
 	{
-		SetEntProp(iCid,Prop_Data,"m_iHealth", GetEntProp(iCid,Prop_Data,"m_iHealth") + (g_iUnbreak_hp*8/10) );
+		SetEntProp(iCid,Prop_Data,"m_iHealth", GetEntProp(iCid,Prop_Data,"m_iHealth") + (g_iUnbreak_hp) );
 
 		if (GetEntProp(iCid,Prop_Data,"m_iHealth") > (100+g_iUnbreak_hp) )
 			SetEntProp(iCid,Prop_Data,"m_iHealth", 100+g_iUnbreak_hp );
