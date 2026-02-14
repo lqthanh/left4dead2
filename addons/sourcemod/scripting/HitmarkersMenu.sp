@@ -270,7 +270,7 @@ void SetClientCookies(int client)
 void ShowOverlayEnemies(int client)
 {
 	char sBuffer[128];
-	FormatEx(sBuffer, sizeof(sBuffer), "%s%02d.vtf", HitmarkerOverlay, g_iOverlayEnemies[client]);
+	FormatEx(sBuffer, sizeof(sBuffer), "%s%d.vtf", HitmarkerOverlay, g_iOverlayEnemies[client]);
 	ClientCommand(client, "r_screenoverlay \"%s\"", sBuffer);
 	
 	for (int i = 1; i <= MaxClients; i++)
@@ -305,7 +305,7 @@ void ShowOverlayEnemies(int client)
 void ShowOverlayObjects(int client)
 {
 	char sBuffer[128];
-	FormatEx(sBuffer, sizeof(sBuffer), "%s%02d.vtf", HitmarkerOverlay, g_iOverlayObjects[client]);
+	FormatEx(sBuffer, sizeof(sBuffer), "%s%d.vtf", HitmarkerOverlay, g_iOverlayObjects[client]);
 	ClientCommand(client, "r_screenoverlay \"%s\"", sBuffer);
 	
 	for (int i = 1; i <= MaxClients; i++)
