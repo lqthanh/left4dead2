@@ -13,16 +13,6 @@
 native bool l4d2_aim_down_sight_IsClientInADS(int client);
 
 /**
- * Force a weapon to play a specific animation sequence.
- *
- * @param weapon    Weapon entity index
- * @param sequence  Sequence/activity number to play
- * @return          True on success, false otherwise
- * @error           Invalid weapon entity
- */
-native bool l4d2_aim_down_sight_ForceWeaponAnimation(int weapon, int sequence);
-
-/**
  * Play an ADS animation for a weapon.
  * This will automatically convert normal activities to ADS activities.
  *
@@ -50,7 +40,6 @@ public SharedPlugin __pl_l4d2_aim_down_sight =
 public void __pl_l4d2_aim_down_sight_SetNTVOptional()
 {
 	MarkNativeAsOptional("l4d2_aim_down_sight_IsClientInADS");
-	MarkNativeAsOptional("l4d2_aim_down_sight_ForceWeaponAnimation");
 	MarkNativeAsOptional("l4d2_aim_down_sight_PlayADSAnimation");
 }
 #endif

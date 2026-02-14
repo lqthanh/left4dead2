@@ -39,7 +39,6 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	RegPluginLibrary("l4d2_aim_down_sight");
 	
 	CreateNative("l4d2_aim_down_sight_IsClientInADS", Native_IsClientInADS);
-	CreateNative("l4d2_aim_down_sight_ForceWeaponAnimation", Native_ForceWeaponAnimation);
 	CreateNative("l4d2_aim_down_sight_PlayADSAnimation", Native_PlayADSAnimation);
 	
 	return APLRes_Success;
@@ -649,17 +648,6 @@ public int Native_IsClientInADS(Handle plugin, int numParams)
 	return bZoom[client];
 }
 
-public int Native_ForceWeaponAnimation(Handle plugin, int numParams)
-{
-	int weapon = GetNativeCell(1);
-	int sequence = GetNativeCell(2);
-	
-	if (!IsValidEntity(weapon))
-		return false;
-	
-	return SendWeaponAnim(weapon, sequence);
-}
-
 public int Native_PlayADSAnimation(Handle plugin, int numParams)
 {
 	int client = GetNativeCell(1);
@@ -675,9 +663,6 @@ public int Native_PlayADSAnimation(Handle plugin, int numParams)
 	// Check if client is in ADS mode
 	if (!bZoom[client])
 		return false;
-	
-	if (g_bDebug)
-		PrintToServer("[ADS] PlayADSAnimation: Client %N, Activity %d", client, activity);
 	
 	// Get sequence and play animation
 	int sequence = SelectWeightedSequence(weapon, activity);
