@@ -12,7 +12,6 @@
 Handle hHook_SelectWeightedSequence = null;
 Handle hHook_SendWeaponAnim = null;
 Handle hWeaponHolster = null;
-Handle hHook_PrimaryAttack = null;
 KeyValues hWeaponData = null;
 KeyValues hActivityList = null;
 Handle hGetWeaponInfoByID = null;
@@ -22,7 +21,6 @@ int onbutton[MAXPLAYERS + 1];
 bool bZoom[MAXPLAYERS + 1];
 int ads_key;
 bool bPass;
-KeyValues hRestoreWeaponAttr = null;
 bool g_bDebug = false;
 
 public Plugin myinfo = 
@@ -36,8 +34,14 @@ public Plugin myinfo =
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
+	EngineVersion engine = GetEngineVersion();
+	if( engine != Engine_Left4Dead2 )
+	{
+		strcopy(error, err_max, "Plugin only supports Left 4 Dead 2.");
+		return APLRes_SilentFailure;
+	}
+
 	RegPluginLibrary("l4d2_aim_down_sight");
-	
 	CreateNative("l4d2_aim_down_sight_IsClientInADS", Native_IsClientInADS);
 	CreateNative("l4d2_aim_down_sight_PlayADSAnimation", Native_PlayADSAnimation);
 	
@@ -55,7 +59,6 @@ public void OnPluginStart()
 	PrintToServer("[ADS] GameData loaded successfully");
 	
 	iOS = gamedata.GetOffset("Os");
-	PrintToServer("[ADS] iOS offset: %d", iOS);
 	
 	// Setup DHooks - Use manual offset instead of conf
 	hHook_SelectWeightedSequence = DHookCreate(208 - iOS, HookType_Entity, ReturnType_Int, ThisPointer_CBaseEntity);
@@ -69,8 +72,6 @@ public void OnPluginStart()
 	
 	hWeaponHolster = DHookCreate(266 - iOS, HookType_Entity, ReturnType_Void, ThisPointer_CBaseEntity);
 	DHookAddParam(hWeaponHolster, HookParamType_CBaseEntity);
-	
-	hHook_PrimaryAttack = DHookCreate(283 - iOS, HookType_Entity, ReturnType_Void, ThisPointer_CBaseEntity);
 	
 	// Setup SDK Call
 	StartPrepSDKCall(SDKCall_Static);
@@ -102,8 +103,6 @@ public void OnPluginStart()
 	
 	// Register commands and events
 	RegServerCmd("ads_reload", Command_Reload);
-	RegAdminCmd("sm_ads_debug", Command_DebugToggle, ADMFLAG_ROOT, "Toggle ADS debug mode");
-	RegAdminCmd("sm_ads_test", Command_TestADS, ADMFLAG_ROOT, "Test ADS on current weapon");
 	LoadWeaponData();
 	PrintToServer("[ADS] Commands registered");
 	
@@ -151,40 +150,6 @@ Action Command_Reload(int args)
 	return Plugin_Handled;
 }
 
-Action Command_DebugToggle(int client, int args)
-{
-	g_bDebug = !g_bDebug;
-	FindConVar("ads_debug").SetBool(g_bDebug);
-	ReplyToCommand(client, "[ADS] Debug mode: %s", g_bDebug ? "ON" : "OFF");
-	PrintToServer("[ADS] Debug mode: %s", g_bDebug ? "ON" : "OFF");
-	return Plugin_Handled;
-}
-
-Action Command_TestADS(int client, int args)
-{
-	if (client == 0)
-	{
-		ReplyToCommand(client, "[ADS] This command can only be used in-game");
-		return Plugin_Handled;
-	}
-	
-	int weapon = GetPlayerWeapon(client);
-	if (weapon == -1)
-	{
-		ReplyToCommand(client, "[ADS] No weapon equipped");
-		return Plugin_Handled;
-	}
-	
-	char classname[64];
-	GetEntityClassname(weapon, classname, sizeof(classname));
-	ReplyToCommand(client, "[ADS] Current weapon: %s", classname);
-	ReplyToCommand(client, "[ADS] Current zoom state: %s", bZoom[client] ? "ADS" : "Normal");
-	ReplyToCommand(client, "[ADS] Toggling ADS...");
-	
-	SetupZoom(client, weapon, !bZoom[client]);
-	return Plugin_Handled;
-}
-
 void LoadWeaponData()
 {
 	delete hWeaponData;
@@ -217,7 +182,6 @@ public void OnEntityCreated(int entity, const char[] classname)
 		DHookEntity(hHook_SelectWeightedSequence, false, entity, _, DH_OnSelectWeightedSequence);
 		SDKHook(entity, SDKHook_ReloadPost, OnCustomWeaponReload);
 		DHookEntity(hWeaponHolster, true, entity, _, DH_OnGunHolsterPost);
-		DHookEntity(hHook_PrimaryAttack, true, entity, _, DH_PrimaryAttackPost);
 		EntStore[entity] = 0;
 	}
 }
@@ -386,33 +350,6 @@ public MRESReturn DH_OnGunHolsterPost(int weapon)
 		}
 		// Reset helping hand state
 		SetWeaponHelpingHandState(weapon, 0);
-	}
-	return MRES_Ignored;
-}
-
-// Hook: Primary Attack Post
-public MRESReturn DH_PrimaryAttackPost(int weapon)
-{
-	if (hRestoreWeaponAttr != null)
-	{
-		char sectionName[48];
-		hRestoreWeaponAttr.GetSectionName(sectionName, sizeof(sectionName));
-		int weaponinfo = StringToInt(sectionName);
-		
-		if (hRestoreWeaponAttr.GotoFirstSubKey(false))
-		{
-			do
-			{
-				hRestoreWeaponAttr.GetSectionName(sectionName, sizeof(sectionName));
-				int offset = StringToInt(sectionName);
-				float value = hRestoreWeaponAttr.GetFloat(NULL_STRING, 0.0);
-				StoreToAddress(view_as<Address>(weaponinfo + offset), view_as<int>(value), NumberType_Int32, true);
-			}
-			while (hRestoreWeaponAttr.GotoNextKey(false));
-		}
-		
-		delete hRestoreWeaponAttr;
-		hRestoreWeaponAttr = null;
 	}
 	return MRES_Ignored;
 }
@@ -674,5 +611,3 @@ public int Native_PlayADSAnimation(Handle plugin, int numParams)
 	
 	return false;
 }
-
-
