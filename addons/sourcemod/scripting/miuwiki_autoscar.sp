@@ -250,7 +250,7 @@ public void OnClientConnected(int client)
 	player[client].shoveinreload           	= false;
 
 	player[client].animcount          		= 0;
-	player[client].lastAction   		   	= 0; // 0=倖存者無法行動的時候, 1=切換成自動模式時候或是切槍的時候, 2=不做修改
+	player[client].lastAction   		   	= 0; // 0=When survivors are unable to move, 1=When switching to automatic mode or when cutting the gun, 2=No modifications
 	player[client].primaryattacktime   		= 0.0;
 	player[client].secondaryattacktime 		= 0.0;
 	player[client].switchendtime           	= 0.0;
@@ -285,8 +285,8 @@ public void OnClientPutInServer(int client)
 	SDKHook(client, SDKHook_PostThink, SDKCallback_OnClientPostThink);
 }
 
-//切換武器時觸發
-//滾輪或Q切換武器時觸發
+//Triggered when switching weapons
+//Triggered when scroll wheel or Q switches weapons
 void SDKCallback_SwitchDesert(int client, int weapon)
 {
 	if (GetClientTeam(client) != 2) {
@@ -391,11 +391,11 @@ void Event_PlayerDisconnect(Event event, const char[] name, bool dontBroadcast)
 
 /**
  * this function trigger when player holding scar
- * -手持scar步槍才會觸發此涵式
- * -爬梯時會觸發, 被打飛時會觸發
- * -拿著地圖機槍不會觸發
- * -被Smoker拉走拖曳時不觸發
- * -被特感控會觸發
+ * -This function will only be triggered when holding a scar rifle.
+ * -It will be triggered when climbing a ladder, and it will be triggered when being knocked away.
+ * -The machine gun on map will not trigger when holding
+ * -It does not trigger when being dragged away by Smoker.
+ * -Being controlled by SI will trigger
  */
 MRESReturn DhookCallback_ItemPostFrame(int pThis)
 {
