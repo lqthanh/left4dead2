@@ -345,8 +345,6 @@ void Event_RoundStart(Event event, const char[] name, bool dontBroadcast)
  */
 MRESReturn DhookCallback_ItemPostFrame(int pThis)
 {
-	PrintToServer("[AutoScar] PostFrame callback triggered for entity %d", pThis);
-
 	int client = GetEntPropEnt(pThis, Prop_Send, "m_hOwnerEntity");
 	if( client < 1 || client > MaxClients || !IsClientInGame(client) || IsFakeClient(client) )
 		return MRES_Ignored;
