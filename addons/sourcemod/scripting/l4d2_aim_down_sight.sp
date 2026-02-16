@@ -581,7 +581,7 @@ void SetWeaponHelpingHandState(int weapon, int state)
 }
 
 // ============================================================================
-// Native Implementations
+// Native
 // ============================================================================
 
 public int Native_IsClientInADS(Handle plugin, int numParams)

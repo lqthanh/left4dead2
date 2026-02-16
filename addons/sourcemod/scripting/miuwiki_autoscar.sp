@@ -43,14 +43,15 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
 #define GAMEDATA "l4d2_aim_down_sight_fix"
 
-#define SHOOT_EMPTY      "weapons/clipempty_rifle.wav"
+#define SHOOT_EMPTY 			"weapons/clipempty_rifle.wav"
+#define ZOOM_Sound 				"weapons/hunting_rifle/gunother/hunting_rifle_zoom.wav"
 
-#define SCAR_WORLD_MODEL      "models/w_models/weapons/w_desert_rifle.mdl"
-#define SCAR_SWITCH_SEQUENCE 4
+#define SCAR_WORLD_MODEL 		"models/w_models/weapons/w_desert_rifle.mdl"
+#define SCAR_SWITCH_SEQUENCE 	4
 
-#define DEFAULT_RELOAD_TIME  3.2
-#define DEFAULT_ATTACK2_TIME 0.4
-#define NOT_IN_RELOAD        0.0
+#define DEFAULT_RELOAD_TIME 	3.2
+#define DEFAULT_ATTACK2_TIME 	0.4
+#define NOT_IN_RELOAD 			0.0
 
 int
 	g_scar_precache_index,
@@ -132,6 +133,59 @@ public void OnPluginStart()
 	}
 }
 
+void LoadGameData()
+{
+	char sPath[PLATFORM_MAX_PATH];
+	BuildPath(Path_SM, sPath, sizeof(sPath), "gamedata/%s.txt", GAMEDATA);
+	if( !FileExists(sPath) ) 
+		SetFailState("\n==========\nMissing required file: \"%s\".\n==========", sPath);
+
+	GameData hGameData = new GameData(GAMEDATA);
+	if(hGameData == null) 
+		SetFailState("Failed to load \"%s.txt\" gamedata.", GAMEDATA);
+
+	char func[256];
+	FormatEx(func, sizeof(func), "CTerrorGun::AbortReload");
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(hGameData, SDKConf_Virtual, func);
+	if( !(g_SDKCall_AbortReload = EndPrepSDKCall()) )
+		SetFailState("failed to start sdkcall \"%s\"", func);
+	
+	FormatEx(func, sizeof(func), "CTerrorGun::FinishReload");
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(hGameData, SDKConf_Virtual, func);
+	if( !(g_SDKCall_FinishReload = EndPrepSDKCall()) )
+		SetFailState("failed to start sdkcall \"%s\"", func);
+
+	FormatEx(func, sizeof(func), "CTerrorGun::PrimaryAttack");
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(hGameData, SDKConf_Virtual, func);
+	if( !(g_SDKCall_PrimaryAttack = EndPrepSDKCall()) )
+		SetFailState("failed to start sdkcall \"%s\"", func);
+	
+	FormatEx(func, sizeof(func), "CTerrorWeapon::SecondaryAttack");
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(hGameData, SDKConf_Virtual, func);
+	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
+	if( !(g_SDKCall_SeondaryAttack = EndPrepSDKCall()) )
+		SetFailState("failed to start sdkcall \"%s\"", func);
+
+	FormatEx(func, sizeof(func), "CTerrorPlayer::CanAttack");
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(hGameData, SDKConf_Virtual, func);
+	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_Plain);
+	if( !(g_SDKCall_CanAttack = EndPrepSDKCall()) )
+		SetFailState("failed to start sdkcall \"%s\"", func);
+
+	FormatEx(func, sizeof(func), "CTerrorGun::ItemPostFrame");
+	g_DynamicHook_ItemPostFrame = DynamicHook.FromConf(hGameData, func);
+	if( !g_DynamicHook_ItemPostFrame )
+		SetFailState("Failed to start dynamic hook about \"%s\".", func);
+
+	g_Offset_BrustAttackTime = hGameData.GetOffset("ScarBrustTime");
+	delete hGameData;
+}
+
 void LateLoad()
 {
 	for (int client = 1; client <= MaxClients; client++)
@@ -167,10 +221,31 @@ void ConVarChanged_Cvars(ConVar hCvar, const char[] sOldVal, const char[] sNewVa
 	GetCvars();
 }
 
+public void OnConfigsExecuted()
+{
+	GetCvars();
+	OnNextFrame_weapon_reparse_server();
+}
+
 void GetCvars()
 {
 	cvar.cycletime    		= cvar_l4d2_scar_cycletime.FloatValue;
 	cvar.iButtons 	  		= cvar_l4d2_scar_button.IntValue;
+}
+
+Action CmdListen_weapon_reparse_server(int client, const char[] command, int argc)
+{
+	RequestFrame(OnNextFrame_weapon_reparse_server);
+	return Plugin_Continue;
+}
+
+void OnNextFrame_weapon_reparse_server()
+{
+	g_iMaxClip = L4D2_GetIntWeaponAttribute("weapon_rifle_desert", L4D2IWA_ClipSize);
+	g_fReloadTime = L4D2_GetFloatWeaponAttribute("weapon_rifle_desert", L4D2FWA_ReloadDuration);
+	if(g_fReloadTime <= 0.0) g_fReloadTime = 3.32; //just in case
+	g_fCycleTime = L4D2_GetFloatWeaponAttribute("weapon_rifle_desert", L4D2FWA_CycleTime);
+	if(g_fCycleTime <= 0.0) g_fCycleTime = 0.07; //just in case
 }
 
 public void OnAllPluginsLoaded()
@@ -200,14 +275,11 @@ public void OnLibraryRemoved(const char[] name)
 	}
 }
 
-#define ZOOM_Sound "weapons/hunting_rifle/gunother/hunting_rifle_zoom.wav"
 public void OnMapStart()
 {
-	PrecacheSound(ZOOM_Sound);
-
-	g_scar_precache_index = PrecacheModel(SCAR_WORLD_MODEL);
-
 	PrecacheSound(SHOOT_EMPTY);
+	PrecacheSound(ZOOM_Sound);
+	g_scar_precache_index = PrecacheModel(SCAR_WORLD_MODEL);
 }
 
 public void OnClientConnected(int client)
@@ -227,13 +299,6 @@ public void OnClientConnected(int client)
 	player[client].switchendtime		= 0.0;
 	player[client].reloadendtime		= 0.0;
 	player[client].lastshowinfotime		= 0.0;
-}
-
-public void OnConfigsExecuted()
-{
-	GetCvars();
-
-	OnNextFrame_weapon_reparse_server();
 }
 
 public void OnClientPutInServer(int client)
@@ -303,23 +368,6 @@ void SDKCallback_OnClientPostThink(int client)
 	}
 
 	player[client].animcount = animcount;
-}
-
-Action CmdListen_weapon_reparse_server(int client, const char[] command, int argc)
-{
-	RequestFrame(OnNextFrame_weapon_reparse_server);
-
-	return Plugin_Continue;
-}
-
-void OnNextFrame_weapon_reparse_server()
-{
-
-	g_iMaxClip = L4D2_GetIntWeaponAttribute("weapon_rifle_desert", L4D2IWA_ClipSize);
-	g_fReloadTime = L4D2_GetFloatWeaponAttribute("weapon_rifle_desert", L4D2FWA_ReloadDuration);
-	if(g_fReloadTime <= 0.0) g_fReloadTime = 3.32; //just in case
-	g_fCycleTime = L4D2_GetFloatWeaponAttribute("weapon_rifle_desert", L4D2FWA_CycleTime);
-	if(g_fCycleTime <= 0.0) g_fCycleTime = 0.07; //just in case
 }
 
 void Event_RoundStart(Event event, const char[] name, bool dontBroadcast) 
@@ -484,99 +532,6 @@ MRESReturn DhookCallback_ItemPostFrame(int pThis)
 	return MRES_Ignored;
 }
 
-
-bool CanSecondaryAttack(int client)
-{
-	if( !SDKCall(g_SDKCall_CanAttack, client) )
-		return false;
-	
-	return true;
-}
-
-bool CanPrimaryAttack(int client, int clip)
-{
-	if( clip == 0 || player[client].switchendtime > GetGameTime())
-		return false;
-
-	if( player[client].reloadendtime != NOT_IN_RELOAD )
-		return false;
-		
-	if( !SDKCall(g_SDKCall_CanAttack, client) )
-		return false;
-	
-	return true;
-}
-
-bool CanReload(int client, int clip)
-{
-	if( player[client].switchendtime > GetGameTime())
-		return false;
-
-	if( player[client].reloadendtime != NOT_IN_RELOAD )
-		return false;
-		
-	if( !SDKCall(g_SDKCall_CanAttack, client) )
-		return false;
-
-	if( clip >= g_iMaxClip)
-		return false;
-	
-	return true;
-}
-
-void LoadGameData()
-{
-	char sPath[PLATFORM_MAX_PATH];
-	BuildPath(Path_SM, sPath, sizeof(sPath), "gamedata/%s.txt", GAMEDATA);
-	if( !FileExists(sPath) ) 
-		SetFailState("\n==========\nMissing required file: \"%s\".\n==========", sPath);
-
-	GameData hGameData = new GameData(GAMEDATA);
-	if(hGameData == null) 
-		SetFailState("Failed to load \"%s.txt\" gamedata.", GAMEDATA);
-
-	char func[256];
-	FormatEx(func, sizeof(func), "CTerrorGun::AbortReload");
-	StartPrepSDKCall(SDKCall_Entity);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Virtual, func);
-	if( !(g_SDKCall_AbortReload = EndPrepSDKCall()) )
-		SetFailState("failed to start sdkcall \"%s\"", func);
-	
-	FormatEx(func, sizeof(func), "CTerrorGun::FinishReload");
-	StartPrepSDKCall(SDKCall_Entity);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Virtual, func);
-	if( !(g_SDKCall_FinishReload = EndPrepSDKCall()) )
-		SetFailState("failed to start sdkcall \"%s\"", func);
-
-	FormatEx(func, sizeof(func), "CTerrorGun::PrimaryAttack");
-	StartPrepSDKCall(SDKCall_Entity);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Virtual, func);
-	if( !(g_SDKCall_PrimaryAttack = EndPrepSDKCall()) )
-		SetFailState("failed to start sdkcall \"%s\"", func);
-	
-	FormatEx(func, sizeof(func), "CTerrorWeapon::SecondaryAttack");
-	StartPrepSDKCall(SDKCall_Entity);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Virtual, func);
-	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
-	if( !(g_SDKCall_SeondaryAttack = EndPrepSDKCall()) )
-		SetFailState("failed to start sdkcall \"%s\"", func);
-
-	FormatEx(func, sizeof(func), "CTerrorPlayer::CanAttack");
-	StartPrepSDKCall(SDKCall_Entity);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Virtual, func);
-	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_Plain);
-	if( !(g_SDKCall_CanAttack = EndPrepSDKCall()) )
-		SetFailState("failed to start sdkcall \"%s\"", func);
-
-	FormatEx(func, sizeof(func), "CTerrorGun::ItemPostFrame");
-	g_DynamicHook_ItemPostFrame = DynamicHook.FromConf(hGameData, func);
-	if( !g_DynamicHook_ItemPostFrame )
-		SetFailState("Failed to start dynamic hook about \"%s\".", func);
-
-	g_Offset_BrustAttackTime = hGameData.GetOffset("ScarBrustTime");
-	delete hGameData;
-}
-
 public void OnEntityCreated(int entity, const char[] classname)
 {
 	if (!IsValidEntityIndex(entity))
@@ -677,6 +632,50 @@ public void OnPlayerRunCmdPost(int client, int buttons)
 		player[client].inzoom = false;
 	}
 }
+
+// ============================================================================
+// Helper
+// ============================================================================
+
+bool CanSecondaryAttack(int client)
+{
+	if( !SDKCall(g_SDKCall_CanAttack, client) )
+		return false;
+	
+	return true;
+}
+
+bool CanPrimaryAttack(int client, int clip)
+{
+	if( clip == 0 || player[client].switchendtime > GetGameTime())
+		return false;
+
+	if( player[client].reloadendtime != NOT_IN_RELOAD )
+		return false;
+		
+	if( !SDKCall(g_SDKCall_CanAttack, client) )
+		return false;
+	
+	return true;
+}
+
+bool CanReload(int client, int clip)
+{
+	if( player[client].switchendtime > GetGameTime())
+		return false;
+
+	if( player[client].reloadendtime != NOT_IN_RELOAD )
+		return false;
+		
+	if( !SDKCall(g_SDKCall_CanAttack, client) )
+		return false;
+
+	if( clip >= g_iMaxClip)
+		return false;
+	
+	return true;
+}
+
 void PlaySoundAroundClient(int client, const char[] sSoundName)
 {
 	EmitSoundToAll(sSoundName, client, SNDCHAN_AUTO, SNDLEVEL_AIRCRAFT, SND_NOFLAGS, SNDVOL_NORMAL, SNDPITCH_NORMAL, -1, NULL_VECTOR, NULL_VECTOR, true, 0.0);
@@ -768,7 +767,9 @@ void UnhookScarWeapon(int weapon)
 	}
 }
 
+// ============================================================================
 // Native
+// ============================================================================
 
 int Native_IsClientHoldAutoScar(Handle plugin, int numParams)
 {
