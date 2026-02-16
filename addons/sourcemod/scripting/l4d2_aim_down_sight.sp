@@ -2,8 +2,8 @@
 #pragma newdecls optional
 
 #include <sourcemod>
-#include <sdktools>
 #include <sdkhooks>
+#include <sdktools>
 #include <dhooks>
 
 #define PLUGIN_VERSION "1.0"

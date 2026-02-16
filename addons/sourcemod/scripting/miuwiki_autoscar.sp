@@ -8,10 +8,6 @@
 #include <left4dhooks>
 #include <miuwiki_autoscar>
 
-#undef REQUIRE_PLUGIN
-#include <l4d2_aim_down_sight>
-#define REQUIRE_PLUGIN
-
 #define PLUGIN_VERSION "1.3h-2025/10/8"
 
 public Plugin myinfo =
@@ -46,7 +42,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	return APLRes_Success;
 }
 
-#define GAMEDATA "miuwiki_autoscar"
+#define GAMEDATA "l4d2_aim_down_sight_fix"
 
 #define SCAR_SHOOT            "weapons/rifle_desert/gunfire/rifle_fire_1.wav"
 #define SCAR_SHOOT_INCENDIARY "weapons/rifle_desert/gunfire/rifle_fire_1_incendiary.wav"
@@ -78,16 +74,12 @@ StringMap
 
 ConVar
 	cvar_l4d2_scar_cycletime,
-	cvar_l4d2_scar_reloadtime,
-	cvar_l4d2_scar_notify,
 	cvar_l4d2_scar_default,
 	cvar_l4d2_scar_button;
 
 enum struct GlobalConVar
 {
 	float cycletime;
-	float reloadtime;
-	bool bNotify;
 	bool bAutodefault;
 	int iButtons;
 }
@@ -129,15 +121,11 @@ public void OnPluginStart()
 	g_bADSPluginAvailable = LibraryExists("l4d2_aim_down_sight");
 	LoadGameData();
 	cvar_l4d2_scar_cycletime    = CreateConVar("miuwiki_autoscar_cycletime", 	"0.11", 	"Scar full Auto cycle time. [min 0.03, 0=Same as Triple Tap default cycle time]", FCVAR_NOTIFY, true, 0.0);
-	cvar_l4d2_scar_reloadtime   = CreateConVar("miuwiki_autoscar_reloadtime", 	"0",    	"Scar full Auto reload time. [min 0.5, 0=Same as Triple Tap default reload time]", FCVAR_NOTIFY, true, 0.0);
-	cvar_l4d2_scar_notify		= CreateConVar("miuwiki_autoscar_notify", 		"1", 		"1=Enable chat notify, 0=Disable chat notify", FCVAR_NOTIFY, true, 0.0, true, 1.0);
 	cvar_l4d2_scar_default		= CreateConVar("miuwiki_autoscar_default", 		"0", 		"Which mode by default when client joins server? 0=Triple Tap, 1=Full Auto", FCVAR_NOTIFY, true, 0.0, true, 1.0);
 	cvar_l4d2_scar_button		= CreateConVar("miuwiki_autoscar_buttons", 		"524288", 	"Press which button to trigger full auto mode, 131072=Shift, 4=Ctrl, 32=Use, 8192=Reload, 524288=Middle Mouse\nYou can add numbers together, ex: 655360=Shift + Middle Mouse", FCVAR_NOTIFY);
 
 	GetCvars();
 	cvar_l4d2_scar_cycletime.AddChangeHook(ConVarChanged_Cvars);
-	cvar_l4d2_scar_reloadtime.AddChangeHook(ConVarChanged_Cvars);
-	cvar_l4d2_scar_notify.AddChangeHook(ConVarChanged_Cvars);
 	cvar_l4d2_scar_default.AddChangeHook(ConVarChanged_Cvars);
 	cvar_l4d2_scar_button.AddChangeHook(ConVarChanged_Cvars);
 
@@ -189,15 +177,8 @@ void ConVarChanged_Cvars(ConVar hCvar, const char[] sOldVal, const char[] sNewVa
 void GetCvars()
 {
 	cvar.cycletime    		= cvar_l4d2_scar_cycletime.FloatValue;
-	cvar.reloadtime   		= cvar_l4d2_scar_reloadtime.FloatValue;
-	cvar.bNotify 	  		= cvar_l4d2_scar_notify.BoolValue;
 	cvar.bAutodefault 	  	= cvar_l4d2_scar_default.BoolValue;
 	cvar.iButtons 	  		= cvar_l4d2_scar_button.IntValue;
-
-	if(cvar.reloadtime > 0.0 && cvar.reloadtime < 0.5)
-	{
-		cvar.reloadtime = 0.5;
-	}
 }
 
 public void OnAllPluginsLoaded()
@@ -314,13 +295,6 @@ void SDKCallback_SwitchDesert(int client, int weapon)
 		SetEntProp(client, Prop_Data, "m_bPredictWeapons", 1);
 		// Unhook weapon when in triple tap mode to reduce overhead
 		UnhookScarWeapon(weapon);
-	}
-
-	float currenttime = GetEngineTime();
-	if( currenttime - player[client].lastshowinfotime >= 30.0 )
-	{
-		if(cvar.bNotify) PrintToChat(client, "\x04[★]\x05SCAR can be full auto. Use \x04mouse3\x05 to change. ");
-		player[client].lastshowinfotime = currenttime;
 	}
 }
 
@@ -468,12 +442,6 @@ MRESReturn DhookCallback_ItemPostFrame(int pThis)
 			player[client].secondaryattacktime = currenttime + DEFAULT_ATTACK2_TIME;
 			if( player[client].reloadendtime != NOT_IN_RELOAD )
 				player[client].shoveinreload = true;
-			
-			// Play ADS animation if in ADS mode
-			if(g_bADSPluginAvailable && l4d2_aim_down_sight_IsClientInADS(client))
-			{
-				l4d2_aim_down_sight_PlayADSAnimation(client, pThis, 1250); // ACT_VM_MELEE
-			}
 		}
 		return MRES_Ignored; // ignore in_attack and in_reload when pushing pushing.
 	}
@@ -491,12 +459,6 @@ MRESReturn DhookCallback_ItemPostFrame(int pThis)
 				player[client].primaryattacktime = currenttime + g_fScarCycleTime;
 			else
 				player[client].primaryattacktime = currenttime + cvar.cycletime;
-			
-			// Play ADS animation if in ADS mode
-			if(g_bADSPluginAvailable && l4d2_aim_down_sight_IsClientInADS(client))
-			{
-				l4d2_aim_down_sight_PlayADSAnimation(client, pThis, 1252); // ACT_VM_PRIMARYATTACK_LAYER
-			}
 		}
 		return MRES_Ignored; // ignore IN_RELOAD when pushing attack button.
 	}
@@ -512,23 +474,9 @@ MRESReturn DhookCallback_ItemPostFrame(int pThis)
 			EmitSoundToClient(client, SCAR_SHOOT_EMPTY);
 			SetEntProp(viewmodel, Prop_Send, "m_nLayerSequence", 8);
 			SetEntPropFloat(viewmodel, Prop_Send, "m_flLayerStartTime", currenttime);
-			if(cvar.reloadtime <= 0.0)
-			{
-				SetEntPropFloat(pThis, Prop_Send, "m_flPlaybackRate", DEFAULT_RELOAD_TIME / g_fScarReloadTime);
-				player[client].reloadendtime = currenttime + g_fScarReloadTime;
-			}
-			else
-			{
-				SetEntPropFloat(pThis, Prop_Send, "m_flPlaybackRate", DEFAULT_RELOAD_TIME / cvar.reloadtime);
-				player[client].reloadendtime = currenttime + cvar.reloadtime;
-			}
+			SetEntPropFloat(pThis, Prop_Send, "m_flPlaybackRate", DEFAULT_RELOAD_TIME / g_fScarReloadTime);
+			player[client].reloadendtime = currenttime + g_fScarReloadTime;
 			player[client].shoveinreload = false;
-			
-			// Play ADS reload animation if in ADS mode
-			if(g_bADSPluginAvailable && l4d2_aim_down_sight_IsClientInADS(client))
-			{
-				l4d2_aim_down_sight_PlayADSAnimation(client, pThis, 1877); // ACT_PRIMARY_VM_RELOAD
-			}
 
 			return MRES_Ignored; 
 		}
@@ -542,23 +490,10 @@ MRESReturn DhookCallback_ItemPostFrame(int pThis)
 			//EmitSoundToClient(client, SCAR_SHOOT_EMPTY);
 			SetEntProp(viewmodel, Prop_Send, "m_nLayerSequence", 8);
 			SetEntPropFloat(viewmodel, Prop_Send, "m_flLayerStartTime", currenttime);
-			if(cvar.reloadtime <= 0.0)
-			{
-				SetEntPropFloat(pThis, Prop_Send, "m_flPlaybackRate", DEFAULT_RELOAD_TIME / g_fScarReloadTime);
-				player[client].reloadendtime = currenttime + g_fScarReloadTime;
-			}
-			else
-			{
-				SetEntPropFloat(pThis, Prop_Send, "m_flPlaybackRate", DEFAULT_RELOAD_TIME / cvar.reloadtime);
-				player[client].reloadendtime = currenttime + cvar.reloadtime;
-			}
+			SetEntPropFloat(pThis, Prop_Send, "m_flPlaybackRate", DEFAULT_RELOAD_TIME / g_fScarReloadTime);
+			player[client].reloadendtime = currenttime + g_fScarReloadTime;
 			player[client].shoveinreload = false;
 			
-			// Play ADS reload animation if in ADS mode
-			if(g_bADSPluginAvailable && l4d2_aim_down_sight_IsClientInADS(client))
-			{
-				l4d2_aim_down_sight_PlayADSAnimation(client, pThis, 1877); // ACT_PRIMARY_VM_RELOAD
-			}
 		}
 	}
 
@@ -641,7 +576,7 @@ void LoadGameData()
 	if( !(g_SDKCall_FinishReload = EndPrepSDKCall()) )
 		SetFailState("failed to start sdkcall \"%s\"", func);
 
-	FormatEx(func, sizeof(func), "CRifle_Desert::PrimaryAttack");
+	FormatEx(func, sizeof(func), "CTerrorGun::PrimaryAttack");
 	StartPrepSDKCall(SDKCall_Entity);
 	PrepSDKCall_SetFromConf(hGameData, SDKConf_Virtual, func);
 	if( !(g_SDKCall_PrimaryAttack = EndPrepSDKCall()) )
@@ -661,7 +596,7 @@ void LoadGameData()
 	if( !(g_SDKCall_CanAttack = EndPrepSDKCall()) )
 		SetFailState("failed to start sdkcall \"%s\"", func);
 
-	FormatEx(func, sizeof(func), "CRifle_Desert::ItemPostFrame");
+	FormatEx(func, sizeof(func), "CTerrorGun::ItemPostFrame");
 	g_DynamicHook_ItemPostFrame = DynamicHook.FromConf(hGameData, func);
 	if( !g_DynamicHook_ItemPostFrame )
 		SetFailState("Failed to start dynamic hook about \"%s\".", func);
@@ -748,7 +683,6 @@ public void OnPlayerRunCmdPost(int client, int buttons)
 		{
 			SetEntPropFloat(active_weapon, Prop_Send, "m_flNextPrimaryAttack", GetGameTime() + 0.1);
 			SetEntPropFloat(active_weapon, Prop_Send, "m_flNextSecondaryAttack", GetGameTime() + 0.2);
-			if(cvar.bNotify) PrintToChat(client, "\x04[★]\x05Your SCAR mode is \x04'Triple Tap'");
 
 			SetEntProp(client, Prop_Data, "m_bPredictWeapons", 1);
 			player[client].lastAction = 0;
@@ -757,8 +691,6 @@ public void OnPlayerRunCmdPost(int client, int buttons)
 		}
 		else
 		{
-			if(cvar.bNotify) PrintToChat(client, "\x04[★]\x05Your SCAR mode is \x04'Full Auto'");
-
 			SetEntProp(client, Prop_Data, "m_bPredictWeapons", 0);
 			player[client].lastAction = 1;
 			player[client].needrelease = true;
