@@ -74,13 +74,11 @@ StringMap
 
 ConVar
 	cvar_l4d2_scar_cycletime,
-	cvar_l4d2_scar_default,
 	cvar_l4d2_scar_button;
 
 enum struct GlobalConVar
 {
 	float cycletime;
-	bool bAutodefault;
 	int iButtons;
 }
 GlobalConVar
@@ -101,16 +99,14 @@ enum struct PlayerData
 	float reloadendtime;
 	float lastshowinfotime;
 }
-
 PlayerData
 	player[MAXPLAYERS + 1];
 
 int 
-	g_iMaxScarClip;
-
+	g_iMaxClip;
 float 
-	g_fScarReloadTime,
-	g_fScarCycleTime;
+	g_fReloadTime,
+	g_fCycleTime;
 
 bool 
 	g_bADSPluginAvailable = false;
@@ -121,20 +117,17 @@ public void OnPluginStart()
 	g_bADSPluginAvailable = LibraryExists("l4d2_aim_down_sight");
 	LoadGameData();
 	cvar_l4d2_scar_cycletime    = CreateConVar("miuwiki_autoscar_cycletime", 	"0.11", 	"Scar full Auto cycle time. [min 0.03, 0=Same as Triple Tap default cycle time]", FCVAR_NOTIFY, true, 0.0);
-	cvar_l4d2_scar_default		= CreateConVar("miuwiki_autoscar_default", 		"0", 		"Which mode by default when client joins server? 0=Triple Tap, 1=Full Auto", FCVAR_NOTIFY, true, 0.0, true, 1.0);
 	cvar_l4d2_scar_button		= CreateConVar("miuwiki_autoscar_buttons", 		"524288", 	"Press which button to trigger full auto mode, 131072=Shift, 4=Ctrl, 32=Use, 8192=Reload, 524288=Middle Mouse\nYou can add numbers together, ex: 655360=Shift + Middle Mouse", FCVAR_NOTIFY);
 
 	GetCvars();
 	cvar_l4d2_scar_cycletime.AddChangeHook(ConVarChanged_Cvars);
-	cvar_l4d2_scar_default.AddChangeHook(ConVarChanged_Cvars);
 	cvar_l4d2_scar_button.AddChangeHook(ConVarChanged_Cvars);
 
 	AutoExecConfig(true,       "miuwiki_autoscar");
 
 	AddCommandListener(CmdListen_weapon_reparse_server, "weapon_reparse_server");
 
-	HookEvent("round_start",            Event_RoundStart, EventHookMode_PostNoCopy);
-	HookEvent("player_disconnect", 		Event_PlayerDisconnect);
+	HookEvent("round_start", Event_RoundStart, EventHookMode_PostNoCopy);
 	
 	if(bLate)
 	{
@@ -144,13 +137,16 @@ public void OnPluginStart()
 
 void LateLoad()
 {
-    for (int client = 1; client <= MaxClients; client++)
-    {
-        if (!IsClientInGame(client))
-            continue;
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if (!IsClientInGame(client))
+			continue;
 
-        OnClientPutInServer(client);
-    }
+		// Initialize player data for late load since OnClientConnected won't be called
+		player[client].fullautomode = false;
+
+		OnClientPutInServer(client);
+	}
 
     // Hook weapons for players already in auto mode
     int entity = INVALID_ENT_REFERENCE;
@@ -177,7 +173,6 @@ void ConVarChanged_Cvars(ConVar hCvar, const char[] sOldVal, const char[] sNewVa
 void GetCvars()
 {
 	cvar.cycletime    		= cvar_l4d2_scar_cycletime.FloatValue;
-	cvar.bAutodefault 	  	= cvar_l4d2_scar_default.BoolValue;
 	cvar.iButtons 	  		= cvar_l4d2_scar_button.IntValue;
 }
 
@@ -225,36 +220,25 @@ public void OnClientConnected(int client)
 	if( IsFakeClient(client) )
 		return;
 	
-	player[client].inzoom                  	= false;
-	//player[client].fullautomode           = false;
-	player[client].needrelease             	= false;
-	player[client].shoveinreload           	= false;
+	player[client].inzoom				= false;
+	player[client].fullautomode			= false;
+	player[client].needrelease			= false;
+	player[client].shoveinreload		= false;
 
-	player[client].animcount          		= 0;
-	player[client].lastAction   		   	= 0; // 0=When survivors are unable to move, 1=When switching to automatic mode or when cutting the gun, 2=No modifications
-	player[client].primaryattacktime   		= 0.0;
-	player[client].secondaryattacktime 		= 0.0;
-	player[client].switchendtime           	= 0.0;
-	player[client].reloadendtime           	= 0.0;
-	player[client].lastshowinfotime        	= 0.0;
+	player[client].animcount			= 0;
+	player[client].lastAction			= 0; // 0=When survivors are unable to move, 1=When switching to automatic mode or when cutting the gun, 2=No modifications
+	player[client].primaryattacktime	= 0.0;
+	player[client].secondaryattacktime	= 0.0;
+	player[client].switchendtime		= 0.0;
+	player[client].reloadendtime		= 0.0;
+	player[client].lastshowinfotime		= 0.0;
 }
 
-bool g_bFirstLoad = true;
 public void OnConfigsExecuted()
 {
 	GetCvars();
 
 	OnNextFrame_weapon_reparse_server();
-
-	if(g_bFirstLoad)
-	{
-		for(int i = 1; i <= MaxClients; i++)
-		{
-			player[i].fullautomode = cvar.bAutodefault;
-		}
-
-		g_bFirstLoad = false;
-	}
 }
 
 public void OnClientPutInServer(int client)
@@ -336,31 +320,24 @@ Action CmdListen_weapon_reparse_server(int client, const char[] command, int arg
 void OnNextFrame_weapon_reparse_server()
 {
 
-	g_iMaxScarClip = L4D2_GetIntWeaponAttribute("weapon_rifle_desert", L4D2IWA_ClipSize);
-	g_fScarReloadTime = L4D2_GetFloatWeaponAttribute("weapon_rifle_desert", L4D2FWA_ReloadDuration);
-	if(g_fScarReloadTime <= 0.0) g_fScarReloadTime = 3.32; //just in case
-	g_fScarCycleTime = L4D2_GetFloatWeaponAttribute("weapon_rifle_desert", L4D2FWA_CycleTime);
-	if(g_fScarCycleTime <= 0.0) g_fScarCycleTime = 0.07; //just in case
+	g_iMaxClip = L4D2_GetIntWeaponAttribute("weapon_rifle_desert", L4D2IWA_ClipSize);
+	g_fReloadTime = L4D2_GetFloatWeaponAttribute("weapon_rifle_desert", L4D2FWA_ReloadDuration);
+	if(g_fReloadTime <= 0.0) g_fReloadTime = 3.32; //just in case
+	g_fCycleTime = L4D2_GetFloatWeaponAttribute("weapon_rifle_desert", L4D2FWA_CycleTime);
+	if(g_fCycleTime <= 0.0) g_fCycleTime = 0.07; //just in case
 }
 
 void Event_RoundStart(Event event, const char[] name, bool dontBroadcast) 
 {
 	for(int i = 0; i <= MaxClients; i++)
 	{
-		player[i].lastAction 			  	= 0;
-		player[i].primaryattacktime   		= 0.0;
-		player[i].secondaryattacktime 		= 0.0;
-		player[i].switchendtime           	= 0.0;
-		player[i].reloadendtime           	= 0.0;
-		player[i].lastshowinfotime        	= 0.0;
+		player[i].lastAction			= 0;
+		player[i].primaryattacktime		= 0.0;
+		player[i].secondaryattacktime	= 0.0;
+		player[i].switchendtime			= 0.0;
+		player[i].reloadendtime			= 0.0;
+		player[i].lastshowinfotime		= 0.0;
 	}
-}
-
-void Event_PlayerDisconnect(Event event, const char[] name, bool dontBroadcast)
-{
-	int client = GetClientOfUserId(event.GetInt("userid"));
-
-	player[client].fullautomode            = cvar.bAutodefault;
 }
 
 /**
@@ -373,6 +350,8 @@ void Event_PlayerDisconnect(Event event, const char[] name, bool dontBroadcast)
  */
 MRESReturn DhookCallback_ItemPostFrame(int pThis)
 {
+	PrintToServer("[AutoScar] PostFrame callback triggered for entity %d", pThis);
+
 	int client = GetEntPropEnt(pThis, Prop_Send, "m_hOwnerEntity");
 	if( client < 1 || client > MaxClients || !IsClientInGame(client) || IsFakeClient(client) )
 		return MRES_Ignored;
@@ -456,7 +435,7 @@ MRESReturn DhookCallback_ItemPostFrame(int pThis)
 			SDKCall(g_SDKCall_PrimaryAttack, pThis);
 			SetEntPropFloat(pThis, Prop_Send, "m_flNextPrimaryAttack", currenttime + 100.0);
 			if(cvar.cycletime <= 0.0)
-				player[client].primaryattacktime = currenttime + g_fScarCycleTime;
+				player[client].primaryattacktime = currenttime + g_fCycleTime;
 			else
 				player[client].primaryattacktime = currenttime + cvar.cycletime;
 		}
@@ -474,8 +453,8 @@ MRESReturn DhookCallback_ItemPostFrame(int pThis)
 			EmitSoundToClient(client, SCAR_SHOOT_EMPTY);
 			SetEntProp(viewmodel, Prop_Send, "m_nLayerSequence", 8);
 			SetEntPropFloat(viewmodel, Prop_Send, "m_flLayerStartTime", currenttime);
-			SetEntPropFloat(pThis, Prop_Send, "m_flPlaybackRate", DEFAULT_RELOAD_TIME / g_fScarReloadTime);
-			player[client].reloadendtime = currenttime + g_fScarReloadTime;
+			SetEntPropFloat(pThis, Prop_Send, "m_flPlaybackRate", DEFAULT_RELOAD_TIME / g_fReloadTime);
+			player[client].reloadendtime = currenttime + g_fReloadTime;
 			player[client].shoveinreload = false;
 
 			return MRES_Ignored; 
@@ -490,8 +469,8 @@ MRESReturn DhookCallback_ItemPostFrame(int pThis)
 			//EmitSoundToClient(client, SCAR_SHOOT_EMPTY);
 			SetEntProp(viewmodel, Prop_Send, "m_nLayerSequence", 8);
 			SetEntPropFloat(viewmodel, Prop_Send, "m_flLayerStartTime", currenttime);
-			SetEntPropFloat(pThis, Prop_Send, "m_flPlaybackRate", DEFAULT_RELOAD_TIME / g_fScarReloadTime);
-			player[client].reloadendtime = currenttime + g_fScarReloadTime;
+			SetEntPropFloat(pThis, Prop_Send, "m_flPlaybackRate", DEFAULT_RELOAD_TIME / g_fReloadTime);
+			player[client].reloadendtime = currenttime + g_fReloadTime;
 			player[client].shoveinreload = false;
 			
 		}
@@ -546,7 +525,7 @@ bool CanReload(int client, int clip)
 	if( !SDKCall(g_SDKCall_CanAttack, client) )
 		return false;
 
-	if( clip >= g_iMaxScarClip)
+	if( clip >= g_iMaxClip)
 		return false;
 	
 	return true;
