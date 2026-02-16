@@ -427,6 +427,17 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 	if (!IsClientInGame(client) || GetClientTeam(client) != 2 || IsFakeClient(client))
 		return Plugin_Continue;
 	
+	// Debug: Print m_nLayerSequence continuously
+	if (g_bDebug)
+	{
+		int viewModel = GetEntPropEnt(client, Prop_Send, "m_hViewModel");
+		if (viewModel > 0)
+		{
+			int layerSequence = GetEntProp(viewModel, Prop_Send, "m_nLayerSequence");
+			PrintToServer("[ADS DEBUG] Client %N - m_nLayerSequence: %d", client, layerSequence);
+		}
+	}
+	
 	// Determine which button to check based on ads_key
 	int adsButton;
 	char keyName[16];
