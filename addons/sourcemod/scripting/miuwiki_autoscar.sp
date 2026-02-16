@@ -6,7 +6,6 @@
 #include <sdktools>
 #include <dhooks>
 #include <left4dhooks>
-#include <miuwiki_autoscar>
 
 #define PLUGIN_VERSION "1.3h-2025/10/8"
 
@@ -44,9 +43,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
 #define GAMEDATA "l4d2_aim_down_sight_fix"
 
-#define SCAR_SHOOT            "weapons/rifle_desert/gunfire/rifle_fire_1.wav"
-#define SCAR_SHOOT_INCENDIARY "weapons/rifle_desert/gunfire/rifle_fire_1_incendiary.wav"
-#define SCAR_SHOOT_EMPTY      "weapons/clipempty_rifle.wav"
+#define SHOOT_EMPTY      "weapons/clipempty_rifle.wav"
 
 #define SCAR_WORLD_MODEL      "models/w_models/weapons/w_desert_rifle.mdl"
 #define SCAR_SWITCH_SEQUENCE 4
@@ -210,9 +207,7 @@ public void OnMapStart()
 
 	g_scar_precache_index = PrecacheModel(SCAR_WORLD_MODEL);
 
-	PrecacheSound(SCAR_SHOOT);
-	PrecacheSound(SCAR_SHOOT_INCENDIARY);
-	PrecacheSound(SCAR_SHOOT_EMPTY);
+	PrecacheSound(SHOOT_EMPTY);
 }
 
 public void OnClientConnected(int client)
@@ -450,7 +445,7 @@ MRESReturn DhookCallback_ItemPostFrame(int pThis)
 		&& currenttime > player[client].secondaryattacktime )
 		{
 			SDKCall(g_SDKCall_AbortReload, pThis);
-			EmitSoundToClient(client, SCAR_SHOOT_EMPTY);
+			EmitSoundToClient(client, SHOOT_EMPTY);
 			SetEntProp(viewmodel, Prop_Send, "m_nLayerSequence", 8);
 			SetEntPropFloat(viewmodel, Prop_Send, "m_flLayerStartTime", currenttime);
 			SetEntPropFloat(pThis, Prop_Send, "m_flPlaybackRate", DEFAULT_RELOAD_TIME / g_fReloadTime);
@@ -463,10 +458,10 @@ MRESReturn DhookCallback_ItemPostFrame(int pThis)
 		if( (button & IN_RELOAD) && clip > 0 && reserverammo > 0 )
 		{
 			L4D_SetReserveAmmo(client, pThis, reserverammo + clip);
-			SetEntProp(pThis, Prop_Send, "m_iClip1", 0); // 不等下一偵
+			SetEntProp(pThis, Prop_Send, "m_iClip1", 0);
 
 			SDKCall(g_SDKCall_AbortReload, pThis);
-			//EmitSoundToClient(client, SCAR_SHOOT_EMPTY);
+			//EmitSoundToClient(client, SHOOT_EMPTY);
 			SetEntProp(viewmodel, Prop_Send, "m_nLayerSequence", 8);
 			SetEntPropFloat(viewmodel, Prop_Send, "m_flLayerStartTime", currenttime);
 			SetEntPropFloat(pThis, Prop_Send, "m_flPlaybackRate", DEFAULT_RELOAD_TIME / g_fReloadTime);
