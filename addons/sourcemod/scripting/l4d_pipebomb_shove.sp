@@ -253,6 +253,7 @@ public void OnMapEnd()
 bool g_bAvailable_perkmod2;
 public void OnAllPluginsLoaded()
 {
+	g_bLaggedMovement = LibraryExists("LaggedMovement");
 	g_bAvailable_perkmod2 = LibraryExists("perkmod2");
 }
 public void OnLibraryAdded(const char[] name)
