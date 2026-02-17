@@ -39,14 +39,30 @@
 #pragma newdecls required
 #pragma semicolon 1
 
+#define PLUGIN_VERSION 		"1.0.LQT"
+
 public Plugin myinfo =
 {
 	name			= "Hitmarkers",
 	author			= "Nano",
 	description		= "Show a hitmarker when you shoot enemies/bosses/objects (with sound effect)",
-	version			= "1.0",
+	version			= PLUGIN_VERSION,
 	url				= "https://steamcommunity.com/id/lequangthanh/"
 };
+
+/*======================================================================================
+Change Log:
+
+1.0.LQT (17-Feb-2026)
+	- Implement for L4D2 (L4D untested).
+	- Ignore (DMG_POISON = 131072 = bit 17).
+	- Add (DMG_BURN = 8 = bit 3) toggle option.
+	- Add sound effect select option.
+
+1.0
+	- Initial release.
+
+======================================================================================*/
 
 bool 	g_bEnemies	[MAXPLAYERS+1],
 		g_bObjects	[MAXPLAYERS+1],
