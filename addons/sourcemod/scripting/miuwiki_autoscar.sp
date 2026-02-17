@@ -47,9 +47,8 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 #define ZOOM_Sound 				"weapons/hunting_rifle/gunother/hunting_rifle_zoom.wav"
 
 #define SCAR_WORLD_MODEL 		"models/w_models/weapons/w_desert_rifle.mdl"
-#define SCAR_SWITCH_SEQUENCE 	4
+#define SWITCH_SEQUENCE 		4
 
-#define DEFAULT_RELOAD_TIME 	3.2
 #define DEFAULT_ATTACK2_TIME 	0.4
 #define NOT_IN_RELOAD 			0.0
 
@@ -359,7 +358,7 @@ void SDKCallback_OnClientPostThink(int client)
 	int animcount = GetEntProp(viewmodel, Prop_Send, "m_nAnimationParity");
 	if( player[client].fullautomode
 		&& player[client].animcount != animcount 
-		&& GetEntProp(viewmodel, Prop_Send, "m_nLayerSequence") == SCAR_SWITCH_SEQUENCE )
+		&& GetEntProp(viewmodel, Prop_Send, "m_nLayerSequence") == SWITCH_SEQUENCE )
 	{
 		player[client].lastAction = 1;
 		player[client].needrelease = true;
@@ -403,12 +402,15 @@ MRESReturn DhookCallback_ItemPostFrame(int pThis)
 		return MRES_Ignored;
 	}
 
-	for(int i = 0; i < 3; i++)
+	if( GetEntProp(pThis, Prop_Send, "m_iWorldModelIndex") == g_scar_precache_index )
 	{
-		//使用StoreToAddress 換圖時有機率會導致崩潰 crash: tier0.dll + 0x1991d
-		//StoreToAddress(temp + view_as<Address>(4 * i), 0, NumberType_Int32);
+		for(int i = 0; i < 3; i++)
+		{
+			//使用StoreToAddress 換圖時有機率會導致崩潰 crash: tier0.dll + 0x1991d
+			//StoreToAddress(temp + view_as<Address>(4 * i), 0, NumberType_Int32);
 
-		SetEntData(pThis, g_Offset_BrustAttackTime + (4 * i), 0);
+			SetEntData(pThis, g_Offset_BrustAttackTime + (4 * i), 0);
+		}
 	}
 
 	int clip             = GetEntProp(pThis, Prop_Send, "m_iClip1");
@@ -492,9 +494,9 @@ MRESReturn DhookCallback_ItemPostFrame(int pThis)
 		{
 			SDKCall(g_SDKCall_AbortReload, pThis);
 			EmitSoundToClient(client, SHOOT_EMPTY);
-			SetEntProp(viewmodel, Prop_Send, "m_nLayerSequence", 8);
+			SetEntProp(viewmodel, Prop_Send, "m_nLayerSequence", 31);
 			SetEntPropFloat(viewmodel, Prop_Send, "m_flLayerStartTime", currenttime);
-			SetEntPropFloat(pThis, Prop_Send, "m_flPlaybackRate", DEFAULT_RELOAD_TIME / g_fReloadTime);
+			SetEntPropFloat(pThis, Prop_Send, "m_flPlaybackRate", 1.0 / 1.0);
 			player[client].reloadendtime = currenttime + g_fReloadTime;
 			player[client].shoveinreload = false;
 
@@ -508,9 +510,9 @@ MRESReturn DhookCallback_ItemPostFrame(int pThis)
 
 			SDKCall(g_SDKCall_AbortReload, pThis);
 			//EmitSoundToClient(client, SHOOT_EMPTY);
-			SetEntProp(viewmodel, Prop_Send, "m_nLayerSequence", 8);
+			SetEntProp(viewmodel, Prop_Send, "m_nLayerSequence", 31);
 			SetEntPropFloat(viewmodel, Prop_Send, "m_flLayerStartTime", currenttime);
-			SetEntPropFloat(pThis, Prop_Send, "m_flPlaybackRate", DEFAULT_RELOAD_TIME / g_fReloadTime);
+			SetEntPropFloat(pThis, Prop_Send, "m_flPlaybackRate", 1.0 / 1.0);
 			player[client].reloadendtime = currenttime + g_fReloadTime;
 			player[client].shoveinreload = false;
 			
