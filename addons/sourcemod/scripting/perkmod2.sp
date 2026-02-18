@@ -266,6 +266,7 @@
 			Native:
 				Added Native_Pyro_OnWeaponFire
 		QOL:
+			Fix bug.
 			Update Start Menu.
 
 ==========================================================================
@@ -12777,7 +12778,7 @@ public Handle:Menu_Sur3Perk (client)
 	{
 		switch (g_iSur3[client])
 		{
-			case 4: st_current="(CURRENT)";
+			case 5: st_current="(CURRENT)";
 			default: st_current="";
 		}
 		Format(st_display,64,"Little Leaguer %s",st_current);
