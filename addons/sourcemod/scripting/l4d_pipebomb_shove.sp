@@ -32,7 +32,6 @@
 ========================================================================================
 	Change Log:
 1.17.LQT (24-Jan-2026)
-	- Add #tryinclude <l4d_lagged_movement> and Native Func to compatible.
 	- Add #tryinclude <perkmod2> and Native Func to compatible.
 
 1.17 (21-Mar-2025)
@@ -110,12 +109,7 @@
 #include <sourcemod>
 #include <sdkhooks>
 #include <sdktools>
-#tryinclude <l4d_lagged_movement>
 #tryinclude <perkmod2>
-
-#if !defined _l4d_lagged_movement_included_
-	native float L4D_LaggedMovement(int client, float value, bool get);
-#endif
 
 #if !defined _perkmod2_included_
 	native int perkmod2_Pyro_OnWeaponFire(int client, char[] weapon);
@@ -134,6 +128,10 @@ ConVar g_hCvarAllow, g_hCvarDamage, g_hCvarDistance, g_hCvarInfected, g_hCvarL4D
 int g_iClients[MAX_GRENADES], g_iCvarInfected, g_iCvarL4DTime, g_iCvarReload, g_iCvarTime, g_iGrenades[MAX_GRENADES], g_iClassTank;
 bool g_bCvarAllow, g_bCvarSpeed, g_bMapStarted, g_bCvarSwitching, g_bLeft4Dead2, g_bLaggedMovement;
 float g_fCvarDamage, g_fCvarDistance;
+
+native any L4D_LaggedMovement(int client, float value, bool force = false);
+
+
 
 // ====================================================================================================
 //					PLUGIN INFO / START / END
@@ -253,7 +251,6 @@ public void OnMapEnd()
 bool g_bAvailable_perkmod2;
 public void OnAllPluginsLoaded()
 {
-	g_bLaggedMovement = LibraryExists("LaggedMovement");
 	g_bAvailable_perkmod2 = LibraryExists("perkmod2");
 }
 public void OnLibraryAdded(const char[] name)
