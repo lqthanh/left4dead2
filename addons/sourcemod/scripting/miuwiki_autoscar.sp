@@ -8,7 +8,6 @@
 #include <left4dhooks>
 
 #define PLUGIN_VERSION "1.3h-2025/10/8"
-
 public Plugin myinfo =
 {
 	name = "[L4D2] Full Auto Scar",
@@ -45,12 +44,11 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
 #define SHOOT_EMPTY 			"weapons/clipempty_rifle.wav"
 #define ZOOM_Sound 				"weapons/hunting_rifle/gunother/hunting_rifle_zoom.wav"
+#define DEFAULT_ATTACK2_TIME 	0.4
+#define NOT_IN_RELOAD 			0.0
 
 #define SCAR_WORLD_MODEL 		"models/w_models/weapons/w_desert_rifle.mdl"
 #define SWITCH_SEQUENCE 		4
-
-#define DEFAULT_ATTACK2_TIME 	0.4
-#define NOT_IN_RELOAD 			0.0
 
 int
 	g_scar_precache_index,
@@ -95,15 +93,14 @@ enum struct PlayerData
 	float switchendtime;
 	float reloadendtime;
 	float lastshowinfotime;
+	
+	// Per-player weapon attributes
+	int   maxClip;
+	float reloadTime;
+	float cycleTime;
 }
 PlayerData
 	player[MAXPLAYERS + 1];
-
-int 
-	g_iMaxClip;
-float 
-	g_fReloadTime,
-	g_fCycleTime;
 
 bool 
 	g_bADSPluginAvailable = false;
@@ -121,8 +118,6 @@ public void OnPluginStart()
 	cvar_l4d2_scar_button.AddChangeHook(ConVarChanged_Cvars);
 
 	AutoExecConfig(true,       "miuwiki_autoscar");
-
-	AddCommandListener(CmdListen_weapon_reparse_server, "weapon_reparse_server");
 
 	HookEvent("round_start", Event_RoundStart, EventHookMode_PostNoCopy);
 	
@@ -210,7 +205,7 @@ void LateLoad()
         int owner = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
         if (owner > 0 && owner <= MaxClients && IsClientInGame(owner) && player[owner].fullautomode)
         {
-            HookScarWeapon(entity);
+            HookWeapon(entity);
         }
     }
 }
@@ -223,28 +218,12 @@ void ConVarChanged_Cvars(ConVar hCvar, const char[] sOldVal, const char[] sNewVa
 public void OnConfigsExecuted()
 {
 	GetCvars();
-	OnNextFrame_weapon_reparse_server();
 }
 
 void GetCvars()
 {
 	cvar.cycletime    		= cvar_l4d2_scar_cycletime.FloatValue;
 	cvar.iButtons 	  		= cvar_l4d2_scar_button.IntValue;
-}
-
-Action CmdListen_weapon_reparse_server(int client, const char[] command, int argc)
-{
-	RequestFrame(OnNextFrame_weapon_reparse_server);
-	return Plugin_Continue;
-}
-
-void OnNextFrame_weapon_reparse_server()
-{
-	g_iMaxClip = L4D2_GetIntWeaponAttribute("weapon_rifle_desert", L4D2IWA_ClipSize);
-	g_fReloadTime = L4D2_GetFloatWeaponAttribute("weapon_rifle_desert", L4D2FWA_ReloadDuration);
-	if(g_fReloadTime <= 0.0) g_fReloadTime = 3.32; //just in case
-	g_fCycleTime = L4D2_GetFloatWeaponAttribute("weapon_rifle_desert", L4D2FWA_CycleTime);
-	if(g_fCycleTime <= 0.0) g_fCycleTime = 0.07; //just in case
 }
 
 public void OnAllPluginsLoaded()
@@ -298,6 +277,11 @@ public void OnClientConnected(int client)
 	player[client].switchendtime		= 0.0;
 	player[client].reloadendtime		= 0.0;
 	player[client].lastshowinfotime		= 0.0;
+	
+	// Initialize weapon attributes with defaults
+	player[client].maxClip				= 0;
+	player[client].reloadTime			= 0.0;
+	player[client].cycleTime			= 0.0;
 }
 
 public void OnClientPutInServer(int client)
@@ -320,24 +304,21 @@ void SDKCallback_SwitchDesert(int client, int weapon)
 	if( weapon < 1 || !IsValidEntity(weapon) )
 		return;
 
-	if( GetEntProp(weapon, Prop_Send, "m_iWorldModelIndex") != g_scar_precache_index )
-	{
-		SetEntProp(client, Prop_Data, "m_bPredictWeapons", 1);
-		return;
-	}
+	// Load weapon attributes for this player's current weapon
+	LoadPlayerWeaponAttributes(client, weapon);
 
 	if( player[client].fullautomode )
 	{
 		// since predict will cause sound problem and no ammo trace, we predict scar whatever which mode it use.
 		SetEntProp(client, Prop_Data, "m_bPredictWeapons", 0);
 		// Hook weapon when in auto mode
-		HookScarWeapon(weapon);
+		HookWeapon(weapon);
 	}
 	else
 	{
 		SetEntProp(client, Prop_Data, "m_bPredictWeapons", 1);
 		// Unhook weapon when in triple tap mode to reduce overhead
-		UnhookScarWeapon(weapon);
+		UnHookWeapon(weapon);
 	}
 }
 
@@ -346,9 +327,6 @@ void SDKCallback_OnClientPostThink(int client)
 	int weapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
 
 	if( weapon < 1 || !IsValidEntity(weapon) )
-		return;
-
-	if( GetEntProp(weapon, Prop_Send, "m_iWorldModelIndex") != g_scar_precache_index )
 		return;
 
 	int viewmodel = GetEntPropEnt(client, Prop_Send, "m_hViewModel");
@@ -473,7 +451,6 @@ MRESReturn DhookCallback_ItemPostFrame(int pThis)
 		if( currenttime > player[client].primaryattacktime
 			&& currenttime > player[client].secondaryattacktime ) // not allow in attack2
 		{
-			// PrintToChat(client, "attacking, time %f", currenttime);
 			SetEntPropFloat(pThis, Prop_Send, "m_flNextPrimaryAttack", currenttime);
 			SDKCall(g_SDKCall_PrimaryAttack, pThis);
 			SetEntPropFloat(pThis, Prop_Send, "m_flNextPrimaryAttack", currenttime + 100.0);
@@ -538,14 +515,6 @@ public void OnEntityCreated(int entity, const char[] classname)
 {
 	if (!IsValidEntityIndex(entity))
 		return;
-
-	// Don't auto-hook, only hook when player switches to auto mode
-	// This reduces overhead for Triple Tap mode
-	if( strcmp(classname, "weapon_rifle_desert") == 0 )
-	{
-		// g_DynamicHook_ItemPostFrame.HookEntity(Hook_Post, entity, DhookCallback_ItemPostFrame);
-		// Hook will be added in SDKCallback_SwitchDesert if needed
-	}
 }
 
 // fix that keeping press IN_ATTACK before switch weapon will not fire again after switch complete. 
@@ -584,9 +553,6 @@ public void OnPlayerRunCmdPost(int client, int buttons)
 		if( active_weapon < 1 || !IsValidEntity(active_weapon) )
 			return;
 
-		if( GetEntProp(active_weapon, Prop_Send, "m_iWorldModelIndex") != g_scar_precache_index )
-			return;
-
 		float now = GetGameTime();
 		if(player[client].fullautomode)
 		{
@@ -604,7 +570,6 @@ public void OnPlayerRunCmdPost(int client, int buttons)
 			}
 		}
 
-
 		player[client].inzoom = true;
 		player[client].fullautomode = !player[client].fullautomode;
 		PlaySoundAroundClient(client, ZOOM_Sound);
@@ -616,7 +581,7 @@ public void OnPlayerRunCmdPost(int client, int buttons)
 			SetEntProp(client, Prop_Data, "m_bPredictWeapons", 1);
 			player[client].lastAction = 0;
 			// Unhook to reduce server overhead
-			UnhookScarWeapon(active_weapon);
+			UnHookWeapon(active_weapon);
 		}
 		else
 		{
@@ -626,7 +591,7 @@ public void OnPlayerRunCmdPost(int client, int buttons)
 			player[client].switchendtime = GetGameTime() + 0.2;
 			player[client].reloadendtime = NOT_IN_RELOAD;
 			// Hook only when in auto mode
-			HookScarWeapon(active_weapon);
+			HookWeapon(active_weapon);
 		}
 	}
 	else
@@ -672,7 +637,7 @@ bool CanReload(int client, int clip)
 	if( !SDKCall(g_SDKCall_CanAttack, client) )
 		return false;
 
-	if( clip >= g_iMaxClip)
+	if( clip >= player[client].maxClip)
 		return false;
 	
 	return true;
@@ -734,7 +699,7 @@ bool IsValidEntityIndex(int entity)
     return (MaxClients+1 <= entity <= GetMaxEntities());
 }
 
-void HookScarWeapon(int weapon)
+void HookWeapon(int weapon)
 {
 	if (weapon < 1 || !IsValidEntity(weapon))
 		return;
@@ -752,7 +717,7 @@ void HookScarWeapon(int weapon)
 	g_WeaponHookIds.SetValue(key, hookid);
 }
 
-void UnhookScarWeapon(int weapon)
+void UnHookWeapon(int weapon)
 {
 	if (weapon < 1 || !IsValidEntity(weapon))
 		return;
@@ -766,6 +731,51 @@ void UnhookScarWeapon(int weapon)
 		// Unhook and remove from map
 		DynamicHook.RemoveHook(hookid);
 		g_WeaponHookIds.Remove(key);
+	}
+}
+
+// ============================================================================
+// Weapon Attributes
+// ============================================================================
+
+/**
+ * Load weapon attributes for a specific player and weapon
+ * This allows the plugin to work with any weapon type
+ */
+void LoadPlayerWeaponAttributes(int client, int weapon)
+{
+	if (client < 1 || client > MaxClients || !IsClientInGame(client))
+		return;
+	
+	if (weapon < 1 || !IsValidEntity(weapon))
+		return;
+	
+	// Get weapon classname
+	char classname[64];
+	GetEntityClassname(weapon, classname, sizeof(classname));
+	
+	// Load attributes using Left4DHooks
+	player[client].maxClip = L4D2_GetIntWeaponAttribute(classname, L4D2IWA_ClipSize);
+	player[client].reloadTime = L4D2_GetFloatWeaponAttribute(classname, L4D2FWA_ReloadDuration);
+	player[client].cycleTime = L4D2_GetFloatWeaponAttribute(classname, L4D2FWA_CycleTime);
+	
+	// Debug print
+	PrintToServer("[AutoWeapon] Client %N switched to %s", client, classname);
+	PrintToServer("[AutoWeapon] - maxClip: %d, reloadTime: %.3f, cycleTime: %.3f", 
+		player[client].maxClip, player[client].reloadTime, player[client].cycleTime);
+	
+	// Validate attributes
+	if (player[client].maxClip <= 0)
+	{
+		PrintToServer("[AutoWeapon] WARNING: Invalid maxClip value for %s!", classname);
+	}
+	if (player[client].reloadTime <= 0.0)
+	{
+		PrintToServer("[AutoWeapon] WARNING: Invalid reloadTime value for %s!", classname);
+	}
+	if (player[client].cycleTime <= 0.0)
+	{
+		PrintToServer("[AutoWeapon] WARNING: Invalid cycleTime value for %s!", classname);
 	}
 }
 
@@ -793,9 +803,6 @@ int Native_IsClientHoldAutoScar(Handle plugin, int numParams)
 
 	int active_weapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
 	if( active_weapon < 1 || !IsValidEntity(active_weapon) )
-		return false;
-
-	if( GetEntProp(active_weapon, Prop_Send, "m_iWorldModelIndex") != g_scar_precache_index )
 		return false;
 
 	return player[client].fullautomode;
