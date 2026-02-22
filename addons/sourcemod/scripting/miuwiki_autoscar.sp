@@ -471,7 +471,7 @@ MRESReturn DhookCallback_ItemPostFrame(int pThis)
 		{
 			SDKCall(g_SDKCall_AbortReload, pThis);
 			EmitSoundToClient(client, SHOOT_EMPTY);
-			SetEntProp(viewmodel, Prop_Send, "m_nLayerSequence", 31);
+			SetEntProp(viewmodel, Prop_Send, "m_nLayerSequence", 8);
 			SetEntPropFloat(viewmodel, Prop_Send, "m_flLayerStartTime", currenttime);
 			SetEntPropFloat(pThis, Prop_Send, "m_flPlaybackRate", 1.0 / 1.0);
 			player[client].reloadendtime = currenttime + g_fReloadTime;
@@ -487,7 +487,7 @@ MRESReturn DhookCallback_ItemPostFrame(int pThis)
 
 			SDKCall(g_SDKCall_AbortReload, pThis);
 			//EmitSoundToClient(client, SHOOT_EMPTY);
-			SetEntProp(viewmodel, Prop_Send, "m_nLayerSequence", 31);
+			SetEntProp(viewmodel, Prop_Send, "m_nLayerSequence", 8);
 			SetEntPropFloat(viewmodel, Prop_Send, "m_flLayerStartTime", currenttime);
 			SetEntPropFloat(pThis, Prop_Send, "m_flPlaybackRate", 1.0 / 1.0);
 			player[client].reloadendtime = currenttime + g_fReloadTime;
