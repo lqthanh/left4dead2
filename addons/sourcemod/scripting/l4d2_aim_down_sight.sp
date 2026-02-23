@@ -166,16 +166,15 @@ void LoadWeaponData()
 
 public void OnEntityCreated(int entity, const char[] classname)
 {
-	if (classname[0] == 'w' && StrContains(classname, "weapon_") == 0 && StrContains(classname, "spawn") == -1)
-	// if (classname[0] == 'w' 
-	// 	&& StrContains(classname, "weapon_") == 0 
-	// 	&& (StrContains(classname, "pistol") != -1
-	// 	|| StrContains(classname, "shotgun") != -1
-	// 	|| StrContains(classname, "smg") != -1
-	// 	|| StrContains(classname, "sniper") != -1
-	// 	|| StrContains(classname, "rifle") != -1)
-	// 	&& StrContains(classname, "spawn") == -1
-	// )
+	if (classname[0] == 'w' 
+		&& StrContains(classname, "weapon_") == 0 
+		&& (StrContains(classname, "pistol") != -1
+		|| StrContains(classname, "shotgun") != -1
+		|| StrContains(classname, "smg") != -1
+		|| StrContains(classname, "sniper") != -1
+		|| StrContains(classname, "rifle") != -1)
+		&& StrContains(classname, "spawn") == -1
+	)
 	{
 		if (g_bDebug)
 			PrintToServer("[ADS] Hooking weapon entity: %s [%d]", classname, entity);
