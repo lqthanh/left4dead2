@@ -41,8 +41,6 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
 #define GAMEDATA "l4d2_aim_down_sight_fix"
 
-#define SHOOT_EMPTY 			"weapons/clipempty_rifle.wav"
-#define ZOOM_Sound 				"weapons/hunting_rifle/gunother/hunting_rifle_zoom.wav"
 #define DEFAULT_ATTACK2_TIME 	0.4
 
 #define SCAR_WORLD_MODEL 		"models/w_models/weapons/w_desert_rifle.mdl"
@@ -225,8 +223,6 @@ public void OnLibraryRemoved(const char[] name)
 
 public void OnMapStart()
 {
-	PrecacheSound(SHOOT_EMPTY);
-	PrecacheSound(ZOOM_Sound);
 	g_scar_precache_index = PrecacheModel(SCAR_WORLD_MODEL);
 }
 
@@ -544,7 +540,6 @@ public void OnPlayerRunCmdPost(int client, int buttons)
 
 		player[client].inzoom = true;
 		player[client].fullautomode = !player[client].fullautomode;
-		PlaySoundAroundClient(client, ZOOM_Sound);
 		if( !player[client].fullautomode )
 		{
 			SetEntPropFloat(active_weapon, Prop_Send, "m_flNextPrimaryAttack", GetGameTime() + 0.1);
@@ -592,11 +587,6 @@ bool CanPrimaryAttack(int client, int clip)
 		return false;
 	
 	return true;
-}
-
-void PlaySoundAroundClient(int client, const char[] sSoundName)
-{
-	EmitSoundToAll(sSoundName, client, SNDCHAN_AUTO, SNDLEVEL_AIRCRAFT, SND_NOFLAGS, SNDVOL_NORMAL, SNDPITCH_NORMAL, -1, NULL_VECTOR, NULL_VECTOR, true, 0.0);
 }
 
 bool IsGettingUp(int client) 
