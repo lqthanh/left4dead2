@@ -46,16 +46,6 @@
 				"linux" 	"284"
 				"windows"	"283"
 			}
-			"CTerrorGun::AbortReload"
-			{
-				"linux" 	"281"
-				"windows"	"280"
-			}
-			"CTerrorGun::FinishReload"
-			{
-				"linux" 	"280"
-				"windows"	"279"
-			}
 			"CTerrorPlayer::CanAttack"
 			{
 				"linux" 	"528"
