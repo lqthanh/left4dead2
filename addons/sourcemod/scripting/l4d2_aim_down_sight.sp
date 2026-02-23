@@ -129,12 +129,6 @@ void LoadConVars()
 {
 	g_bDebug = FindConVar("ads_debug").BoolValue;
 	ads_key = FindConVar("ads_key").IntValue;
-	
-	if (g_bDebug)
-	{
-		PrintToServer("[ADS] ConVars loaded:");
-		PrintToServer("[ADS] - ADS key: %d (0=Zoom, 1=Shift, 2=Ctrl)", ads_key);
-	}
 }
 
 public void OnConVarChanged(ConVar convar, const char[] oldValue, const char[] newValue)
@@ -144,9 +138,7 @@ public void OnConVarChanged(ConVar convar, const char[] oldValue, const char[] n
 
 Action Command_Reload(int args)
 {
-	PrintToServer("[ADS] Reloading weapon data...");
 	LoadWeaponData();
-	PrintToServer("[ADS] Weapon data reloaded");
 	return Plugin_Handled;
 }
 
