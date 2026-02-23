@@ -794,20 +794,6 @@ void LoadPlayerWeaponAttributes(int client, int weapon)
 	PrintToServer("[AutoWeapon] Client %N switched to %s", client, classname);
 	PrintToServer("[AutoWeapon] - maxClip: %d, reloadTime: %.3f, cycleTime: %.3f", 
 		player[client].maxClip, player[client].reloadTime, player[client].cycleTime);
-	
-	// Validate attributes
-	if (player[client].cycleTime <= 0.0)
-	{
-		PrintToServer("[AutoWeapon] WARNING: Invalid cycleTime value for %s!", classname);
-	}
-	if (player[client].maxClip <= 0)
-	{
-		PrintToServer("[AutoWeapon] WARNING: Invalid maxClip value for %s!", classname);
-	}
-	if (player[client].reloadTime <= 0.0)
-	{
-		PrintToServer("[AutoWeapon] WARNING: Invalid reloadTime value for %s!", classname);
-	}
 }
 
 // ============================================================================
