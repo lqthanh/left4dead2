@@ -19,9 +19,20 @@ int iOS;
 int EntStore[2049];
 int onbutton[MAXPLAYERS + 1];
 bool bZoom[MAXPLAYERS + 1];
-int ads_key;
 bool bPass;
-bool g_bDebug = false;
+
+ConVar
+	cvar_ads_debug,
+	cvar_ads_key,
+	cvar_ads_scar_cycletime;
+enum struct GlobalConVar
+{
+	bool ads_debug;
+	int ads_key;
+	float ads_scar_cycletime;
+}
+GlobalConVar
+	cvar;
 
 public Plugin myinfo = 
 {
@@ -40,23 +51,15 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 		strcopy(error, err_max, "Plugin only supports Left 4 Dead 2.");
 		return APLRes_SilentFailure;
 	}
-
-	RegPluginLibrary("l4d2_aim_down_sight");
-	CreateNative("l4d2_aim_down_sight_IsClientInADS", Native_IsClientInADS);
-	CreateNative("l4d2_aim_down_sight_PlayADSAnimation", Native_PlayADSAnimation);
 	
 	return APLRes_Success;
 }
 
 public void OnPluginStart()
 {
-	PrintToServer("[ADS] Plugin starting...");
-	
 	GameData gamedata = LoadGameConfigFile("l4d2_aim_down_sight");
 	if (!gamedata)
 		SetFailState("Can't load gamedata \"l4d2_aim_down_sight.txt\" or not found");
-	
-	PrintToServer("[ADS] GameData loaded successfully");
 	
 	iOS = gamedata.GetOffset("Os");
 	
@@ -65,12 +68,15 @@ public void OnPluginStart()
 	if (!hHook_SelectWeightedSequence)
 		SetFailState("Failed to create DHook: SelectWeightedSequence");
 	DHookAddParam(hHook_SelectWeightedSequence, HookParamType_Int);
-	PrintToServer("[ADS] DHook SelectWeightedSequence created (offset: %d)", 208 - iOS);
 	
 	hHook_SendWeaponAnim = DHookCreate(252 - iOS, HookType_Entity, ReturnType_Int, ThisPointer_CBaseEntity);
+	if (!hHook_SendWeaponAnim)
+		SetFailState("Failed to create DHook: SendWeaponAnim");
 	DHookAddParam(hHook_SendWeaponAnim, HookParamType_Int);
 	
 	hWeaponHolster = DHookCreate(266 - iOS, HookType_Entity, ReturnType_Void, ThisPointer_CBaseEntity);
+	if (!hWeaponHolster)
+		SetFailState("Failed to create DHook: Weapon Holster");
 	DHookAddParam(hWeaponHolster, HookParamType_CBaseEntity);
 	
 	// Setup SDK Call
@@ -101,34 +107,27 @@ public void OnPluginStart()
 		PrintToServer("[ADS] Activity list loaded successfully");
 	}
 	
-	// Register commands and events
-	RegServerCmd("ads_reload", Command_Reload);
-	LoadWeaponData();
-	PrintToServer("[ADS] Commands registered");
-	
 	HookEvent("weapon_zoom", Event_WeaponZoom, EventHookMode_Post);
 	HookEvent("weapon_drop", Event_WeaponDrop, EventHookMode_Post);
 	PrintToServer("[ADS] Events hooked");
 	
 	// Create ConVars
-	ConVar cvar;
-	cvar = CreateConVar("ads_debug", "0", "Enable debug logging");
-	cvar.AddChangeHook(OnConVarChanged);
-	
-	cvar = CreateConVar("ads_key", "0", "Key to activate ADS. 0 = Zoom key (MOUSE 3), 1 = Walk key (SHIFT), 2 = Duck key (CTRL)");
-	cvar.AddChangeHook(OnConVarChanged);
-	
+	cvar_ads_debug = 			CreateConVar("ads_debug", "0", "Enable debug logging");
+	cvar_ads_key = 				CreateConVar("ads_key", "0", "Key to activate ADS. 0 = Zoom key (MOUSE 3), 1 = Walk key (SHIFT), 2 = Duck key (CTRL)");
+	cvar_ads_scar_cycletime = 	CreateConVar("ads_scar_cycletime", "0.12", "Override cycle time for SCAR");
+	cvar_ads_debug.AddChangeHook(OnConVarChanged);
+	cvar_ads_key.AddChangeHook(OnConVarChanged);
+	cvar_ads_scar_cycletime.AddChangeHook(OnConVarChanged);
 	LoadConVars();
 	AutoExecConfig(true, "l4d2_aim_down_sight");
-	PrintToServer("[ADS] Plugin loaded successfully!");
-	PrintToServer("[ADS] Use 'sm_ads_debug' to toggle debug mode");
-	PrintToServer("[ADS] Use 'sm_ads_test' to test ADS on your weapon");
+	LoadWeaponData();
 }
 
 void LoadConVars()
 {
-	g_bDebug = FindConVar("ads_debug").BoolValue;
-	ads_key = FindConVar("ads_key").IntValue;
+	cvar.ads_debug = cvar_ads_debug.BoolValue;
+	cvar.ads_key = cvar_ads_key.IntValue;
+	cvar.ads_scar_cycletime = cvar_ads_scar_cycletime.FloatValue;
 }
 
 public void OnConVarChanged(ConVar convar, const char[] oldValue, const char[] newValue)
@@ -136,10 +135,9 @@ public void OnConVarChanged(ConVar convar, const char[] oldValue, const char[] n
 	LoadConVars();
 }
 
-Action Command_Reload(int args)
+public void OnConfigsExecuted()
 {
-	LoadWeaponData();
-	return Plugin_Handled;
+	LoadConVars();
 }
 
 void LoadWeaponData()
@@ -149,18 +147,9 @@ void LoadWeaponData()
 	char buffer[PLATFORM_MAX_PATH];
 	BuildPath(Path_SM, buffer, sizeof(buffer), "data/l4d2_aim_down_sight.txt");
 	
-	if (g_bDebug)
-		PrintToServer("[ADS] Loading weapon data from: %s", buffer);
-	
 	if (!hWeaponData.ImportFromFile(buffer))
 	{
 		LogError("[ADS] Failed to load weapon data from %s", buffer);
-		if (g_bDebug)
-			PrintToServer("[ADS] Weapon data file not found - using default behavior");
-	}
-	else if (g_bDebug)
-	{
-		PrintToServer("[ADS] Weapon data loaded successfully");
 	}
 }
 
@@ -176,9 +165,6 @@ public void OnEntityCreated(int entity, const char[] classname)
 		&& StrContains(classname, "spawn") == -1
 	)
 	{
-		if (g_bDebug)
-			PrintToServer("[ADS] Hooking weapon entity: %s [%d]", classname, entity);
-		
 		DHookEntity(hHook_SelectWeightedSequence, false, entity, _, DH_OnSelectWeightedSequence);
 		SDKHook(entity, SDKHook_ReloadPost, OnCustomWeaponReload);
 		DHookEntity(hWeaponHolster, true, entity, _, DH_OnGunHolsterPost);
@@ -377,9 +363,6 @@ public Action OnCustomWeaponReload(int weapon)
 			int buttons = GetClientButtons(owner);
 			if (buttons & IN_RELOAD)
 			{
-				if (g_bDebug)
-					PrintToServer("[ADS] Client %N inspecting weapon", owner);
-				
 				// Play inspect animation (ACT_VM_FIDGET = 184)
 				SendWeaponAnim(weapon, 184);
 				return Plugin_Handled;
@@ -419,21 +402,10 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 	if (!IsClientInGame(client) || GetClientTeam(client) != 2 || IsFakeClient(client))
 		return Plugin_Continue;
 	
-	// Debug: Print m_nLayerSequence continuously
-	if (g_bDebug)
-	{
-		int viewModel = GetEntPropEnt(client, Prop_Send, "m_hViewModel");
-		if (viewModel > 0)
-		{
-			int layerSequence = GetEntProp(viewModel, Prop_Send, "m_nLayerSequence");
-			PrintToServer("[ADS DEBUG] Client %N - m_nLayerSequence: %d", client, layerSequence);
-		}
-	}
-	
 	// Determine which button to check based on ads_key
 	int adsButton;
 	char keyName[16];
-	switch (ads_key)
+	switch (cvar.ads_key)
 	{
 		case 1: // SHIFT key
 		{
@@ -459,14 +431,8 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 			onbutton[client] |= adsButton;
 			int activeWeapon = GetPlayerWeapon(client);
 			// Allow ADS if: not a sniper, OR using custom key (not zoom key)
-			if (activeWeapon != -1 && (!CanZoom(activeWeapon) || ads_key != 0))
+			if (activeWeapon != -1 && (!CanZoom(activeWeapon) || cvar.ads_key != 0))
 			{
-				if (g_bDebug)
-				{
-					char classname[64];
-					GetEntityClassname(activeWeapon, classname, sizeof(classname));
-					PrintToServer("[ADS] Client %N pressed %s button - Weapon: %s", client, keyName, classname);
-				}
 				SetupZoom(client, activeWeapon, !bZoom[client]);
 			}
 		}
@@ -482,21 +448,13 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 // Utility functions
 void SetupZoom(int client, int weapon, bool zoom)
 {
-	if (g_bDebug)
-		PrintToServer("[ADS] SetupZoom: Client %N, Zoom: %s", client, zoom ? "ON" : "OFF");
-	
 	int targetActivity = zoom ? 1873 : 183; // ACT_PRIMARY_VM_IDLE : ACT_VM_IDLE
 	int sequence = SelectWeightedSequence(weapon, targetActivity);
 	
 	if (sequence == -1)
 	{
-		if (g_bDebug)
-			PrintToServer("[ADS] Failed to find sequence for activity %d", targetActivity);
 		return;
 	}
-	
-	if (g_bDebug)
-		PrintToServer("[ADS] Setting zoom state to: %s (sequence: %d)", zoom ? "ADS" : "Normal", sequence);
 	
 	bZoom[client] = zoom;
 	
@@ -581,44 +539,4 @@ int GetWeaponClip(int weapon)
 void SetWeaponHelpingHandState(int weapon, int state)
 {
 	SetEntProp(weapon, Prop_Send, "m_helpingHandState", state);
-}
-
-// ============================================================================
-// Native
-// ============================================================================
-
-public int Native_IsClientInADS(Handle plugin, int numParams)
-{
-	int client = GetNativeCell(1);
-	if (client < 1 || client > MaxClients || !IsClientInGame(client))
-		return false;
-	
-	return bZoom[client];
-}
-
-public int Native_PlayADSAnimation(Handle plugin, int numParams)
-{
-	int client = GetNativeCell(1);
-	int weapon = GetNativeCell(2);
-	int activity = GetNativeCell(3);
-	
-	if (client < 1 || client > MaxClients || !IsClientInGame(client))
-		return false;
-	
-	if (!IsValidEntity(weapon))
-		return false;
-	
-	// Check if client is in ADS mode
-	if (!bZoom[client])
-		return false;
-	
-	// Get sequence and play animation
-	int sequence = SelectWeightedSequence(weapon, activity);
-	if (sequence != -1)
-	{
-		SetWeaponHelpingHandState(weapon, 6);
-		return SendWeaponAnim(weapon, activity);
-	}
-	
-	return false;
 }
