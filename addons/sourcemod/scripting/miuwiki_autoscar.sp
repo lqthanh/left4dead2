@@ -73,7 +73,7 @@ ConVar
 
 enum struct GlobalConVar
 {
-	float cycletime;
+	float scarcycletime;
 	int iButtons;
 }
 GlobalConVar
@@ -95,9 +95,10 @@ enum struct PlayerData
 	float lastshowinfotime;
 	
 	// Per-player weapon attributes
+	float cycleTime;
 	int   maxClip;
 	float reloadTime;
-	float cycleTime;
+	char  weaponClass[64];
 }
 PlayerData
 	player[MAXPLAYERS + 1];
@@ -222,17 +223,13 @@ public void OnConfigsExecuted()
 
 void GetCvars()
 {
-	cvar.cycletime    		= cvar_l4d2_scar_cycletime.FloatValue;
+	cvar.scarcycletime 		= cvar_l4d2_scar_cycletime.FloatValue;
 	cvar.iButtons 	  		= cvar_l4d2_scar_button.IntValue;
 }
 
 public void OnAllPluginsLoaded()
 {
 	g_bADSPluginAvailable = LibraryExists("l4d2_aim_down_sight");
-	if(g_bADSPluginAvailable)
-	{
-		PrintToServer("[AutoScar] ADS plugin detected - Enhanced animations enabled");
-	}
 }
 
 public void OnLibraryAdded(const char[] name)
@@ -240,7 +237,6 @@ public void OnLibraryAdded(const char[] name)
 	if(StrEqual(name, "l4d2_aim_down_sight"))
 	{
 		g_bADSPluginAvailable = true;
-		PrintToServer("[AutoScar] ADS plugin loaded");
 	}
 }
 
@@ -249,7 +245,6 @@ public void OnLibraryRemoved(const char[] name)
 	if(StrEqual(name, "l4d2_aim_down_sight"))
 	{
 		g_bADSPluginAvailable = false;
-		PrintToServer("[AutoScar] ADS plugin unloaded");
 	}
 }
 
@@ -279,9 +274,9 @@ public void OnClientConnected(int client)
 	player[client].lastshowinfotime		= 0.0;
 	
 	// Initialize weapon attributes with defaults
+	player[client].cycleTime			= 0.0;
 	player[client].maxClip				= 0;
 	player[client].reloadTime			= 0.0;
-	player[client].cycleTime			= 0.0;
 }
 
 public void OnClientPutInServer(int client)
@@ -454,10 +449,27 @@ MRESReturn DhookCallback_ItemPostFrame(int pThis)
 			SetEntPropFloat(pThis, Prop_Send, "m_flNextPrimaryAttack", currenttime);
 			SDKCall(g_SDKCall_PrimaryAttack, pThis);
 			SetEntPropFloat(pThis, Prop_Send, "m_flNextPrimaryAttack", currenttime + 100.0);
-			if(cvar.cycletime <= 0.0)
-				player[client].primaryattacktime = currenttime + g_fCycleTime;
+			
+			// Determine cycle time: SCAR uses cvar if > 0, others use weapon default
+			float nextAttackTime;
+			if(cvar.scarcycletime > 0.0 && StrEqual(player[client].weaponClass, "weapon_rifle_desert"))
+			{
+				nextAttackTime = cvar.scarcycletime;
+				PrintToServer("[AutoWeapon] Fire (SCAR custom): nextAttack in %.3fs", nextAttackTime);
+			}
+			else if(player[client].cycleTime > 0.0)
+			{
+				nextAttackTime = player[client].cycleTime;
+				PrintToServer("[AutoWeapon] Fire (weapon default): nextAttack in %.3fs (cycleTime: %.3f)", 
+					nextAttackTime, player[client].cycleTime);
+			}
 			else
-				player[client].primaryattacktime = currenttime + cvar.cycletime;
+			{
+				nextAttackTime = 0.1; // Emergency fallback
+				PrintToServer("[AutoWeapon] WARNING: Invalid cycleTime, using fallback 0.1");
+			}
+			
+			player[client].primaryattacktime = currenttime + nextAttackTime;
 		}
 		return MRES_Ignored; // ignore IN_RELOAD when pushing attack button.
 	}
@@ -474,8 +486,17 @@ MRESReturn DhookCallback_ItemPostFrame(int pThis)
 			SetEntProp(viewmodel, Prop_Send, "m_nLayerSequence", 8);
 			SetEntPropFloat(viewmodel, Prop_Send, "m_flLayerStartTime", currenttime);
 			SetEntPropFloat(pThis, Prop_Send, "m_flPlaybackRate", 1.0 / 1.0);
+
+			float g_fReloadTime;
+			if(player[client].reloadTime > 0.0) g_fReloadTime = player[client].reloadTime;
+			else
+			{
+				g_fReloadTime = 2.0; // Emergency fallback
+				PrintToServer("[AutoWeapon] WARNING: Invalid reloadTime, using fallback 2.0");
+			}
 			player[client].reloadendtime = currenttime + g_fReloadTime;
 			player[client].shoveinreload = false;
+			PrintToServer("[AutoWeapon] Auto-reload (empty): duration %.3fs", g_fReloadTime);
 
 			return MRES_Ignored; 
 		}
@@ -490,8 +511,17 @@ MRESReturn DhookCallback_ItemPostFrame(int pThis)
 			SetEntProp(viewmodel, Prop_Send, "m_nLayerSequence", 8);
 			SetEntPropFloat(viewmodel, Prop_Send, "m_flLayerStartTime", currenttime);
 			SetEntPropFloat(pThis, Prop_Send, "m_flPlaybackRate", 1.0 / 1.0);
+			
+			float g_fReloadTime;
+			if(player[client].reloadTime > 0.0) g_fReloadTime = player[client].reloadTime;
+			else
+			{
+				g_fReloadTime = 2.0; // Emergency fallback
+				PrintToServer("[AutoWeapon] WARNING: Invalid reloadTime, using fallback 2.0");
+			}
 			player[client].reloadendtime = currenttime + g_fReloadTime;
 			player[client].shoveinreload = false;
+			PrintToServer("[AutoWeapon] Manual reload: duration %.3fs", g_fReloadTime);
 			
 		}
 	}
@@ -755,9 +785,10 @@ void LoadPlayerWeaponAttributes(int client, int weapon)
 	GetEntityClassname(weapon, classname, sizeof(classname));
 	
 	// Load attributes using Left4DHooks
+	player[client].cycleTime = L4D2_GetFloatWeaponAttribute(classname, L4D2FWA_CycleTime);
 	player[client].maxClip = L4D2_GetIntWeaponAttribute(classname, L4D2IWA_ClipSize);
 	player[client].reloadTime = L4D2_GetFloatWeaponAttribute(classname, L4D2FWA_ReloadDuration);
-	player[client].cycleTime = L4D2_GetFloatWeaponAttribute(classname, L4D2FWA_CycleTime);
+	strcopy(player[client].weaponClass, sizeof(player[].weaponClass), classname);
 	
 	// Debug print
 	PrintToServer("[AutoWeapon] Client %N switched to %s", client, classname);
@@ -765,6 +796,10 @@ void LoadPlayerWeaponAttributes(int client, int weapon)
 		player[client].maxClip, player[client].reloadTime, player[client].cycleTime);
 	
 	// Validate attributes
+	if (player[client].cycleTime <= 0.0)
+	{
+		PrintToServer("[AutoWeapon] WARNING: Invalid cycleTime value for %s!", classname);
+	}
 	if (player[client].maxClip <= 0)
 	{
 		PrintToServer("[AutoWeapon] WARNING: Invalid maxClip value for %s!", classname);
@@ -772,10 +807,6 @@ void LoadPlayerWeaponAttributes(int client, int weapon)
 	if (player[client].reloadTime <= 0.0)
 	{
 		PrintToServer("[AutoWeapon] WARNING: Invalid reloadTime value for %s!", classname);
-	}
-	if (player[client].cycleTime <= 0.0)
-	{
-		PrintToServer("[AutoWeapon] WARNING: Invalid cycleTime value for %s!", classname);
 	}
 }
 
