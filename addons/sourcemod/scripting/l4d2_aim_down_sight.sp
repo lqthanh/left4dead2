@@ -17,9 +17,15 @@ KeyValues hActivityList = null;
 Handle hGetWeaponInfoByID = null;
 int iOS;
 int EntStore[2049];
-int onbutton[MAXPLAYERS + 1];
-bool bZoom[MAXPLAYERS + 1];
 bool bPass;
+
+enum struct PlayerData
+{
+	bool bZoom;
+	int onbutton;
+}
+PlayerData
+	player[MAXPLAYERS + 1];
 
 ConVar
 	cvar_ads_debug,
@@ -109,7 +115,6 @@ public void OnPluginStart()
 	
 	HookEvent("weapon_zoom", Event_WeaponZoom, EventHookMode_Post);
 	HookEvent("weapon_drop", Event_WeaponDrop, EventHookMode_Post);
-	PrintToServer("[ADS] Events hooked");
 	
 	// Create ConVars
 	cvar_ads_debug = 			CreateConVar("ads_debug", "0", "Enable debug logging");
@@ -123,13 +128,6 @@ public void OnPluginStart()
 	LoadWeaponData();
 }
 
-void LoadConVars()
-{
-	cvar.ads_debug = cvar_ads_debug.BoolValue;
-	cvar.ads_key = cvar_ads_key.IntValue;
-	cvar.ads_scar_cycletime = cvar_ads_scar_cycletime.FloatValue;
-}
-
 public void OnConVarChanged(ConVar convar, const char[] oldValue, const char[] newValue)
 {
 	LoadConVars();
@@ -138,6 +136,13 @@ public void OnConVarChanged(ConVar convar, const char[] oldValue, const char[] n
 public void OnConfigsExecuted()
 {
 	LoadConVars();
+}
+
+void LoadConVars()
+{
+	cvar.ads_debug = cvar_ads_debug.BoolValue;
+	cvar.ads_key = cvar_ads_key.IntValue;
+	cvar.ads_scar_cycletime = cvar_ads_scar_cycletime.FloatValue;
 }
 
 void LoadWeaponData()
@@ -166,8 +171,8 @@ public void OnEntityCreated(int entity, const char[] classname)
 	)
 	{
 		DHookEntity(hHook_SelectWeightedSequence, false, entity, _, DH_OnSelectWeightedSequence);
-		SDKHook(entity, SDKHook_ReloadPost, OnCustomWeaponReload);
 		DHookEntity(hWeaponHolster, true, entity, _, DH_OnGunHolsterPost);
+		SDKHook(entity, SDKHook_ReloadPost, OnCustomWeaponReload);
 		EntStore[entity] = 0;
 	}
 }
@@ -190,7 +195,7 @@ public MRESReturn DH_OnSelectWeightedSequence(int weapon, Handle hReturn, Handle
 			if (GetWeaponClip(weapon) == 0)
 				activity = 1269;
 			
-			if (owner > 0 && bZoom[owner])
+			if (owner > 0 && player[owner].bZoom)
 			{
 				SetWeaponHelpingHandState(weapon, 6);
 				activity = 1877; // ACT_PRIMARY_VM_RELOAD
@@ -198,7 +203,7 @@ public MRESReturn DH_OnSelectWeightedSequence(int weapon, Handle hReturn, Handle
 		}
 		case 1250, 1254: // ACT_VM_MELEE
 		{
-			if (owner > 0 && bZoom[owner])
+			if (owner > 0 && player[owner].bZoom)
 			{
 				SetWeaponHelpingHandState(weapon, 6);
 				activity = 1876; // ACT_PRIMARY_VM_SECONDARYATTACK
@@ -210,7 +215,7 @@ public MRESReturn DH_OnSelectWeightedSequence(int weapon, Handle hReturn, Handle
 			{
 				if (GetWeaponClip(weapon) > 0)
 				{
-					if (bZoom[owner])
+					if (player[owner].bZoom)
 					{
 						SetWeaponHelpingHandState(weapon, 6);
 						activity = 1875; // ACT_PRIMARY_VM_PRIMARYATTACK
@@ -218,7 +223,7 @@ public MRESReturn DH_OnSelectWeightedSequence(int weapon, Handle hReturn, Handle
 				}
 				else
 				{
-					activity = bZoom[owner] ? 1878 : 194; // ACT_PRIMARY_VM_DRYFIRE : ACT_VM_DRYFIRE
+					activity = player[owner].bZoom ? 1878 : 194; // ACT_PRIMARY_VM_DRYFIRE : ACT_VM_DRYFIRE
 				}
 			}
 		}
@@ -233,7 +238,7 @@ public MRESReturn DH_OnSelectWeightedSequence(int weapon, Handle hReturn, Handle
 				}
 			}
 			if (owner > 0)
-				bZoom[owner] = false;
+				player[owner].bZoom = false;
 		}
 	}
 	
@@ -261,6 +266,184 @@ public MRESReturn DH_OnSelectWeightedSequence(int weapon, Handle hReturn, Handle
 	
 	return MRES_Ignored;
 }
+
+// Hook: Weapon Holster
+public MRESReturn DH_OnGunHolsterPost(int weapon)
+{
+	int owner = GetWeaponOwner(weapon);
+	if (owner > 0 && player[owner].bZoom)
+	{
+		player[owner].bZoom = false;
+		// Reset the weapon animation to normal idle
+		int sequence = SelectWeightedSequence(weapon, 183); // ACT_VM_IDLE
+		if (sequence != -1)
+		{
+			int viewModel = GetEntPropEnt(owner, Prop_Send, "m_hViewModel");
+			if (viewModel > 0)
+			{
+				SetEntProp(viewModel, Prop_Send, "m_nSequence", sequence);
+			}
+		}
+		// Reset helping hand state
+		SetWeaponHelpingHandState(weapon, 0);
+	}
+	return MRES_Ignored;
+}
+
+// Hook: Custom Weapon Reload - Inspect weapon when reload with full clip
+public Action OnCustomWeaponReload(int weapon)
+{
+	int owner = GetWeaponOwner(weapon);
+	if (owner <= 0 || owner > MaxClients || !IsClientInGame(owner))
+		return Plugin_Continue;
+	
+	// Only inspect when:
+	// 1. Clip is full
+	// 2. Not in ADS mode (bZoom is false)
+	// 3. Weapon is ready (can fire soon)
+	if (GetWeaponClip(weapon) >= GetWeaponGunClipSize(weapon) && !player[owner].bZoom)
+	{
+		float nextAttack = GetEntDataFloat(weapon, FindSendPropInfo("CBaseCombatWeapon", "m_flNextPrimaryAttack"));
+		float gameTime = GetGameTime();
+		
+		// Check if weapon is idle (ready to fire within 1 second)
+		if (gameTime + 1.0 >= nextAttack)
+		{
+			// Check if player pressed reload button
+			int buttons = GetClientButtons(owner);
+			if (buttons & IN_RELOAD)
+			{
+				// Play inspect animation (ACT_VM_FIDGET = 184)
+				SendWeaponAnim(weapon, 184);
+				return Plugin_Handled;
+			}
+		}
+	}
+	
+	return Plugin_Continue;
+}
+
+// Player command processing
+public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3], float angles[3], int& weapon, int& subtype, int& cmdnum, int& tickcount, int& seed, int mouse[2])
+{
+	if (!IsClientInGame(client) || GetClientTeam(client) != 2 || IsFakeClient(client))
+		return Plugin_Continue;
+	
+	// Determine which button to check based on ads_key
+	int adsButton;
+	char keyName[16];
+	switch (cvar.ads_key)
+	{
+		case 1: // SHIFT key
+		{
+			adsButton = IN_SPEED;
+			Format(keyName, sizeof(keyName), "SHIFT");
+		}
+		case 2: // CTRL key
+		{
+			adsButton = IN_DUCK;
+			Format(keyName, sizeof(keyName), "CTRL");
+		}
+		default: // Zoom key (0 or any other value)
+		{
+			adsButton = IN_ZOOM;
+			Format(keyName, sizeof(keyName), "ZOOM");
+		}
+	}
+	
+	if (buttons & adsButton)
+	{
+		if (!(player[client].onbutton & adsButton))
+		{
+			player[client].onbutton |= adsButton;
+			int activeWeapon = GetPlayerWeapon(client);
+			// Allow ADS if: not a sniper, OR using custom key (not zoom key)
+			if (activeWeapon != -1 && (!CanZoom(activeWeapon) || cvar.ads_key != 0))
+			{
+				SetupZoom(client, activeWeapon, !player[client].bZoom);
+			}
+		}
+	}
+	else if (player[client].onbutton & adsButton)
+	{
+		player[client].onbutton &= ~adsButton;
+	}
+	
+	return Plugin_Continue;
+}
+
+
+int SelectWeightedSequence(int entity, int activity)
+{
+	static Handle hCall = null;
+	if (hCall == null)
+	{
+		StartPrepSDKCall(SDKCall_Entity);
+		PrepSDKCall_SetVirtual(208 - iOS);
+		PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+		PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
+		hCall = EndPrepSDKCall();
+	}
+	return SDKCall(hCall, entity, activity);
+}
+
+bool SendWeaponAnim(int weapon, int sequence)
+{
+	static Handle hCall = null;
+	if (hCall == null)
+	{
+		StartPrepSDKCall(SDKCall_Entity);
+		PrepSDKCall_SetVirtual(252 - iOS);
+		PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+		PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
+		hCall = EndPrepSDKCall();
+	}
+	return SDKCall(hCall, weapon, sequence);
+}
+
+int GetWeaponGunClipSize(int weapon)
+{
+	static Handle hCall = null;
+	if (hCall == null)
+	{
+		StartPrepSDKCall(SDKCall_Entity);
+		PrepSDKCall_SetVirtual(324 - iOS);
+		PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
+		hCall = EndPrepSDKCall();
+	}
+	return SDKCall(hCall, weapon);
+}
+
+// ============================================================================
+// Events
+// ============================================================================
+
+// Event: Weapon Zoom
+void Event_WeaponZoom(Event event, const char[] name, bool dontBroadcast)
+{
+	int client = GetClientOfUserId(event.GetInt("userid"));
+	if (client <= 0)
+		return;
+	
+	bool zoomed = GetEntProp(client, Prop_Send, "m_iFOV") != 0;
+	if (zoomed != player[client].bZoom)
+	{
+		int weapon = GetPlayerWeapon(client);
+		if (weapon != -1)
+			SetupZoom(client, weapon, zoomed);
+	}
+}
+
+// Event: Weapon Drop
+void Event_WeaponDrop(Event event, const char[] name, bool dontBroadcast)
+{
+	int propid = event.GetInt("propid");
+	EntStore[propid] = 0;
+}
+
+// ============================================================================
+// Helper
+// ============================================================================
 
 int GetCustomWeaponAnim(int weapon, int activity)
 {
@@ -317,135 +500,6 @@ int GetCustomWeaponAnim(int weapon, int activity)
 	return -1;
 }
 
-// Hook: Weapon Holster
-public MRESReturn DH_OnGunHolsterPost(int weapon)
-{
-	int owner = GetWeaponOwner(weapon);
-	if (owner > 0 && bZoom[owner])
-	{
-		bZoom[owner] = false;
-		// Reset the weapon animation to normal idle
-		int sequence = SelectWeightedSequence(weapon, 183); // ACT_VM_IDLE
-		if (sequence != -1)
-		{
-			int viewModel = GetEntPropEnt(owner, Prop_Send, "m_hViewModel");
-			if (viewModel > 0)
-			{
-				SetEntProp(viewModel, Prop_Send, "m_nSequence", sequence);
-			}
-		}
-		// Reset helping hand state
-		SetWeaponHelpingHandState(weapon, 0);
-	}
-	return MRES_Ignored;
-}
-
-// Hook: Custom Weapon Reload - Inspect weapon when reload with full clip
-public Action OnCustomWeaponReload(int weapon)
-{
-	int owner = GetWeaponOwner(weapon);
-	if (owner <= 0 || owner > MaxClients || !IsClientInGame(owner))
-		return Plugin_Continue;
-	
-	// Only inspect when:
-	// 1. Clip is full
-	// 2. Not in ADS mode (bZoom is false)
-	// 3. Weapon is ready (can fire soon)
-	if (GetWeaponClip(weapon) >= GetWeaponGunClipSize(weapon) && !bZoom[owner])
-	{
-		float nextAttack = GetEntDataFloat(weapon, FindSendPropInfo("CBaseCombatWeapon", "m_flNextPrimaryAttack"));
-		float gameTime = GetGameTime();
-		
-		// Check if weapon is idle (ready to fire within 1 second)
-		if (gameTime + 1.0 >= nextAttack)
-		{
-			// Check if player pressed reload button
-			int buttons = GetClientButtons(owner);
-			if (buttons & IN_RELOAD)
-			{
-				// Play inspect animation (ACT_VM_FIDGET = 184)
-				SendWeaponAnim(weapon, 184);
-				return Plugin_Handled;
-			}
-		}
-	}
-	
-	return Plugin_Continue;
-}
-
-// Event: Weapon Zoom
-void Event_WeaponZoom(Event event, const char[] name, bool dontBroadcast)
-{
-	int client = GetClientOfUserId(event.GetInt("userid"));
-	if (client <= 0)
-		return;
-	
-	bool zoomed = GetEntProp(client, Prop_Send, "m_iFOV") != 0;
-	if (zoomed != bZoom[client])
-	{
-		int weapon = GetPlayerWeapon(client);
-		if (weapon != -1)
-			SetupZoom(client, weapon, zoomed);
-	}
-}
-
-// Event: Weapon Drop
-void Event_WeaponDrop(Event event, const char[] name, bool dontBroadcast)
-{
-	int propid = event.GetInt("propid");
-	EntStore[propid] = 0;
-}
-
-// Player command processing
-public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3], float angles[3], int& weapon, int& subtype, int& cmdnum, int& tickcount, int& seed, int mouse[2])
-{
-	if (!IsClientInGame(client) || GetClientTeam(client) != 2 || IsFakeClient(client))
-		return Plugin_Continue;
-	
-	// Determine which button to check based on ads_key
-	int adsButton;
-	char keyName[16];
-	switch (cvar.ads_key)
-	{
-		case 1: // SHIFT key
-		{
-			adsButton = IN_SPEED;
-			Format(keyName, sizeof(keyName), "SHIFT");
-		}
-		case 2: // CTRL key
-		{
-			adsButton = IN_DUCK;
-			Format(keyName, sizeof(keyName), "CTRL");
-		}
-		default: // Zoom key (0 or any other value)
-		{
-			adsButton = IN_ZOOM;
-			Format(keyName, sizeof(keyName), "ZOOM");
-		}
-	}
-	
-	if (buttons & adsButton)
-	{
-		if (!(onbutton[client] & adsButton))
-		{
-			onbutton[client] |= adsButton;
-			int activeWeapon = GetPlayerWeapon(client);
-			// Allow ADS if: not a sniper, OR using custom key (not zoom key)
-			if (activeWeapon != -1 && (!CanZoom(activeWeapon) || cvar.ads_key != 0))
-			{
-				SetupZoom(client, activeWeapon, !bZoom[client]);
-			}
-		}
-	}
-	else if (onbutton[client] & adsButton)
-	{
-		onbutton[client] &= ~adsButton;
-	}
-	
-	return Plugin_Continue;
-}
-
-// Utility functions
 void SetupZoom(int client, int weapon, bool zoom)
 {
 	int targetActivity = zoom ? 1873 : 183; // ACT_PRIMARY_VM_IDLE : ACT_VM_IDLE
@@ -456,7 +510,7 @@ void SetupZoom(int client, int weapon, bool zoom)
 		return;
 	}
 	
-	bZoom[client] = zoom;
+	player[client].bZoom = zoom;
 	
 	float nextAttack = GetEntDataFloat(weapon, FindSendPropInfo("CBaseCombatWeapon", "m_flNextPrimaryAttack"));
 	if (GetGameTime() > nextAttack)
@@ -477,47 +531,6 @@ bool CanZoom(int weapon)
 	return (StrContains(classname[7], "sniper", false) != -1 || 
 	        StrContains(classname[7], "hunting", false) != -1 || 
 	        StrContains(classname[13], "sg552", false) != -1);
-}
-
-int SelectWeightedSequence(int entity, int activity)
-{
-	static Handle hCall = null;
-	if (hCall == null)
-	{
-		StartPrepSDKCall(SDKCall_Entity);
-		PrepSDKCall_SetVirtual(208 - iOS);
-		PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
-		PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
-		hCall = EndPrepSDKCall();
-	}
-	return SDKCall(hCall, entity, activity);
-}
-
-bool SendWeaponAnim(int weapon, int sequence)
-{
-	static Handle hCall = null;
-	if (hCall == null)
-	{
-		StartPrepSDKCall(SDKCall_Entity);
-		PrepSDKCall_SetVirtual(252 - iOS);
-		PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
-		PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
-		hCall = EndPrepSDKCall();
-	}
-	return SDKCall(hCall, weapon, sequence);
-}
-
-int GetWeaponGunClipSize(int weapon)
-{
-	static Handle hCall = null;
-	if (hCall == null)
-	{
-		StartPrepSDKCall(SDKCall_Entity);
-		PrepSDKCall_SetVirtual(324 - iOS);
-		PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
-		hCall = EndPrepSDKCall();
-	}
-	return SDKCall(hCall, weapon);
 }
 
 int GetPlayerWeapon(int client)
