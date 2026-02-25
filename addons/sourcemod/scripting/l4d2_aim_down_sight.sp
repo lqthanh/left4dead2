@@ -82,10 +82,12 @@ PlayerData
 	player[MAXPLAYERS + 1];
 
 ConVar
+	cvar_ads_debug,
 	cvar_ads_key,
 	cvar_ads_scar_cycletime;
 enum struct GlobalConVar
 {
+	bool ads_debug;
 	int ads_key;
 	float ads_scar_cycletime;
 }
@@ -274,8 +276,10 @@ void LoadWeaponData()
 void LoadConVars()
 {
 	// Create ConVars
+	cvar_ads_debug = 			CreateConVar("ads_debug", "0", "Enable debug messages for ADS plugin");
 	cvar_ads_key = 				CreateConVar("ads_key", "0", "Key to activate ADS. 0 = Zoom key (MOUSE 3), 1 = Walk key (SHIFT), 2 = Duck key (CTRL)");
 	cvar_ads_scar_cycletime = 	CreateConVar("ads_scar_cycletime", "0.12", "Override cycle time for SCAR");
+	cvar_ads_debug.AddChangeHook(OnConVarChanged);
 	cvar_ads_key.AddChangeHook(OnConVarChanged);
 	cvar_ads_scar_cycletime.AddChangeHook(OnConVarChanged);
 	GetConVars();
@@ -284,6 +288,7 @@ void LoadConVars()
 
 void GetConVars()
 {
+	cvar.ads_debug = cvar_ads_debug.BoolValue;
 	cvar.ads_key = cvar_ads_key.IntValue;
 	cvar.ads_scar_cycletime = cvar_ads_scar_cycletime.FloatValue;
 }
@@ -567,17 +572,12 @@ MRESReturn DhookCallback_ItemPostFrame(int weapon)
 			if(cvar.ads_scar_cycletime > 0.0 && StrEqual(player[client].weaponClass, "weapon_rifle_desert"))
 			{
 				nextAttackTime = cvar.ads_scar_cycletime;
-				PrintToServer("[AutoWeapon] Fire (SCAR custom): nextAttack in %.3fs", nextAttackTime);
+				// PrintToServer("[ADS] Fire (SCAR): nextAttack in %.3fs", nextAttackTime);
 			}
 			else if(player[client].cycleTime > 0.0)
 			{
 				nextAttackTime = player[client].cycleTime;
-				PrintToServer("[AutoWeapon] Fire (weapon default): nextAttack in %.3fs (cycleTime: %.3f)", nextAttackTime, player[client].cycleTime);
-			}
-			else
-			{
-				nextAttackTime = 0.1; // Emergency fallback
-				PrintToServer("[AutoWeapon] WARNING: Invalid cycleTime, using fallback 0.1");
+				// PrintToServer("[ADS] Fire (weapon): nextAttack in %.3fs (cycleTime: %.3f)", nextAttackTime, player[client].cycleTime);
 			}
 			
 			player[client].primaryattacktime = currenttime + nextAttackTime;
@@ -588,10 +588,10 @@ MRESReturn DhookCallback_ItemPostFrame(int weapon)
 	int reserverammo = L4D_GetReserveAmmo(client, weapon);
 	
 	// When player presses reload button or auto-reload triggers (empty clip), 
-	// set flag to disable auto mode safely outside of this callback
+	// set flag to disable AdsFix mode safely outside of this callback
 	if( (button & IN_RELOAD) || (clip == 0 && reserverammo > 0 && currenttime > player[client].secondaryattacktime) )
 	{
-		// Set flag to disable auto mode (will be processed in OnPlayerRunCmd)
+		// Set flag to disable AdsFix mode (will be processed in OnPlayerRunCmd)
 		player[client].pendingDisableAdsFix = true;
 		// Reset attack timings to allow normal game reload behavior
 		SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", currenttime);
