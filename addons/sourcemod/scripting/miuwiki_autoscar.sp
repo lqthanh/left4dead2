@@ -251,13 +251,13 @@ public void OnClientPutInServer(int client)
 	if( IsFakeClient(client) )
 		return;
 	
-	SDKHook(client, SDKHook_WeaponSwitchPost, SDKCallback_SwitchDesert);
+	SDKHook(client, SDKHook_WeaponSwitchPost, SDKCallback_WeaponSwitchPost);
 	SDKHook(client, SDKHook_PostThink, SDKCallback_OnClientPostThink);
 }
 
 //Triggered when switching weapons
 //Triggered when scroll wheel or Q switches weapons
-void SDKCallback_SwitchDesert(int client, int weapon)
+void SDKCallback_WeaponSwitchPost(int client, int weapon)
 {
 	if (GetClientTeam(client) != 2) {
 		return;
@@ -459,6 +459,7 @@ public void OnEntityCreated(int entity, const char[] classname)
 {
 	if (!IsValidEntityIndex(entity))
 		return;
+	// g_DynamicHook_ItemPostFrame.HookEntity(Hook_Post, entity, DhookCallback_ItemPostFrame);
 }
 
 // fix that keeping press IN_ATTACK before switch weapon will not fire again after switch complete. 
