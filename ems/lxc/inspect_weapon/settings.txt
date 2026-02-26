@@ -1,0 +1,84 @@
+"Settings"
+{
+	BindKeyboard = 0
+	BindButton = BUTTON_SCORE
+	ButtonMode = 1
+	MultiClick = 2
+	LongPressTime = 1
+	HideCrosshair = 1
+	DisableAutoTriggers = 0
+	DemoMode = 0
+	NoShuffle = 0
+}
+"Animations"
+{
+	[1] = ["ACT_VM_ITEMPICKUP_EXTEND_LAYER", "ACT_VM_ITEMPICKUP_LOOP_LAYER", "ACT_VM_ITEMPICKUP_RETRACT_LAYER"],
+	[2] = ["ACT_VM_HELPINGHAND_EXTEND_LAYER", "ACT_VM_HELPINGHAND_LOOP_LAYER", "ACT_VM_HELPINGHAND_RETRACT_LAYER"],
+}
+"Weapons"
+{
+	pistol = 3
+	pistol_magnum = 3
+	smg = 3
+	smg_silenced = 3
+	shotgun_chrome = 3
+	pumpshotgun = 3
+	rifle = 3
+	rifle_ak47 = 3
+	rifle_desert = 3
+	rifle_sg552 = 3
+	autoshotgun = 3
+	shotgun_spas = 3
+	hunting_rifle = 3
+	sniper_military = 3
+	smg_mp5 = 3
+	sniper_scout = 3
+	sniper_awp = 3
+	grenade_launcher = 3
+	rifle_m60 = 3
+
+	// Melee
+	chainsaw = 3
+	fireaxe = 3
+	frying_pan = 3
+	machete = 3
+	baseball_bat = 3
+	crowbar = 3
+	cricket_bat = 3
+	tonfa = 3
+	katana = 3
+	electric_guitar = 3
+	knife = 3
+	golfclub = 3
+	shovel = 3
+	pitchfork = 3
+	riotshield = 3
+
+	// Custom Melee
+	custom_melee_default = 3
+
+	// Grenade
+	molotov = 3
+	pipe_bomb = 3
+	vomitjar = 3
+
+	// Heal Item
+	first_aid_kit = 3
+	defibrillator = 3
+	adrenaline = 3
+	pain_pills = 3
+
+	// Upgrade Item
+	upgradepack_explosive = 3
+	upgradepack_incendiary = 3
+
+	// Misc
+	gnome = 3
+	gascan = 3
+	cola_bottles = 3
+	oxygentank = 3
+	propanetank = 3
+	fireworkcrate = 3
+}
+
+ 

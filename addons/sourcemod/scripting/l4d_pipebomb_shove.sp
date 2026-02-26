@@ -18,7 +18,7 @@
 
 
 
-#define PLUGIN_VERSION 		"1.17"
+#define PLUGIN_VERSION 		"1.17.LQT"
 
 /*======================================================================================
 	Plugin Info:
@@ -32,7 +32,7 @@
 ========================================================================================
 	Change Log:
 1.17.LQT (24-Jan-2026)
-	- Add #tryinclude <perkmod2> and Native Func to compatible
+	- Add #tryinclude <perkmod2> and Native Func to compatible.
 
 1.17 (21-Mar-2025)
 	- Fixed errors thrown by invalid clients. Thanks to "zuaLdakid05" for reporting.

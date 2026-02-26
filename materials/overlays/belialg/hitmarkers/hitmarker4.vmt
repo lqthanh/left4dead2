@@ -2,4 +2,8 @@
 {
 	"$basetexture" "overlays/belialg/hitmarkers/hitmarker4"
 	"$translucent" 1
+	"$ignorez" 1
+	"$no_fullbright" 1
+	"$vertexalpha" 1
+	"$nofog" 1
 }

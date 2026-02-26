@@ -256,18 +256,33 @@
 		Quick hotfix for Extreme Conditioning not applying sometimes.
 - version 2.2.2
 		Another quick hotfix, this time the ability cooldown perks shouldn't be broken with every patch.
-- version 2.2.3.tlq
-		Change Pyrotechnician: 
-			For a set amount of time, you will be given a ( pipe bomb -> random type )
-			Add Native_Pyro_OnWeaponFire
-		Change Unbreakable: heal full HP
-		Change Little Leaguer: gives a ( baseball bat -> katana )
-		Update Start Menu
+- version 2.2.2.LQT
+		Perks:
+			Change Pyrotechnician: 
+				For a set amount of time, you will be given a ( pipe bomb -> random type )
+			Change Unbreakable: heal full HP
+			Change Little Leaguer: gives a ( baseball bat -> katana )
+		Compatibility:
+			Native:
+				Added Native_Pyro_OnWeaponFire
+		QOL:
+			Fix bug.
+			Update Start Menu.
 
 ==========================================================================
 ========================================================================*/
 
 
+//info
+#define PLUGIN_VERSION "2.2.2.LQT"
+public Plugin:myinfo=
+{
+	name="PerkMod",
+	author="tPoncho",
+	description="Adds Call Of Duty-style perks for L4D",
+	version=PLUGIN_VERSION,
+	url=""
+}
 
 //=============================
 // Start
@@ -277,16 +292,24 @@
 #include <sourcemod>
 #include <sdktools>
 #include <perkmod2>
-#define PLUGIN_VERSION "2.2.3.tlq"
+#tryinclude <l4d_lagged_movement>
 
-//info
-public Plugin:myinfo=
+#if !defined _l4d_lagged_movement_included_
+	native float L4D_LaggedMovement(int client, float value, bool get);
+#endif
+
+bool g_bLaggedMovement;
+public void OnAllPluginsLoaded()
 {
-	name="PerkMod",
-	author="tPoncho",
-	description="Adds Call Of Duty-style perks for L4D",
-	version=PLUGIN_VERSION,
-	url=""
+	g_bLaggedMovement = LibraryExists("LaggedMovement");
+}
+public void OnLibraryAdded(const char[] name)
+{
+	g_bLaggedMovement = LibraryExists("LaggedMovement");
+}
+public void OnLibraryRemoved(const char[] name)
+{
+	g_bLaggedMovement = LibraryExists("LaggedMovement");
 }
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
@@ -7651,6 +7674,7 @@ Pyro_Timer()
 			else if (g_iL4D_12 == 1)
 				iMax = 1;
 
+			// give random grenade type
 			new iI=GetRandomInt(0,iMax);
 			if (iI==0)
 				FakeClientCommand(iCid, "give pipe_bomb");
@@ -12754,7 +12778,7 @@ public Handle:Menu_Sur3Perk (client)
 	{
 		switch (g_iSur3[client])
 		{
-			case 4: st_current="(CURRENT)";
+			case 5: st_current="(CURRENT)";
 			default: st_current="";
 		}
 		Format(st_display,64,"Little Leaguer %s",st_current);

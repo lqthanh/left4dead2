@@ -18,7 +18,7 @@
 
 
 
-#define PLUGIN_VERSION 		"1.9"
+#define PLUGIN_VERSION 		"1.9.LQT"
 
 /*======================================================================================
 	Plugin Info:
@@ -31,7 +31,7 @@
 
 ========================================================================================
 	Change Log:
-1.09.LQT (24-Jan-2026)
+1.9.LQT (24-Jan-2026)
 	- Add #tryinclude <perkmod2> and Native Func to compatible
 
 1.9 (01-Nov-2022)

@@ -12,6 +12,7 @@
 #define HitmarkerOverlay5Vtf "overlays/belialg/hitmarkers/hitmarker4.vtf"
 #define HitmarkerOverlay6Vtf "overlays/belialg/hitmarkers/hitmarker5.vtf"
 #define HitmarkerOverlay7Vtf "overlays/belialg/hitmarkers/hitmarker6.vtf"
+
 #define HitmarkerOverlay1VtfD "materials/overlays/belialg/hitmarkers/hitmarker0.vtf"
 #define HitmarkerOverlay2VtfD "materials/overlays/belialg/hitmarkers/hitmarker1.vtf"
 #define HitmarkerOverlay3VtfD "materials/overlays/belialg/hitmarkers/hitmarker2.vtf"
@@ -19,6 +20,7 @@
 #define HitmarkerOverlay5VtfD "materials/overlays/belialg/hitmarkers/hitmarker4.vtf"
 #define HitmarkerOverlay6VtfD "materials/overlays/belialg/hitmarkers/hitmarker5.vtf"
 #define HitmarkerOverlay7VtfD "materials/overlays/belialg/hitmarkers/hitmarker6.vtf"
+
 #define HitmarkerOverlay1Vmt "materials/overlays/belialg/hitmarkers/hitmarker0.vmt"
 #define HitmarkerOverlay2Vmt "materials/overlays/belialg/hitmarkers/hitmarker1.vmt"
 #define HitmarkerOverlay3Vmt "materials/overlays/belialg/hitmarkers/hitmarker2.vmt"
@@ -26,21 +28,41 @@
 #define HitmarkerOverlay5Vmt "materials/overlays/belialg/hitmarkers/hitmarker4.vmt"
 #define HitmarkerOverlay6Vmt "materials/overlays/belialg/hitmarkers/hitmarker5.vmt"
 #define HitmarkerOverlay7Vmt "materials/overlays/belialg/hitmarkers/hitmarker6.vmt"
-#define HitmarkerSoundEffect "belialg/hm.mp3"
-#define HitmarkerSoundEffectD "sound/belialg/hm.mp3"
+
+#define HitmarkerSoundEffect1 "belialg/hm1.mp3"
+#define HitmarkerSoundEffect2 "belialg/hm2.mp3"
+#define HitmarkerSoundEffect1D "sound/belialg/hm1.mp3"
+#define HitmarkerSoundEffect2D "sound/belialg/hm2.mp3"
+
 #define HitmarkerOverlay "overlays/belialg/hitmarkers/hitmarker"
 
 #pragma newdecls required
 #pragma semicolon 1
+
+#define PLUGIN_VERSION 		"1.0.LQT"
 
 public Plugin myinfo =
 {
 	name			= "Hitmarkers",
 	author			= "Nano",
 	description		= "Show a hitmarker when you shoot enemies/bosses/objects (with sound effect)",
-	version			= "1.1",
-	url				= "https://steamcommunity.com/id/nano2k06/"
+	version			= PLUGIN_VERSION,
+	url				= "https://steamcommunity.com/id/lequangthanh/"
 };
+
+/*======================================================================================
+Change Log:
+
+1.0.LQT (17-Feb-2026)
+	- Implement for L4D2 (L4D untested).
+	- Ignore (DMG_POISON = 131072 = bit 17).
+	- Add (DMG_BURN = 8 = bit 3) toggle option.
+	- Add sound effect select option.
+
+1.0
+	- Initial release.
+
+======================================================================================*/
 
 bool 	g_bEnemies	[MAXPLAYERS+1],
 		g_bObjects	[MAXPLAYERS+1],
@@ -53,10 +75,12 @@ Handle 	g_hEnemiesCookie 	= INVALID_HANDLE,
 		g_hOverlayEnemies 	= INVALID_HANDLE,
 		g_hOverlayObjects 	= INVALID_HANDLE,
 		g_hHasSound 		= INVALID_HANDLE,
+		g_hSoundOption 		= INVALID_HANDLE,
 		g_hDmgBurn 			= INVALID_HANDLE;
 
 int 	g_iOverlayEnemies	[MAXPLAYERS+1],
-		g_iOverlayObjects	[MAXPLAYERS+1];
+		g_iOverlayObjects	[MAXPLAYERS+1],
+		g_iSoundOption		[MAXPLAYERS+1];
 
 ConVar	g_cGlobal, g_cEnemiesGlobal, g_cObjectsGlobal, g_cSoundFXGlobal, 
 		g_cTimerReset, g_cSoundFXVolume, g_cObserver;
@@ -69,6 +93,7 @@ public void OnPluginStart()
 	g_hDmgBurn 				= RegClientCookie("HM Burn Damage", 		"", CookieAccess_Protected);
 	g_hOverlayEnemies 		= RegClientCookie("HM Enemies Overlay",		"", CookieAccess_Protected);
 	g_hOverlayObjects 		= RegClientCookie("HM Objects Overlay", 	"", CookieAccess_Protected);
+	g_hSoundOption 			= RegClientCookie("HM Sound Option", 		"", CookieAccess_Protected);
 	
 	HookEvent("player_hurt", Event_PlayerHurt);
 	HookEvent("infected_hurt", Event_InfectedHurt);
@@ -120,8 +145,6 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
 public void OnMapStart()
 {
-	PrecacheSound(HitmarkerSoundEffect);
-
 	PrecacheModel(HitmarkerOverlay1Vmt);
 	PrecacheModel(HitmarkerOverlay2Vmt);
 	PrecacheModel(HitmarkerOverlay3Vmt);
@@ -130,7 +153,9 @@ public void OnMapStart()
 	PrecacheModel(HitmarkerOverlay6Vmt);
 	PrecacheModel(HitmarkerOverlay7Vmt);
 
-	AddFileToDownloadsTable(HitmarkerSoundEffectD);
+	PrecacheSound(HitmarkerSoundEffect1);
+	PrecacheSound(HitmarkerSoundEffect2);
+
 	AddFileToDownloadsTable(HitmarkerOverlay1VtfD);
 	AddFileToDownloadsTable(HitmarkerOverlay2VtfD);
 	AddFileToDownloadsTable(HitmarkerOverlay3VtfD);
@@ -138,6 +163,7 @@ public void OnMapStart()
 	AddFileToDownloadsTable(HitmarkerOverlay5VtfD);
 	AddFileToDownloadsTable(HitmarkerOverlay6VtfD);
 	AddFileToDownloadsTable(HitmarkerOverlay7VtfD);
+
 	AddFileToDownloadsTable(HitmarkerOverlay1Vmt);
 	AddFileToDownloadsTable(HitmarkerOverlay2Vmt);
 	AddFileToDownloadsTable(HitmarkerOverlay3Vmt);
@@ -145,6 +171,9 @@ public void OnMapStart()
 	AddFileToDownloadsTable(HitmarkerOverlay5Vmt);
 	AddFileToDownloadsTable(HitmarkerOverlay6Vmt);
 	AddFileToDownloadsTable(HitmarkerOverlay7Vmt);
+
+	AddFileToDownloadsTable(HitmarkerSoundEffect1D);
+	AddFileToDownloadsTable(HitmarkerSoundEffect2D);
 }
 
 public void OnPluginEnd()
@@ -197,6 +226,8 @@ void Cleanup(bool bPluginEnd = false)
 			CloseHandle(g_hOverlayEnemies);
 		if (g_hOverlayObjects != INVALID_HANDLE)
 			CloseHandle(g_hOverlayObjects);
+		if (g_hSoundOption != INVALID_HANDLE)
+			CloseHandle(g_hSoundOption);
 	}
 }
 
@@ -221,6 +252,9 @@ void ReadClientCookies(int client)
 	
 	GetClientCookie(client, g_hOverlayObjects, sBuffer, sizeof(sBuffer));
 	g_iOverlayObjects[client] = (sBuffer[0] == '\0' ? 0 : StringToInt(sBuffer));
+	
+	GetClientCookie(client, g_hSoundOption, sBuffer, sizeof(sBuffer));
+	g_iSoundOption[client] = (sBuffer[0] == '\0' ? 0 : StringToInt(sBuffer));
 }
 
 void SetClientCookies(int client)
@@ -244,6 +278,9 @@ void SetClientCookies(int client)
 	
 	Format(sValue, sizeof(sValue), "%i", g_iOverlayObjects[client]);
 	SetClientCookie(client, g_hOverlayObjects, sValue);
+	
+	Format(sValue, sizeof(sValue), "%i", g_iSoundOption[client]);
+	SetClientCookie(client, g_hSoundOption, sValue);
 }
 
 void ShowOverlayEnemies(int client)
@@ -274,7 +311,9 @@ void ShowOverlayEnemies(int client)
 
 		if(g_cSoundFXGlobal.IntValue >= 1)
 		{
-			EmitSoundToClient(i, HitmarkerSoundEffect, SOUND_FROM_PLAYER, SNDCHAN_AUTO, SNDLEVEL_NORMAL, SND_NOFLAGS, GetConVarFloat(g_cSoundFXVolume));
+			char soundPath[64];
+			GetSoundPath(client, soundPath, sizeof(soundPath));
+			EmitSoundToClient(i, soundPath, SOUND_FROM_PLAYER, SNDCHAN_AUTO, SNDLEVEL_NORMAL, SND_NOFLAGS, GetConVarFloat(g_cSoundFXVolume));
 		}
 	}
 }
@@ -307,8 +346,20 @@ void ShowOverlayObjects(int client)
 
 		if(g_cSoundFXGlobal.IntValue >= 1)
 		{
-			EmitSoundToClient(i, HitmarkerSoundEffect, SOUND_FROM_PLAYER, SNDCHAN_AUTO, SNDLEVEL_NORMAL, SND_NOFLAGS, GetConVarFloat(g_cSoundFXVolume));
+			char soundPath[64];
+			GetSoundPath(client, soundPath, sizeof(soundPath));
+			EmitSoundToClient(i, soundPath, SOUND_FROM_PLAYER, SNDCHAN_AUTO, SNDLEVEL_NORMAL, SND_NOFLAGS, GetConVarFloat(g_cSoundFXVolume));
 		}
+	}
+}
+
+void GetSoundPath(int client, char[] buffer, int maxlen)
+{
+	switch(g_iSoundOption[client])
+	{
+		case 0: FormatEx(buffer, maxlen, HitmarkerSoundEffect1);
+		case 1: FormatEx(buffer, maxlen, HitmarkerSoundEffect2);
+		default: FormatEx(buffer, maxlen, HitmarkerSoundEffect1);
 	}
 }
 
@@ -344,6 +395,7 @@ public void HMMenu(int client)
 	AddMenuItem(menu, NULL_STRING, "BurnDamage");
 	AddMenuItem(menu, NULL_STRING, "Overlay1");
 	AddMenuItem(menu, NULL_STRING, "Overlay2");
+	AddMenuItem(menu, NULL_STRING, "SoundOption");
 	AddMenuItem(menu, NULL_STRING, "Exit");
 	DisplayMenu(menu, client, MENU_TIME_FOREVER);
 }
@@ -405,6 +457,18 @@ public int MenuHandler_HMenu(Menu menu, MenuAction action, int client, int param
 					}	
 					CPrintToChat(client, PREFIX, "OVERLAY_2", g_iOverlayObjects[client]);	
 				}	
+				case 6:	
+				{	
+					if(g_iSoundOption[client] >= 1)	
+					{	
+						g_iSoundOption[client] = 0;	
+					}	
+					else	
+					{	
+						g_iSoundOption[client]++;	
+					}	
+					CPrintToChat(client, PREFIX, "OVERLAY_3", g_iSoundOption[client]);	
+				}	
 				default: return 0;	
 			}	
 			DisplayMenu(menu, client, MENU_TIME_FOREVER);	
@@ -439,6 +503,10 @@ public int MenuHandler_HMenu(Menu menu, MenuAction action, int client, int param
 					Format(sBuffer, sizeof(sBuffer), "%t", "LINE_6", g_iOverlayObjects[client]);	
 				}	
 				case 6:	
+				{	
+					Format(sBuffer, sizeof(sBuffer), "%t", "LINE_7", g_iSoundOption[client]);	
+				}	
+				case 7:	
 				{	
 					Format(sBuffer, sizeof(sBuffer), "Exit");	
 				}	
@@ -497,7 +565,9 @@ public void Event_PlayerHurt(Event event, const char[] name, bool dontBroadcast)
 	
 	if(g_cSoundFXGlobal.IntValue >= 1 && g_bHasSound[attacker])
 	{
-		EmitSoundToClient(attacker, HitmarkerSoundEffect, SOUND_FROM_PLAYER, SNDCHAN_AUTO, SNDLEVEL_NORMAL, SND_NOFLAGS, GetConVarFloat(g_cSoundFXVolume));
+		char soundPath[64];
+		GetSoundPath(attacker, soundPath, sizeof(soundPath));
+		EmitSoundToClient(attacker, soundPath, SOUND_FROM_PLAYER, SNDCHAN_AUTO, SNDLEVEL_NORMAL, SND_NOFLAGS, GetConVarFloat(g_cSoundFXVolume));
 	}
 }
 
@@ -531,7 +601,9 @@ public void Event_InfectedHurt(Event event, const char[] name, bool dontBroadcas
 	
 	if(g_cSoundFXGlobal.IntValue >= 1 && g_bHasSound[attacker])
 	{
-		EmitSoundToClient(attacker, HitmarkerSoundEffect, SOUND_FROM_PLAYER, SNDCHAN_AUTO, SNDLEVEL_NORMAL, SND_NOFLAGS, GetConVarFloat(g_cSoundFXVolume));
+		char soundPath[64];
+		GetSoundPath(attacker, soundPath, sizeof(soundPath));
+		EmitSoundToClient(attacker, soundPath, SOUND_FROM_PLAYER, SNDCHAN_AUTO, SNDLEVEL_NORMAL, SND_NOFLAGS, GetConVarFloat(g_cSoundFXVolume));
 	}
 }
 
@@ -550,7 +622,9 @@ public void Hook_OnDamageCounter(const char[] output, int caller, int activator,
 
 	if(g_cSoundFXGlobal.IntValue >= 1 && IsValidSound(activator))
 	{
-		EmitSoundToClient(activator, HitmarkerSoundEffect, SOUND_FROM_PLAYER, SNDCHAN_AUTO, SNDLEVEL_NORMAL, SND_NOFLAGS, GetConVarFloat(g_cSoundFXVolume));
+		char soundPath[64];
+		GetSoundPath(activator, soundPath, sizeof(soundPath));
+		EmitSoundToClient(activator, soundPath, SOUND_FROM_PLAYER, SNDCHAN_AUTO, SNDLEVEL_NORMAL, SND_NOFLAGS, GetConVarFloat(g_cSoundFXVolume));
 	}
 }
 
@@ -569,7 +643,9 @@ public void Hook_OnDamage(const char[] output, int caller, int activator, float 
 
 	if(g_cSoundFXGlobal.IntValue >= 1 && IsValidSound(activator))
 	{
-		EmitSoundToClient(activator, HitmarkerSoundEffect, SOUND_FROM_PLAYER, SNDCHAN_AUTO, SNDLEVEL_NORMAL, SND_NOFLAGS, GetConVarFloat(g_cSoundFXVolume));
+		char soundPath[64];
+		GetSoundPath(activator, soundPath, sizeof(soundPath));
+		EmitSoundToClient(activator, soundPath, SOUND_FROM_PLAYER, SNDCHAN_AUTO, SNDLEVEL_NORMAL, SND_NOFLAGS, GetConVarFloat(g_cSoundFXVolume));
 	}
 }
 

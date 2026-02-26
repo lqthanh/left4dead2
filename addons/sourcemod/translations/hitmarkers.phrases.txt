@@ -54,6 +54,13 @@
 		"es"		"Elegiste el {orange}overlay Nº{1}{default} contra objetos/jefes."
 	}
 
+	"OVERLAY_3"
+	{
+		"#format"	"{1:i}"
+		"en"		"You have chosen hitmarker {orange}sound option Nº{1}."
+		"es"		"Elegiste la {orange}opción de sonido Nº{1}{default}."
+	}
+
 	"LINE_1"
 	{
 		"#format"	"{1:s}"
@@ -93,5 +100,12 @@
 		"#format"	"{1:i}"
 		"en"		"Skin for objects: {1}"
 		"es"		"Hitmarker para objetos: {1}"
+	}
+
+	"LINE_7"
+	{
+		"#format"	"{1:i}"
+		"en"		"Sound option: {1}"
+		"es"		"Opción de sonido: {1}"
 	}
 }
