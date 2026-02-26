@@ -94,6 +94,8 @@ enum struct GlobalConVar
 GlobalConVar
 	cvar;
 
+int currentActivity[MAXPLAYERS + 1];
+
 // #endregion
 // ============================================================================
 
@@ -377,6 +379,29 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 		}
 		player[client].pendingDisableAdsFix = false;
 	}
+
+	if (cvar.ads_debug)
+	{
+		int viewModel = GetEntPropEnt(client, Prop_Send, "m_hViewModel");
+		if (viewModel > 0)
+		{
+			int layerSequence = GetEntProp(viewModel, Prop_Send, "m_nLayerSequence");
+			int activeWeapon = GetPlayerWeapon(client);
+			char weaponClass[64];
+			char activityName[128];
+			
+			if (activeWeapon > 0)
+				GetEntityClassname(activeWeapon, weaponClass, sizeof(weaponClass));
+			else
+				Format(weaponClass, sizeof(weaponClass), "none");
+			
+			// Get real activity name from activity ID
+			GetActivityName(currentActivity[client], activityName, sizeof(activityName));
+			
+			PrintToServer("[ADS DEBUG] Client %N - Activity: %s (%d), m_nLayerSequence: %d, Weapon: %s, ADS: %s", 
+				client, activityName, currentActivity[client], layerSequence, weaponClass, player[client].bZoom ? "ON" : "OFF");
+		}
+	}
 	
 	// Determine which button to check based on ads_key
 	int adsButton;
@@ -555,7 +580,7 @@ MRESReturn DhookCallback_ItemPostFrame(int weapon)
 			SDKCall(g_SDKCall_SecondaryAttack, weapon);
 			player[client].secondaryattacktime = currenttime + DEFAULT_ATTACK2_TIME;
 		}
-		return MRES_Ignored; // ignore in_attack and in_reload when pushing pushing.
+		return MRES_Ignored; // ignore in_attack and in_reload when pushing.
 	}
 
 	if( (button & IN_ATTACK) && CanAttack(client, clip) )
@@ -807,6 +832,33 @@ int GetWeaponClip(int weapon)
 void SetWeaponHelpingHandState(int weapon, int state)
 {
 	SetEntProp(weapon, Prop_Send, "m_helpingHandState", state);
+}
+
+void GetActivityName(int activity, char[] buffer, int maxlen)
+{
+	if (hActivityList == null)
+	{
+		Format(buffer, maxlen, "UNKNOWN");
+		return;
+	}
+	
+	hActivityList.Rewind();
+	if (hActivityList.GotoFirstSubKey(false))
+	{
+		do
+		{
+			if (activity == hActivityList.GetNum(NULL_STRING, 0))
+			{
+				hActivityList.GetSectionName(buffer, maxlen);
+				hActivityList.Rewind();
+				return;
+			}
+		}
+		while (hActivityList.GotoNextKey(false));
+	}
+	
+	hActivityList.Rewind();
+	Format(buffer, maxlen, "UNKNOWN_%d", activity);
 }
 
 // #endregion

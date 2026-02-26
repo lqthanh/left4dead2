@@ -1,0 +1,165 @@
+This is an information file.
+
+"Settings"
+    BindKeyboard = 0
+        0 = disable, 1 = enable & need manual bind, "<key>" = enable & auto bind
+        Binding any keys on the keyboard and mouse, this mode only support single click.
+        You can find some special keys' name in here: https://developer.valvesoftware.com/wiki/Bind#Special_Keys
+        Set the key what you want, need to be enclosed in double quotes, it is best not to use keys that are already used in the game.
+        For example, I want to bind the b key: BindKeyboard = "b"
+        Although the mod will bind the key automatically, but I still recommend using autoexec.cfg.
+        If you only want to do it yourself, please set BindKeyboard = 1
+        Then add the following to Left 4 Dead 2/left4dead2/cfg/autoexec.cfg, after finished, enter exec autoexec in the console.
+            setinfo cmd_inspect 0
+            alias "_inspect" "setinfo cmd_inspect 1; alias _inspect _inspect2"
+            alias "_inspect2" "incrementvar cmd_inspect 1 999999 1"
+            bind "b" "_inspect"
+        P.S. When this mode is enabled, BindButton will be disabled, but other players in the game who not set up will still be able to use it.
+
+    BindButton = BUTTON_RELOAD
+        Press the button(s) play inspect animation, again to end.
+        Attack/shove/reloading/switch weapon and dominated by special infected will interrupt the animation.
+        These button can be detected, for multiple buttons, use + connect them or add the numbers together.
+        Button JUMP/FORWARD/BACK/USE/MOVELEFT/MOVERIGHT not work while incapacitated.
+            BUTTON_JUMP = 2          // Jump (space)
+            BUTTON_DUCK = 4          // Duck (ctrl)
+            BUTTON_FORWARD = 8       // Forward (w)
+            BUTTON_BACK = 16         // Back (s)
+            BUTTON_USE = 32          // Use (e)
+            BUTTON_MOVELEFT = 512    // Move Left (a)
+            BUTTON_MOVERIGHT = 1024  // Move Right (d)
+            BUTTON_RELOAD = 8192     // Reload (r), default set
+            BUTTON_SCORE = 65536     // Scores (tab)
+            BUTTON_WALK = 131072     // Walk (shift)
+            BUTTON_ZOOM = 524288     // Zoom (middle mouse), bad with SG552 and Sniper
+
+    ButtonMode = 1
+        0 = close button detection, can still use command to inspect.
+        1 = click
+        2 = long press
+        3 = click + long press
+
+    MultiClick = 2
+        Detects arbitrary press counts, set to 0 will never trigger.
+
+    LongPressTime = 1
+        Hold the button for a while.
+
+    HideCrosshair = 1
+        0/1 Hide in-game crosshair while playing animation, not work at custom crosshair.
+
+    DisableAutoTriggers = 0
+        0 = close, 1 = look item, 2 = help friend, 3 = both
+        Disable automatic play the looking item and helping hand animations.
+
+    DemoMode = 0
+        0/1 Only play the inspect animations once.
+        Retract animation usually has not aligned with the end of the inspect animation, so it will be a little unsmooth.
+
+    NoShuffle = 0
+        Play the animations listed in "Animations" random or order.
+        0 = random，1 = order，2 = order when DemoMode enabled
+
+    NeedlessFix = 0
+
+"Animations"
+    [1] = ["ACT_VM_ITEMPICKUP_EXTEND_LAYER", "ACT_VM_ITEMPICKUP_LOOP_LAYER", "ACT_VM_ITEMPICKUP_RETRACT_LAYER"],
+    [2] = ["ACT_VM_HELPINGHAND_EXTEND_LAYER", "ACT_VM_HELPINGHAND_LOOP_LAYER", "ACT_VM_HELPINGHAND_RETRACT_LAYER"],
+    Usually custom models replace these animations as inspect animations, the 1st one is looking item animations, and 2nd is helping hand animations.
+    Few weapons use different names, but you don't have to worry about that as long as the model use these animations.
+
+    And new animations
+        In order to easily modify the configuration of each weapon, use 2^n(n >= 0) as the key name in the "Animations" table.
+        If you want to add new animations, best use the ones with "LAYER" suffix.
+        Also use "debug" command to get all animations information, and "play" to test them.
+        Not force to set all animations, only one is ok.
+        If you add two or number greater than two loopable animations, press button will toggle them instead end until the last one played.
+        Be careful not to forget the [] and "", also the final comma.
+        This is an example: [4] = ["ACT_VM_DEPLOY_LAYER", "", ""],
+
+"Weapons"
+    Set playable animations for each weapon, all available by default.
+    The value is the sum of the key name in "Animations" table. 0 = empty, -1 = all animatons.
+    If there are multiple animations, it is can write to 1 + 2 or plus them.
+    Most of custom models may only replace the looking item animations.
+    Except primary/secondary weapons, other items almost have no inspect animations replaced.
+    Some custom maps have new melee weapons, you can add them to the list, weapon's name are same as the 'give' console command shows, or you can use "custom_melee_default" for all custom melee which not added.
+
+    Default values
+        pistol = 3
+        pistol_magnum = 3
+        smg = 3
+        smg_silenced = 3
+        shotgun_chrome = 3
+        pumpshotgun = 3
+        rifle = 3
+        rifle_ak47 = 3
+        rifle_desert = 3
+        rifle_sg552 = 3
+        autoshotgun = 3
+        shotgun_spas = 3
+        hunting_rifle = 3
+        sniper_military = 3
+        smg_mp5 = 3
+        sniper_scout = 3
+        sniper_awp = 3
+        grenade_launcher = 3
+        rifle_m60 = 3
+
+        // Melee
+        chainsaw = 3
+        fireaxe = 3
+        frying_pan = 3
+        machete = 3
+        baseball_bat = 3
+        crowbar = 3
+        cricket_bat = 3
+        tonfa = 3
+        katana = 3
+        electric_guitar = 3
+        knife = 3
+        golfclub = 3
+        shovel = 3
+        pitchfork = 3
+        riotshield = 3
+
+        // Custom Melee
+        custom_melee_default = 3
+
+        // Grenade
+        molotov = 3
+        pipe_bomb = 3
+        vomitjar = 3
+
+        // Heal Item
+        first_aid_kit = 3
+        defibrillator = 3
+        adrenaline = 3
+        pain_pills = 3
+
+        // Upgread Item
+        upgradepack_explosive = 3
+        upgradepack_incendiary = 3
+
+        // Misc
+        gnome = 3
+        gascan = 3
+        cola_bottles = 3
+        oxygentank = 3
+        propanetank = 3
+        fireworkcrate = 3
+
+Chat Commands(use "!iw " as prefix):
+Command    Parameter                        Description
+
+reload                                      when you change files after game started, use it.
+                                            admin only.
+
+debug                                       print animations infomation in console for held weapon.
+                                            admin only.
+
+play       <sequence id|animation name>     play the animation if has.
+                                            example:
+                                            !iw play 15
+
+inspect                                     inspect weapon, as backup method if disable the button mode.

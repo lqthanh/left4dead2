@@ -5,6 +5,9 @@
 !motd.txt
 !index.html
 
+!/ems/
+!/ems/**
+
 !/addons/
 !/addons/**
 
