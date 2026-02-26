@@ -332,6 +332,11 @@ void Event_WeaponDrop(Event event, const char[] name, bool dontBroadcast)
 {
 	int propid = event.GetInt("propid");
 	EntStore[propid] = 0;
+	int owner = GetWeaponOwner(propid);
+	if (owner > 0 && player[owner].bZoom)
+	{
+		ToggleAdsFix(owner, propid, false);
+	}
 }
 
 void Event_RoundStart(Event event, const char[] name, bool dontBroadcast)
