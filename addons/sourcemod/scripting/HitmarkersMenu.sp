@@ -236,13 +236,13 @@ void ReadClientCookies(int client)
 	char sBuffer[4];
 
 	GetClientCookie(client, g_hEnemiesCookie, sBuffer, sizeof(sBuffer));
-	g_bEnemies[client] = sBuffer[0] == '\0' ? true : view_as<bool>(StringToInt(sBuffer));
+	g_bEnemies[client] = sBuffer[0] == '\0' ? false : view_as<bool>(StringToInt(sBuffer));
 
 	GetClientCookie(client, g_hObjectsCookie, sBuffer, sizeof(sBuffer));
-	g_bObjects[client] = sBuffer[0] == '\0' ? true : view_as<bool>(StringToInt(sBuffer));
+	g_bObjects[client] = sBuffer[0] == '\0' ? false : view_as<bool>(StringToInt(sBuffer));
 	
 	GetClientCookie(client, g_hHasSound, sBuffer, sizeof(sBuffer));
-	g_bHasSound[client] = sBuffer[0] == '\0' ? true : view_as<bool>(StringToInt(sBuffer));
+	g_bHasSound[client] = sBuffer[0] == '\0' ? false : view_as<bool>(StringToInt(sBuffer));
 
 	GetClientCookie(client, g_hDmgBurn, sBuffer, sizeof(sBuffer));
 	g_bDmgBurn[client] = sBuffer[0] == '\0' ? false : view_as<bool>(StringToInt(sBuffer));

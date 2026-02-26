@@ -2,7 +2,7 @@
 {
 	BindKeyboard = 0
 	BindButton = BUTTON_SCORE
-	ButtonMode = 1
+	ButtonMode = 2
 	MultiClick = 2
 	LongPressTime = 1
 	HideCrosshair = 1
