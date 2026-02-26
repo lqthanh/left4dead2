@@ -523,6 +523,13 @@ public MRESReturn DH_OnSelectWeightedSequence(int weapon, Handle hReturn, Handle
 		}
 	}
 	
+	if (cvar.ads_debug)
+	{
+		// Track activity for owner
+		if (owner > 0 && owner <= MaxClients)
+			currentActivity[owner] = activity;
+	}
+	
 	// Try custom animation first
 	sequence = GetCustomWeaponAnim(weapon, activity);
 	if (sequence != -1)
