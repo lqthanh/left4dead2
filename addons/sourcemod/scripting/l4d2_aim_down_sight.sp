@@ -332,7 +332,7 @@ void Event_WeaponDrop(Event event, const char[] name, bool dontBroadcast)
 {
 	int propid = event.GetInt("propid");
 	EntStore[propid] = 0;
-	int owner = GetWeaponOwner(propid);
+	int owner = GetClientOfUserId(event.GetInt("userid"));
 	if (owner > 0 && player[owner].bZoom)
 	{
 		ToggleAdsFix(owner, propid, false);
@@ -524,7 +524,6 @@ public MRESReturn DH_OnSelectWeightedSequence(int weapon, Handle hReturn, Handle
 			}
 			if (owner > 0)
 				player[owner].bZoom = false;
-				ToggleAdsFix(owner, weapon, false);
 		}
 	}
 	
