@@ -2293,7 +2293,7 @@ CreateConvars()
 	g_hSur3_default = CreateConVar(
 		"l4d_perkmod_default_survivor3" ,
 		"1" ,
-		"Default selected perk for Survivor, Secondary: 1 = pack rat, 2 = chem reliant, 3 = hard to kill" ,
+		"Default selected perk for Survivor, Tertiary: 1 = pack rat, 2 = chem reliant, 3 = hard to kill" ,
 		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
 	HookConVarChange(g_hSur3_default, Convar_Def_Sur3);
 	g_iSur3_default = 1;
