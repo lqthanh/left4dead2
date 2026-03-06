@@ -333,7 +333,7 @@ void Event_WeaponDrop(Event event, const char[] name, bool dontBroadcast)
 	int propid = event.GetInt("propid");
 	EntStore[propid] = 0;
 	int owner = GetClientOfUserId(event.GetInt("userid"));
-	if (owner > 0 && player[owner].bZoom)
+	if (owner > 0)
 	{
 		ToggleAdsFix(owner, propid, false);
 	}
@@ -915,7 +915,7 @@ void ToggleAdsFix(int client, int weapon, bool enable)
 	
 	if (weapon < 1 || !IsValidEntity(weapon))
 		return;
-
+	
 	SetEntProp(client, Prop_Data, "m_bPredictWeapons", enable ? 0 : 1);
 	
 	if (enable)
