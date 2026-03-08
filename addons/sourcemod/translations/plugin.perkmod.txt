@@ -1,4 +1,4 @@
-"Phrases"
+﻿"Phrases"
 {
 	"WelcomeMessageHint"
 	{
@@ -70,21 +70,6 @@
 		"en"	"A larger mob has been called!"
 	}
 
-	"JuggernautHint"
-	{
-		"en"	"Your health has increased!"
-	}
-
-	"MetabolicHint"
-	{
-		"en"	"Your speed has increased!"
-	}
-
-	"StormCallerHint"
-	{
-		"en"	"a zombie wave has been summoned!"
-	}
-
 	"MapPerksPanel"
 	{
 		"en"	"Your perks for this round"
@@ -148,31 +133,6 @@
 	"MotionSicknessDescriptionPanel"
 	{
 		"en"	"faster run, run while vomiting"
-	}
-
-	"BodySlamDescriptionPanel"
-	{
-		"en"	"minimum pounce damage"
-	}
-
-	"EfficientKillerDescriptionPanel"
-	{
-		"en"	"bonus shred damage"
-	}
-
-	"GrasshopperDescriptionPanel"
-	{
-		"en"	"pounce farther"
-	}
-
-	"OldSchoolDescriptionPanel"
-	{
-		"en"	"bonus claw damage"
-	}
-
-	"StormCallerDescriptionPanel"
-	{
-		"en"	"zombie wave on spawn"
 	}
 
 	"InitialMenuPanel1"
@@ -350,32 +310,12 @@
 		"en"	"more health buffer"
 	}
 
-	"SqueezerDescriptionText"
-	{
-		"en"	"Your tongue deals extra damage while choking"
-	}
-
 	"MartialArtistDescriptionPanelCoop"
 	{
 		"en"	"run faster"
 	}
 
 
-
-	"AdrenalGlandsHint"
-	{
-		"en"	"you can attack faster!"
-	}
-
-	"DoubleTroubleHint1"
-	{
-		"en"	"your health is reduced, and another tank has spawned!"
-	}
-
-	"DoubleTroubleHint2"
-	{
-		"en"	"You have less health, and none of your tank perks will work!"
-	}
 
 	"MartialArtistDescriptionPanel"
 	{
@@ -402,108 +342,10 @@
 		"en"	"survivors lose hud on vomit, shorter cooldown"
 	}
 
-	"TongueTwisterDescriptionPanel"
-	{
-		"en"	"faster and longer tongue"
-	}
-
-	"TongueTwisterDescriptionPanel1"
-	{
-		"en"	"tongue shoots faster"
-	}
-
-	"TongueTwisterDescriptionPanel2"
-	{
-		"en"	"tongue range is extended"
-	}
-
-	"TongueTwisterDescriptionPanel3"
-	{
-		"en"	"tongue pulls faster"
-	}
-
-	"DragAndDropDescriptionPanel"
-	{
-		"en"	"much shorter cooldown and manual release with MELEE button"
-	}
-
-	"SpeedDemonDescriptionPanel"
-	{
-		"en"	"bonus speed"
-	}
-
-	"AdrenalGlandsDescriptionPanelShort"
-	{
-		"en"	"attack faster"
-	}
-
-	"AdrenalGlandsDescriptionPanel1"
-	{
-		"en"	"punch faster"
-	}
-
-	"AdrenalGlandsDescriptionPanel2"
-	{
-		"en"	"throw rocks faster"
-	}
-
-	"AdrenalGlandsDescriptionPanel3"
-	{
-		"en"	"cannot become frustrated"
-	}
-
-	"DoubleTroubleDescriptionPanel"
-	{
-		"en"	"second tank on spawn"
-	}
-
-	"DoubleTroubleDescriptionPanel2"
-	{
-		"en"	"reduced health for both"
-	}
-
-	"RideLikeTheWindDescriptionPanel"
-	{
-		"en"	"ride faster"
-	}
-
-	"FroggerDescriptionPanel"
-	{
-		"en"	"leap distance and"
-	}
-
-	"GhostRiderDescriptionPanel"
-	{
-		"en"	"invisibility"
-	}
-
-	"TwinSpitfireDescriptionPanel"
-	{
-		"en"	"spit twice in a row"
-	}
-
-	"ScatteringRamDescriptionPanel"
-	{
-		"en"	"bonus health and knock survivors farther away"
-	}
-
-	"SpeedingBulletDescriptionPanel"
-	{
-		"en"	"charge faster"
-	}
 	"LittleLeaguerDescriptionPanel"
 	{
 		"en"	"spawn with a katana"
 	}
-	"MegaAdhesiveDescriptionPanel"
-	{
-		"en"	"slows survivors"
-	}
-	"SmokeItDescriptionPanel"
-	{
-		"en"	"can walk while pulling survivors"
-	}
-
 
 
 	"DoubleTapRestrictionWarning"
