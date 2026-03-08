@@ -65,11 +65,6 @@
 		"en"	"gave you bonus temporary health!"
 	}
 
-	"BarfBaggedMobHint"
-	{
-		"en"	"A larger mob has been called!"
-	}
-
 	"MapPerksPanel"
 	{
 		"en"	"Your perks for this round"
@@ -118,21 +113,6 @@
 	"HardToKillDescriptionPanel"
 	{
 		"en"	"more health when incapped"
-	}
-
-	"BarfBaggedDescriptionPanel"
-	{
-		"en"	"vomit attracts more zombies"
-	}
-
-	"DeadWreckeningDescriptionPanel"
-	{
-		"en"	"vomit called zombies do more damage"
-	}
-
-	"MotionSicknessDescriptionPanel"
-	{
-		"en"	"faster run, run while vomiting"
 	}
 
 	"InitialMenuPanel1"
@@ -335,11 +315,6 @@
 	"HelpingHandDescriptionPanel2"
 	{
 		"en"	"revive others faster, give bonus health buffer"
-	}
-
-	"AcidVomitDescriptionPanel"
-	{
-		"en"	"survivors lose hud on vomit, shorter cooldown"
 	}
 
 	"LittleLeaguerDescriptionPanel"

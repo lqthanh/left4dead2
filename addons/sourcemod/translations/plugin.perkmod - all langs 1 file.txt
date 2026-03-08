@@ -130,16 +130,6 @@
 		"fr"	"a vous donne plus de sante temporaire!"
 	}
 
-	"BarfBaggedMobHint"
-	{
-		"en"	"A larger mob has been called!"
-		"de"	"Eine groessere Horde naht!"
-		"it"	"Un'orda piщ grossa sta arrivando!"
-		"da"	"En stшrre hob er blevet tilkaldt!"
-		"ru"	"Большая орда была вызвана!"
-		"fr"	"Plus de zombies viennent!"
-	}
-
 	"MapPerksPanel"
 	{
 		"en"	"Your perks for this round"
@@ -248,37 +238,6 @@
 		"ru"	"Больше хп когда вы лежите"
 		"fr"	"plus de sante quand on tombe"
 	}
-
-	"BarfBaggedDescriptionPanel"
-	{
-		"en"	"vomit attracts more zombies"
-		"de"	"Schleim zieht mehr Zombies an"
-		"it"	"il vomito attrae piщ zombie"
-		"da"	"brжk tilkalder flere zombier"
-		"ru"	"Блевота вызывает больше зомби"
-		"fr"	"vomi appele plus de zombies"
-	}
-
-	"DeadWreckeningDescriptionPanel"
-	{
-		"en"	"vomit called zombies do more damage"
-		"de"	"Schleim-gerufene Zombies schlagen haerter"
-		"it"	"gli zombie richiamati dal vomito fanno piщ danno"
-		"da"	"Zombier tilkaldt ved opkast gшr mere skade"
-		"ru"	"привлеченная орда наносит больше урона"
-		"fr"	"vomi-appele zombies font plus de degats"
-	}
-
-	"MotionSicknessDescriptionPanel"
-	{
-		"en"	"faster run, run while vomiting"
-		"de"	"schneller laufen, im Lauf Kotzen"
-		"it"	"corsa piщ veloce, corsa mentre si vomita"
-		"da"	"lшb hurtigere, lшb mens du kaster op"
-		"ru"	"Более быстрый бег, бег когда блюешь"
-		"fr"	"courir plus vite, courir pendant de vomissement"
-	}
-
 
 	"InitialMenuPanel1"
 	{
@@ -669,16 +628,6 @@
 		"fr"	"donner l'aide plus vite et plus de sante temporaire"
 		"de"	""
 		"da"	""
-	}
-
-	"AcidVomitDescriptionPanel"
-	{
-		"en"	"survivors lose hud on vomit, shorter cooldown"
-		"de"	"Eingeschleimte verlieren ihr HUD, shorter cooldown"
-		"it"	"Ricarica più breve e i bersagli del vomito perdono l'HUD (visione in sovraimpressione)."
-		"da"	"overlevere mister HUD ved opkast, shorter cooldown"
-		"ru"	"Выжившим убирается HUD при заблевывании, перезарядка короче"
-		"fr"	"les survivants deviennent aveugles avec vomi, recharge plus vite"
 	}
 
 	"LittleLeaguerDescriptionPanel"

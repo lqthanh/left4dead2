@@ -308,7 +308,6 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 new g_iSur1[MAXPLAYERS+1];	//survivors, primary
 new g_iSur2[MAXPLAYERS+1];	//survivors, secondary
 new g_iSur3[MAXPLAYERS+1];	//survivors, tertiary
-new g_iInf1[MAXPLAYERS+1];	//boomer
 new g_iConfirm[MAXPLAYERS+1];	//check if perks are confirmed, to prevent mid-game changing abuses
 
 //timer perks handle
@@ -396,32 +395,15 @@ new g_iMAAttCount[MAXPLAYERS+1];
 //ie. when two related events fire at the same time that both trigger PR
 new bool:g_bPRalreadyApplying[MAXPLAYERS+1];
 
-//VARIOUS INFECTED PERKS
-//this is used by most cooldown-reducing SI
-//perks, keeps track of when an ability was used
-new Float:g_flTimeStamp[MAXPLAYERS+1];
 //contains id of target, for given disabler
 new g_iMyDisableTarget[MAXPLAYERS+1];
 //contains id of disabler, for given survivor
 new g_iMyDisabler[MAXPLAYERS+1];
 
-//BARF BAGGED PERK
-//used to track how many survivors are boomed at a given time
-//because spawning a whole mob per player is WAY too many
-//also used indirectly to check if someone is currently vomited on
-new g_iSlimed=0;
-
-//DEAD WRECKENING PERK
-//used to track who vomited on a survivor last
-new g_iSlimerLast=0;
-
 
 //VARS TO STORE CONVAR VALUES
 //declare revive time var
 new Float:g_flReviveTime= -1.0;
-//declare vomit fatigue var
-new Float:g_flVomitFatigue= -1.0;
-
 //OFFSETS
 new g_iHPBuffO			= -1;
 new g_iHPBuffTimeO		= -1;
@@ -438,7 +420,6 @@ new g_iShotRelStateO	= -1;
 new g_iNextAttO			= -1;
 new g_iTimeIdleO		= -1;
 new g_iLaggedMovementO	= -1;
-new g_iAbilityO			= -1;
 new g_iClassO			= -1;
 new g_iVMStartTimeO		= -1;
 new g_iViewModelO		= -1;
@@ -673,36 +654,6 @@ new g_iLittle_enable_sur;
 new g_iLittle_enable_vs;
 
 
-//INF1 (BOOMER) PERKS
-//blind luck, cooldown multiplier
-//one-size-fits-all
-new Handle:g_hBlind_enable;
-new Handle:g_hBlind_cdmult;
-//associated var
-new g_iBlind_enable;
-new Float:g_flBlind_cdmult;
-
-//dead wreckening, damage multiplier
-//one-size-fits-all
-new Handle:g_hDead_enable;
-new Handle:g_hDead_dmgmult;
-//associated var
-new g_iDead_enable;
-new Float:g_flDead_dmgmult;
-
-//barf bagged
-new Handle:g_hBarf_enable;
-new g_iBarf_enable;
-
-//motion sickness
-//one-size-fits-all
-new Handle:g_hMotion_rate;
-new Handle:g_hMotion_enable;
-//associated vars
-new Float:g_flMotion_rate;
-new g_iMotion_enable;
-
-
 //BOT CONTROLLER VARS
 //these track the server's preference
 //for what perks bots should use
@@ -711,8 +662,6 @@ new g_iMotion_enable;
 new Handle:g_hBot_Sur1;
 new Handle:g_hBot_Sur2;
 new Handle:g_hBot_Sur3;
-//boomer
-new Handle:g_hBot_Inf1;
 //DEFAULT PERKS
 //These vars track the server's
 //given default perks, to account
@@ -728,9 +677,6 @@ new g_iSur2_default;
 new Handle:g_hSur3_default;
 new g_iSur3_default;
 
-//inf1/boomer
-new Handle:g_hInf1_default;
-new g_iInf1_default;
 //FORCE RANDOM PERKS
 //tracks server setting for
 //whether to force random perks
@@ -752,11 +698,9 @@ new g_iRandomEnable;
 new Handle:g_hSur1_enable;
 new Handle:g_hSur2_enable;
 new Handle:g_hSur3_enable;
-new Handle:g_hInf1_enable;
 new g_iSur1_enable;
 new g_iSur2_enable;
 new g_iSur3_enable;
-new g_iInf1_enable;
 
 //PERK HIERARCHY AVAILABILITY
 //option for servers to completely
@@ -826,7 +770,6 @@ public OnPluginStart()
 	HookEvent("revive_success", Event_ReviveSuccess);
 	HookEvent("ammo_pickup", Event_AmmoPickup);
 	HookEvent("player_incapacitated", Event_Incap);
-	HookEvent("player_now_it", Event_PlayerNowIt);
 	HookEvent("ability_use", Event_AbilityUsePre, EventHookMode_Pre);
 	HookEvent("tongue_grab", Event_TongueGrabPre, EventHookMode_Pre);
 	HookEvent("tongue_release", Event_TongueRelease);
@@ -865,7 +808,6 @@ public OnPluginStart()
 	//RegConsoleCmd("say_team", Debug_OnSay);
 
 	//init vars
-	g_flVomitFatigue	=	GetConVarFloat(FindConVar("z_vomit_fatigue"));
 	g_flReviveTime		=	GetConVarFloat(FindConVar("survivor_revive_duration"));
 
 	//get offsets
@@ -884,7 +826,6 @@ public OnPluginStart()
 	g_iNextAttO			=	FindSendPropInfo("CTerrorPlayer","m_flNextAttack");
 	g_iTimeIdleO		=	FindSendPropInfo("CTerrorGun","m_flTimeWeaponIdle");
 	g_iLaggedMovementO	=	FindSendPropInfo("CTerrorPlayer","m_flLaggedMovementValue");
-	g_iAbilityO			=	FindSendPropInfo("CTerrorPlayer","m_customAbility");
 	g_iClassO			=	FindSendPropInfo("CTerrorPlayer","m_zombieClass");
 	g_iVMStartTimeO		=	FindSendPropInfo("CTerrorViewModel","m_flLayerStartTime");
 	g_iViewModelO		=	FindSendPropInfo("CTerrorPlayer","m_hViewModel");
@@ -1393,69 +1334,6 @@ CreateConvars()
 
 
 
-	//BOOMER
-	//barf bagged
-	g_hBarf_enable = CreateConVar(
-		"l4d_perkmod_barfbagged_enable" ,
-		"1" ,
-		"Barf Bagged perk: Allows the perk to be chosen by players, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hBarf_enable, Convar_Barf_en);
-	g_iBarf_enable = 1;
-
-	//blind luck
-	g_hBlind_cdmult = CreateConVar(
-		"l4d_perkmod_blindluck_timemultiplier" ,
-		"0.5" ,
-		"Blind Luck perk: Cooldown (default 30s) is multiplied by this value (clamped between 0.01 < 1.0)" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hBlind_cdmult, Convar_Blind);
-	g_flBlind_cdmult = 0.5;
-
-	g_hBlind_enable = CreateConVar(
-		"l4d_perkmod_blindluck_enable" ,
-		"1" ,
-		"Blind Luck perk: Allows the perk to be chosen by players, 0=disabled, 1=enabled (NOTE: This perk normally adjusts the z_vomit_interval ConVar; disabling this perk will stop the plugin from adjusting this ConVar)" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hBlind_enable, Convar_Blind_en);
-	g_iBlind_enable = 1;
-
-	//dead wreckening
-	g_hDead_dmgmult = CreateConVar(
-		"l4d_perkmod_deadwreckening_damagemultiplier" ,
-		"0.5" ,
-		"Dead Wreckening perk: Common infected damage is multiplied by this value and ADDED to their base damage (clamped between 0.01 < 4.0)" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hDead_dmgmult, Convar_Dead);
-	g_flDead_dmgmult = 0.5;
-
-	g_hDead_enable = CreateConVar(
-		"l4d_perkmod_deadwreckening_enable" ,
-		"1" ,
-		"Dead Wreckening perk: Allows the perk to be chosen by players, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hDead_enable, Convar_Dead_en);
-	g_iDead_enable = 1;
-
-	//motion sickness
-	g_hMotion_rate = CreateConVar(
-		"l4d_perkmod_motionsickness_rate" ,
-		"1.25" ,
-		"Motion Sickness perk: Boomer movement is multiplied by this value (clamped between 1.0 < 4.0)" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hMotion_rate, Convar_Motion);
-	g_flMotion_rate = 1.25;
-
-	g_hMotion_enable = CreateConVar(
-		"l4d_perkmod_motionsickness_enable" ,
-		"1" ,
-		"Motion Sickness perk: Allows the perk to be chosen by players, 0=disabled, 1=enabled (NOTE: This perk normally adjusts the z_vomit_fatigue ConVar; disabling this perk will stop the plugin from adjusting this ConVar)" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hMotion_enable, Convar_Motion_en);
-	g_iMotion_enable = 1;
-
-
-
 	//MISC
 	//bot preferences for perks
 	g_hBot_Sur1 = CreateConVar(
@@ -1474,12 +1352,6 @@ CreateConvars()
 		"l4d_perkmod_bot_survivor3" ,
 		"1,2" ,
 		"Bot preferences for Survivor 2 perks: 1 = pack rat, 2 = hard to kill" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-
-	g_hBot_Inf1 = CreateConVar(
-		"l4d_perkmod_bot_boomer" ,
-		"1,2,3" ,
-		"Bot preferences for boomer perks: 1 = barf bagged, 2 = blind luck, 3 = dead wreckening (NOTE: You can select more than one using the format '1,3,4', and the game will randomize between your choices)" ,
 		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
 
 	//default perks
@@ -1507,14 +1379,6 @@ CreateConvars()
 	HookConVarChange(g_hSur3_default, Convar_Def_Sur3);
 	g_iSur3_default = 1;
 
-	g_hInf1_default = CreateConVar(
-		"l4d_perkmod_default_boomer" ,
-		"1" ,
-		"Default selected perk for Boomer: 1 = barf bagged, 2 = blind luck, 3 = dead wreckening" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hInf1_default, Convar_Def_Inf1);
-	g_iInf1_default = 1;
-
 	//enable perk trees
 	//-----------------
 	g_hSur1_enable = CreateConVar(
@@ -1540,14 +1404,6 @@ CreateConvars()
 		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
 	HookConVarChange(g_hSur3_enable, Convar_Sur3_en);
 	g_iSur3_enable = 1;
-
-	g_hInf1_enable = CreateConVar(
-		"l4d_perkmod_perktree_boomer_enable" ,
-		"1" ,
-		"If set to 1, players will be allowed to select perks from the Boomer tree." ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hInf1_enable, Convar_Inf1_en);
-	g_iInf1_enable = 1;
 
 	//perk hierarchy
 	//--------------
@@ -2234,80 +2090,6 @@ public Convar_Little_en_vs (Handle:convar, const String:oldValue[], const String
 	g_iLittle_enable_vs = iI;
 }
 
-//barf bagged
-public Convar_Barf_en (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iBarf_enable = iI;
-}
-
-//blind luck
-public Convar_Blind (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new Float:flF=StringToFloat(newValue);
-	if (flF<0.01)
-		flF=0.01;
-	else if (flF>1.0)
-		flF=1.0;
-	g_flBlind_cdmult = flF;
-}
-
-public Convar_Blind_en (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iBlind_enable = iI;
-}
-
-//dead wreckening
-public Convar_Dead (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new Float:flF=StringToFloat(newValue);
-	if (flF<0.01)
-		flF=0.01;
-	else if (flF>4.0)
-		flF=4.0;
-	g_flDead_dmgmult = flF;
-}
-
-public Convar_Dead_en (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iDead_enable = iI;
-}
-
-//motion sickness
-public Convar_Motion (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new Float:flF=StringToFloat(newValue);
-	if (flF<1.0)
-		flF=1.0;
-	else if (flF>4.0)
-		flF=4.0;
-	g_flMotion_rate = flF;
-}
-
-public Convar_Motion_en (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iMotion_enable = iI;
-}
-
 //default perks
 public Convar_Def_Sur1 (Handle:convar, const String:oldValue[], const String:newValue[])
 {
@@ -2340,17 +2122,6 @@ public Convar_Def_Sur3 (Handle:convar, const String:oldValue[], const String:new
 		iI=3;
 
 	g_iSur3_default=iI;
-}
-
-public Convar_Def_Inf1 (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI<=0)
-		iI=1;
-	else if (iI>3)
-		iI=3;
-
-	g_iInf1_default=iI;
 }
 
 //force random perks
@@ -2415,18 +2186,6 @@ public Convar_Sur3_en (Handle:convar, const String:oldValue[], const String:newV
 	RunChecksAll();
 }
 
-public Convar_Inf1_en (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-
-	g_iInf1_enable=iI;
-	RunChecksAll();
-}
-
 public Convar_InfAll (Handle:convar, const String:oldValue[], const String:newValue[])
 {
 	new iI=StringToInt(newValue);
@@ -2475,7 +2234,6 @@ public Action:Event_PlayerHurtPre (Handle:event, const String:name[], bool:dontB
 
 	if (iVic==0) return Plugin_Continue;
 
-	new iType=GetEventInt(event,"type");
 	new iDmgOrig=GetEventInt(event,"dmg_health");
 
 	//----DEBUG----
@@ -2483,10 +2241,6 @@ public Action:Event_PlayerHurtPre (Handle:event, const String:name[], bool:dontB
 	//GetEventString(event,"weapon",sWeapon,128);
 	//PrintToChatAll("\x03attacker:\x01%i\x03 weapon:\x01%s\x03 type:\x01%i\x03 amount: \x01%i",iAtt,sWeapon,iType,iDmgOrig);
 
-
-	//check for dead wreckening damage add for zombies
-	if (DeadWreckening_DamageAdd(iAtt,iVic,iType,iDmgOrig)==1)
-		return Plugin_Continue;
 
 	if (iAtt==0) return Plugin_Continue;
 
@@ -2538,8 +2292,6 @@ public Event_PlayerRescued (Handle:event, const String:name[], bool:dontBroadcas
 	g_iMyDisabler[iCid] = -1;
 	g_iPIncap[iCid]=0;
 	g_iSpiritCooldown[iCid]=0;
-	//reset var related to blind luck perk
-	SetEntProp(iCid, Prop_Send, "m_iHideHUD", 0);
 	//rebuilds double tap registry
 	CreateTimer(0.3,Delayed_Rebuild,0);
 
@@ -2675,31 +2427,6 @@ public Event_Jump (Handle:event, const String:name[], bool:dontBroadcast)
 	if (iCid==0)
 		return;
 
-}
-
-//on becoming slimed, check if player will lose hud
-public Event_PlayerNowIt (Handle:event, const String:name[], bool:dontBroadcast)
-{
-	new iAtt=GetClientOfUserId(GetEventInt(event,"attacker"));
-	new iVic=GetClientOfUserId(GetEventInt(event,"userid"));
-
-	if (iAtt==0 || iVic==0) return;
-
-	//----DEBUG----
-	//PrintToChatAll("\x03slimed detected, victim/client: \x01%i\x03, attacker: \x01%i",iVic,iAtt);
-
-	//tell plugin another one got slimed (pungent)
-	g_iSlimed++;
-	//update plugin var for who vomited last (dead wreckening)
-	g_iSlimerLast=iAtt;
-
-	//check for blind luck
-	BlindLuck_OnIt(iAtt,iVic);
-
-	//check for barf bagged
-	BarfBagged_OnIt(iAtt);
-
-	CreateTimer(15.0,PlayerNoLongerIt,iVic);
 }
 
 public Action:Event_TongueGrabPre (Handle:event, const String:name[], bool:dontBroadcast)
@@ -2935,22 +2662,6 @@ public Event_PlayerSpawn (Handle:event, const String:name[], bool:dontBroadcast)
 		if ( GetEntProp(iCid,Prop_Data,"m_iHealth") > iMaxHP)
 			SetEntProp(iCid,Prop_Data,"m_iHealth", iMaxHP );
 
-		//set bot perks
-		if (IsFakeClient(iCid)==true)
-		{
-			g_iInf1[iCid] = Bot_Inf1_PickRandom();
-			g_iConfirm[iCid]=1;
-
-			//----DEBUG----
-			//PrintToChatAll("\x03-boomer bot perk \x01%i",g_iInf1[iCid]);
-		}
-
-		//----DEBUG----
-		//PrintToChatAll("\x03spawned boomer \x01%i\x03 health \x01%i\x03, maxhp \x01%i", iCid, GetEntProp(iCid,Prop_Data,"m_iHealth"), iMaxHP );
-
-		Motion_OnSpawn(iCid);
-		BlindLuck_OnSpawn(iCid);
-
 		return;
 	}
 }
@@ -2991,8 +2702,6 @@ public Event_PConnect(Handle:event, const String:name[], bool:dontBroadcast)
 		g_iSur2[iCid] = g_iSur2_default;
 	if (g_iSur3[iCid]==0)
 		g_iSur3[iCid] = g_iSur3_default;
-	if (g_iInf1[iCid]==0)
-		g_iInf1[iCid] = g_iInf1_default;
 	g_iConfirm[iCid]=0;
 	g_iMyDisabler[iCid] = -1;
 	g_iMyDisableTarget[iCid] = -1;
@@ -3019,7 +2728,6 @@ public Event_PDisconnect(Handle:event, const String:name[], bool:dontBroadcast)
 	g_iSur1[iCid]=0;
 	g_iSur2[iCid]=0;
 	g_iSur3[iCid]=0;
-	g_iInf1[iCid]=0;
 	g_iConfirm[iCid]=0;
 	g_iGren[iCid]=0;
 	g_iGrenThrow[iCid]=0;
@@ -3142,23 +2850,8 @@ public Event_RoundStart (Handle:event, const String:name[], bool:dontBroadcast)
 			//show the perk menu if their perks are unconfirmed
 			if (g_iConfirm[iI]==0)
 				CreateTimer(3.0,Timer_ShowTopMenu,iI);
-			//reset var related to blind luck perk
-			//SendConVarValue(iI,hCvar,"0");
-			SetEntProp(iI, Prop_Send, "m_iHideHUD", 0);
 		}
 
-	}
-
-	decl Handle:hCvar;
-
-	//reset vomit vars
-
-	if (g_iInf1_enable==1
-		&& g_iMotion_enable==1)
-	{
-		hCvar=FindConVar("z_vomit_fatigue");
-		ResetConVar(hCvar,false,false);
-		g_flVomitFatigue=GetConVarFloat(hCvar);
 	}
 
 	//reset tongue vars
@@ -3171,9 +2864,6 @@ public Event_RoundStart (Handle:event, const String:name[], bool:dontBroadcast)
 	//recalculate DT and stopping power
 	//permissions on game frame
 	RunChecksAll();
-	//reset boomer vars
-	g_iSlimed		= 0;
-	g_iSlimerLast	= 0;
 
 	//detect gamemode and difficulty
 	new String:stArg[MAXPLAYERS+1];
@@ -3424,23 +3114,8 @@ public OnPluginEnd()
 		{
 			//reset run speeds for martial artist
 			SetEntDataFloat(iI,g_iLaggedMovementO, 1.0 ,true);
-
-			//reset var related to blind luck perk
-			//SendConVarValue(iI,hCvar,"0");
-			SetEntProp(iI, Prop_Send, "m_iHideHUD", 0);
 		}
 
-	}
-
-	decl Handle:hCvar;
-
-	//reset vomit vars
-
-	if (g_iInf1_enable==1
-		&& g_iMotion_enable==1)
-	{
-		hCvar=FindConVar("z_vomit_fatigue");
-		ResetConVar(hCvar,false,false);
 	}
 
 	//reset tongue vars
@@ -3465,229 +3140,7 @@ public OnPluginEnd()
 
 
 
-//=============================
-// Misc. Perk Functions
-//=============================
-
-//This is a recently-added function adapted from the complex function I originally wrote
-//for body slam. Simpler code I wrote for the other infected-to-survivor perks kept
-//inadvertently killing the survivors when they weren't black-and-white... but since
-//body slam never had that problem, I decided to use body slam's code to avoid that
-//problem altogether... hence this giant function. However, since body slam doesn't fire
-//if the original damage exceeds a minimum, it still has its own code.
-InfToSurDamageAdd (any:iVic, any:iDmgAdd, any:iDmgOrig)
-{
-	//don't bother running if client id is zero
-	//since sourcemod is intolerant of local servers
-	//and if damage add is zero... why bother?
-	if (iVic==0 || iDmgAdd<=0) return;
-
-	new iHP=GetEntProp(iVic,Prop_Data,"m_iHealth");
-
-	//CONDITION 1:
-	//HEALTH > DMGADD
-	//-----------------
-	//if health>Min, then run normally
-	//easiest condition, since we can
-	//apply the damage directly to their hp
-	if (iHP>iDmgAdd)
-	{
-		//----DEBUG----
-		//PrintToChatAll("\x03iHP>%i condition",iDmgAdd);
-
-		SetEntProp(iVic,Prop_Data,"m_iHealth", iHP-iDmgAdd );
-
-		//----DEBUG----
-		//PrintToChatAll("\x03-%i bonus damage", iDmgAdd );
-
-		return;
-	}
-
-	//CONDITION 2:
-	//HEALTH <= DMGADD
-	//-----------------
-	//otherwise, we gotta do a bit of work
-	//if survivor's health is
-	//less than or equal to 8
-	else
-	{
-		//----DEBUG----
-		//PrintToChatAll("\x03iHP<=%i condition",iDmgAdd);
-		//PrintToChatAll("\x03-pre-mod iHP: \x01%i",iHP);
-
-		new Float:flHPBuff=GetEntDataFloat(iVic,g_iHPBuffO);
-
-		//CONDITION 2A:
-		//HEALTH <= DMGADD
-		//&& BUFFER > 0
-		//-----------------
-		//if victim has health buffer,
-		//we need to do some extra work
-		//to reduce health buffer as well
-		if (flHPBuff>0)
-		{
-			//----DEBUG----
-			//PrintToChatAll("\x03-flHPBuff>0 condition, pre-mod HPbuffer: \x01%f", flHPBuff);
-
-			//since we know the damage add exceeds
-			//health, we need to take the difference
-			//and apply it to health buffer instead
-
-			//we leave the survivor with 1 health
-			//because the engine will take it away
-			//when it applies the original damage
-			//and we want to avoid strange death behaviour
-			//(which occurs if victim's health falls below 0)
-			new iDmgCount=iHP-1;
-			iDmgAdd-=iDmgCount;
-			SetEntProp(iVic,Prop_Data,"m_iHealth", iHP-iDmgCount );
-
-			//and now we take the remainder of the
-			//damage add and apply it to the health buffer.
-
-			//if damage add is more than health buffer,
-			//set damage add to health buffer amount
-			new iHPBuff=RoundToFloor(flHPBuff);
-			if (iHPBuff<iDmgAdd) iDmgAdd=iHPBuff;
-			//and here we apply the damage to the buffer
-			SetEntDataFloat(iVic,g_iHPBuffO, flHPBuff-iDmgAdd ,true);
-
-			//finally, set the proper value in the event info
-
-			//----DEBUG----
-			//PrintToChatAll("\x03-damage to health: \x01%i\x03, current health: \x01%i",iDmgCount,GetEntProp(iVic,Prop_Data,"m_iHealth"));
-			//PrintToChatAll("\x03-damage to buffer: \x01%i\x03, current buffer: \x01%f",iDmgAdd,GetEntDataFloat(iVic,g_iHPBuffO));
-
-			return;
-		}
-
-		//CONDITION 2B:
-		//HEALTH <= DMGADD
-		//&& BUFFER <= 0
-		//-----------------
-		//without health buffer, it's straightforward
-		//since we just need to apply however much
-		//of the damage add we can to the victim's health
-		else
-		{
-			//----DEBUG----
-			//PrintToChatAll("\x03no temp hp condition");
-
-			//if original damage exceeds health,
-			//just skip the rest since there's no
-			//health buffer to worry about,
-			//and the engine will incap or kill
-			//the survivor anyways with the base damage
-			if (iDmgOrig>=iHP) return;
-
-			//to prevent strange death behaviour,
-			//reduce damage add to less than that
-			//of remaining health if necessary
-			if (iDmgAdd>=iHP) iDmgAdd=iHP-1;
-			//and if this puts it below 0, just skip everything
-			if (iDmgAdd<0) return;
-
-			SetEntProp(iVic,Prop_Data,"m_iHealth", iHP-iDmgAdd );
-
-			//----DEBUG----
-			//PrintToChatAll("\x03-%i bonus damage", iDmgAdd );
-
-			return;
-		}
-	}
-}
-
-
-
-//just because Sourcemod's RoundToCeil and RoundToFloor functions are
-//currently unreliable, I've just written my own workable version
-//returns the damage add, randomly picks between higher and lower rounded value
-DamageAddRound (iDmgOrig, Float:flDmgMult)
-{
-	//calculate the damage add
-	decl iDmgAdd;
-	new Float:flDmg = iDmgOrig * flDmgMult;
-	new iDmgRound = RoundToNearest(flDmg);
-
-	//----DEBUG----
-	//PrintToChatAll("\x03- fldmg \x01%f\x03 idmground \x01%i",flDmg,iDmgRound);
-
-	//if rounding error can occur...
-	new Float:flDmgDiff = iDmgRound - flDmg;
-	//check if the rounded value is different from the actual value
-	if ( flDmgDiff != 0 )
-	{
-		//if it is, check if we had rounded up
-		if (flDmgDiff > 0)
-		{
-			//if it was rounded up, then randomize between the upper and lower value
-			//and weigh it by each 0.1 amount the rounded value was off by
-			if (GetRandomInt(1,10) <= (flDmgDiff * 10) )
-				//since we rounded up earlier, just set dmgadd to rounded value
-				iDmgAdd = iDmgRound;
-			//otherwise, set the damage add to the rounded value minus 1
-			else
-				iDmgAdd = iDmgRound - 1;
-		}
-		//the other case is if we rounded down
-		else
-		{
-			//same as above, except multiply it by a negative number to get the abs value
-			if (GetRandomInt(1,10) <= (flDmgDiff * (-10)) )
-				//since we rounded down earlier, set dmgadd to rounded value plus 1
-				iDmgAdd = iDmgRound + 1;
-			//otherwise, set the damage add to the rounded value
-			else
-				iDmgAdd = iDmgRound;
-		}
-	}
-
-	//if the bonus damage is a clean integer value...
-	else
-	{
-		//just use the value without further fussing
-		iDmgAdd = iDmgRound;
-	}
-
-
-
-	//stop if damage add is <= 0
-	if (iDmgAdd <= 0)
-		return 0;
-
-	//----DEBUG----
-	//PrintToChatAll("\x03- idmgadd \x01%i\x03, idmgorig \x01%i", iDmgAdd, iDmgOrig );
-
-	return iDmgAdd;
-}
-
 //on drying from slime, remove hud changes
-//and lower count of people slimed (pungent)
-public Action:PlayerNoLongerIt (Handle:timer, any:iCid)
-{
-	KillTimer(timer);
-	if (IsServerProcessing()==false)
-		return Plugin_Stop;
-
-	if (IsClientInGame(iCid)==true
-		&& IsFakeClient(iCid)==false)
-		SetEntProp(iCid, Prop_Send, "m_iHideHUD", 0);
-		//SendConVarValue(iCid,FindConVar("sv_cheats"),"0");
-
-	//----DEBUG----
-	//PrintToChatAll("\x03client \x01%i\x03 no longer it \n attempting to restore hud",iCid);
-	//PrintToChatAll("\x03old g_iSlimed: \x01%i",g_iSlimed);
-
-	if (g_iSlimed>4) g_iSlimed=3;
-	else if (g_iSlimed<0) g_iSlimed=0;
-	else g_iSlimed--;
-
-	//----DEBUG----
-	//PrintToChatAll("\x03new g_iSlimed: \x01%i",g_iSlimed);
-
-	return Plugin_Stop;
-}
-
 RunChecksAll ()
 {
 	if (g_bIsLoading == true
@@ -3947,43 +3400,6 @@ AssignRandomPerks (iCid)
 		g_iSur3[iCid] = iPerkType[ GetRandomInt(1,iPerkCount) ];
 
 
-	//INF1 (BOOMER) PERK
-	//------------------
-	iPerkCount=0;
-
-	//1 barf bagged
-	if (g_iBarf_enable==1)
-	{
-		iPerkCount++;
-		iPerkType[iPerkCount]=1;
-	}
-
-	//2 blind luck
-	if (g_iBlind_enable==1)
-	{
-		iPerkCount++;
-		iPerkType[iPerkCount]=2;
-	}
-
-	//3 dead wreckening
-	if (g_iDead_enable==1)
-	{
-		iPerkCount++;
-		iPerkType[iPerkCount]=3;
-	}
-
-	//4 motion sickness
-	if (g_iMotion_enable==1)
-	{
-		iPerkCount++;
-		iPerkType[iPerkCount]=4;
-	}
-
-	//randomize a perk
-	if (iPerkCount>0)
-		g_iInf1[iCid] = iPerkType[ GetRandomInt(1,iPerkCount) ];
-
-
 	//finally, confirm perks
 	//and run the necessary functions
 	//as if the player had confirmed
@@ -4139,73 +3555,6 @@ Bot_Sur3_PickRandom ()
 		return iPerkType[ GetRandomInt(1,iPerkCount) ];
 	else
 		return 0;
-}
-
-Bot_Inf1_PickRandom ()
-{
-	//stop if boomer perks are disabled
-	if (g_iInf1_enable==0)
-		return 0;
-
-	//----DEBUG----
-	//PrintToChatAll("\x03begin random perk for boomer");
-
-	new iPerkType[12];
-	new iPerkCount=0;
-
-	decl String:stPerk[24];
-	if (g_hBot_Inf1 != INVALID_HANDLE)
-		GetConVarString(g_hBot_Inf1,stPerk,24);
-	else
-		stPerk = "1,2,3";
-
-	//----DEBUG----
-	//PrintToChatAll("\x03-stPerk: \x01%s",stPerk);
-
-	//barf bagged
-	if (StrContains(stPerk,"1",false) != -1
-		&& g_iBarf_enable==1)
-	{
-		iPerkCount++;
-		iPerkType[iPerkCount]=1;
-
-		//----DEBUG----
-		//PrintToChatAll("\x03-count \x01%i\x03, type \x01%i",iPerkCount,iPerkType[iPerkCount]);
-	}
-
-	//blind luck
-	if (StrContains(stPerk,"2",false) != -1
-		&& g_iBlind_enable==1)
-	{
-		iPerkCount++;
-		iPerkType[iPerkCount]=2;
-
-		//----DEBUG----
-		//PrintToChatAll("\x03-count \x01%i\x03, type \x01%i",iPerkCount,iPerkType[iPerkCount]);
-	}
-
-	//dead wreckening
-	if (StrContains(stPerk,"3",false) != -1
-		&& g_iDead_enable==1)
-	{
-		iPerkCount++;
-		iPerkType[iPerkCount]=3;
-
-		//----DEBUG----
-		//PrintToChatAll("\x03-count \x01%i\x03, type \x01%i",iPerkCount,iPerkType[iPerkCount]);
-	}
-
-	//randomize
-	decl iReturn;
-	if (iPerkCount>0)
-		iReturn = iPerkType[ GetRandomInt(1,iPerkCount) ];
-	else
-		iReturn = 0;
-
-	//----DEBUG----
-	//PrintToChatAll("\x03-returning \x01%i",iReturn);
-
-	return iReturn;
 }
 
 //=============================
@@ -6801,229 +6150,6 @@ Extreme_Rebuild ()
 }
 
 
-
-
-//=============================
-// Inf1: Blind Luck
-//=============================
-
-BlindLuck_OnIt (iAtt, iVic)
-{
-	//don't blind bots as per grandwaziri's plugin, they suck enough anyways
-	if (g_iInf1[iAtt]==2
-		&& g_iConfirm[iAtt]==1
-		&& IsFakeClient(iVic)==false)
-	{
-		//check if perk is enabled
-		if (g_iInf1_enable==0
-			|| g_iBlind_enable==0)
-			return;
-
-		SetEntProp(iVic, Prop_Send, "m_iHideHUD", 64);
-
-		//----DEBUG----
-		//PrintToChatAll("\x03-attempting to hide hud");
-	}
-	return;
-}
-
-BlindLuck_OnSpawn (iCid)
-{
-	//stop if convar changes are disallowed for this perk
-	if (g_iBlind_enable==0
-		|| g_iInf1_enable==0)
-		return 0;
-
-	if (g_iInf1[iCid]==2)
-	{
-		//----DEBUG----
-		//PrintToChatAll("\x05drag\x03 creating timer");
-
-		CreateTimer(1.0,Timer_BlindLuckChecks,iCid,TIMER_REPEAT);
-	}
-	
-	return 0;
-}
-
-public Action:Timer_BlindLuckChecks (Handle:timer, any:iCid)
-{
-	//INITIAL CHECKS
-	//--------------
-	if (IsServerProcessing()==false
-		|| iCid <= 0
-		|| IsClientInGame(iCid)==false
-		|| IsPlayerAlive(iCid)==false
-		|| GetEntData(iCid, g_iClassO)!=2)
-	{
-		//----DEBUG----
-		//if (IsServerProcessing()==false)			PrintToChatAll("\x03- server not processing, stopping");
-		//else if (iCid <= 0)							PrintToChatAll("\x03- icid <= 0, stopping, client id \x01%i", iCid);
-		//else if (IsClientInGame(iCid)==false)		PrintToChatAll("\x03- client not in game, stopping");
-		//else if (IsPlayerAlive(iCid)==false)		PrintToChatAll("\x03- client not alive, stopping");
-		//else if (GetEntData(iCid, g_iClassO)!=1)	PrintToChatAll("\x03- class not correct, stopping, class id \x01%i", GetEntData(iCid, g_iClassO));
-
-		KillTimer(timer);
-		return Plugin_Stop;
-	}
-
-	//----DEBUG----
-	//PrintToChatAll("\x03- \x05blind luck \x03 tick");
-
-	//RETRIEVE VARIABLES
-	//------------------
-	//get the ability ent id
-	new iEntid = GetEntDataEnt2(iCid,g_iAbilityO);
-	//if the retrieved gun id is -1, then move on
-	if (iEntid == -1)
-	{
-		//----DEBUG----
-		//PrintToChatAll("\x03- ientid == -1, stopping");
-
-		KillTimer(timer);
-		return Plugin_Stop;
-	}
-	//retrieve the next act time
-	//new Float:flDuration_ret = GetEntDataFloat(iEntid,g_iNextActO+4);
-
-	//----DEBUG----
-	//if (g_iShow==1)
-	//	PrintToChatAll("\x03- actsuppress dur \x01 %f\x03 timestamp \x01%f", GetEntDataFloat(iEntid, g_iSuppressO+4), GetEntDataFloat(iEntid, g_iSuppressO+8) );
-
-
-
-
-	//CHECK 1: AFTER ADJUSTED SHOT IS MADE
-	//------------------------------------
-	//at this point, either a gun was swapped, or
-	//the attack time needs to be adjusted
-	//also, only change timer if it's the first shot
-
-	//retrieve current timestamp
-	new Float:flTimeStamp_ret = GetEntDataFloat(iEntid,g_iNextActO+8);
-
-	if (g_flTimeStamp[iCid] < flTimeStamp_ret)
-	{
-		//----DEBUG----
-		//PrintToChatAll("\x05BlindLuck:\x03 after adjusted shot\n-pre, client \x01%i\x03; entid \x01%i\x03; enginetime\x01 %f\x03; nextactivation: dur \x01 %f\x03 timestamp \x01%f",iCid,iEntid,GetGameTime(),GetEntDataFloat(iEntid, g_iNextActO+4), GetEntDataFloat(iEntid, g_iNextActO+8) );
-
-		//update the timestamp stored in plugin
-		g_flTimeStamp[iCid] = flTimeStamp_ret;
-
-		//this calculates the time that the player theoretically
-		//should have used his ability in order to use it
-		//with the shortened cooldown
-		//FOR EXAMPLE:
-		//vomit, normal cooldown 30s, desired cooldown 6s
-		//player uses it at T = 1:30
-		//normally, game predicts it to be ready at T + 30s
-		//so if we modify T to 1:06, it will be ready at 1:36
-		//which is 6s after the player used the ability
-		new Float:flTimeStamp_calc = flTimeStamp_ret - (GetConVarFloat(FindConVar("z_vomit_interval")) * (1 - g_flBlind_cdmult) );
-		SetEntDataFloat(iEntid, g_iNextActO+8, flTimeStamp_calc, true);
-
-		//----DEBUG----
-		//PrintToChatAll("\x03-post, nextactivation dur \x01 %f\x03 timestamp \x01%f", GetEntDataFloat(iEntid, g_iNextActO+4), GetEntDataFloat(iEntid, g_iNextActO+8) );
-	}
-
-	return Plugin_Continue;
-}
-
-
-
-//=============================
-// Inf1: Barf Bagged
-//=============================
-
-BarfBagged_OnIt (iAtt)
-{
-	//only spawn a mob if one guy got slimed
-	//or if all four got slimed (max 2 extra mobs)
-	if (g_iInf1[iAtt]==1
-		&& g_iConfirm[iAtt]==1
-		&& (g_iSlimed==1 || g_iSlimed==4)
-		&& GetClientTeam(iAtt) == 3)
-	{
-		//check if perk is enabled
-		if (g_iInf1_enable==0
-			|| g_iBarf_enable==0)
-			return 0;
-
-		//----DEBUG----
-		//PrintToChatAll("\x03-attempting to spawn a mob, g_iSlimed=\x01%i",g_iSlimed);
-
-		new iflags=GetCommandFlags("z_spawn");
-		SetCommandFlags("z_spawn", iflags & ~FCVAR_CHEAT);
-		FakeClientCommand(iAtt,"z_spawn mob auto");
-		SetCommandFlags("z_spawn", iflags);
-
-		if (g_iSlimed==4) PrintHintText(iAtt,"Barf Bagged! %t", "BarfBaggedMobHint");
-	}
-	return 0;
-}
-
-
-
-//=============================
-// Inf1: Dead Wreckening
-//=============================
-
-//damage add
-DeadWreckening_DamageAdd (iAtt, iVic, iType, iDmgOrig)
-{
-	if (iAtt==0
-		&& iType==128
-		&& g_iSlimed>0
-		&& g_iConfirm[g_iSlimerLast]==1
-		&& g_iInf1[g_iSlimerLast]==3)
-	{
-		//check if perk is enabled
-		if (g_iInf1_enable==0
-			|| g_iDead_enable==0)
-			return 1;
-
-		//----DEBUG----
-		//PrintToChatAll("\x03dead wreckening fire");
-
-		new iDmgAdd = DamageAddRound (iDmgOrig, g_flDead_dmgmult);
-
-		if (iDmgAdd==0)
-			return 0;
-
-		InfToSurDamageAdd(iVic, iDmgAdd ,iDmgOrig);
-		
-		return 1;
-	}
-	return 0;
-}
-
-
-
-//=============================
-// Inf1: Motion Sickness
-//=============================
-
-Motion_OnSpawn (iCid)
-{
-	//stop here if the perk is disabled
-	if (g_iMotion_enable==0
-		|| g_iInf1_enable==0)
-		return 0;
-
-	//check for motion sickness
-	if (g_iInf1[iCid]==4
-		&& g_iConfirm[iCid]==1)
-	{
-		SetConVarFloat(FindConVar("z_vomit_fatigue"),0.0,false,false);
-		SetEntDataFloat(iCid,g_iLaggedMovementO, 1.0*g_flMotion_rate ,true);
-	}
-	else
-		SetConVarFloat(FindConVar("z_vomit_fatigue"), g_flVomitFatigue ,false,false);
-
-	return 0;
-}
-
-
-
 //====================================================
 //====================================================
 //					M	E	N	U
@@ -7358,32 +6484,6 @@ public Handle:Menu_Top_Inf (iCid)
 	new Handle:menu = CreatePanel();
 	SetPanelTitle(menu, "tPoncho's Perkmod - Main Menu");
 	DrawPanelText(menu,"Select a submenu to choose a perk");
-	decl String:st_perk[32];
-	decl String:st_display[MAXPLAYERS+1];
-	decl iPerk;
-
-	//set name for inf1 perk
-	iPerk = g_iInf1[iCid];
-	if (iPerk==1
-		&& g_iBarf_enable==1)
-		st_perk="Barf Bagged";
-	else if (iPerk==2
-		&& g_iBlind_enable==1)
-		st_perk="Blind Luck";
-	else if (iPerk==3
-		&& g_iDead_enable==1)
-		st_perk="Dead Wreckening";
-	else if (iPerk==4
-		&& g_iMotion_enable==1)
-		st_perk="Motion Sickness";
-	else
-		st_perk="Not set";
-
-	Format(st_display,64,"Boomer (%s)", st_perk);
-	if (g_iInf1_enable==1)
-		DrawPanelItem(menu,st_display);
-	else
-		DrawPanelItem(menu,st_display, ITEMDRAW_NOTEXT);
 
 	DrawPanelText(menu,"In order for your perks to work");
 	DrawPanelText(menu,"you MUST hit 'done'");
@@ -7399,8 +6499,6 @@ public Menu_ChooseSubMenu_Inf (Handle:topmenu, MenuAction:action, param1, param2
 	{
 		switch(param2)
 		{
-			case 1:
-				SendPanelToClient(Menu_Inf1Perk(param1),param1,Menu_ChooseInf1Perk,MENU_TIME_FOREVER);
 			case 8:
 				SendPanelToClient(Menu_Confirm(param1),param1,Menu_ChooseConfirm_Inf,MENU_TIME_FOREVER);
 			default:
@@ -7652,47 +6750,6 @@ public Handle:Menu_ShowChoices_Inf (iCid)
 {
 	new Handle:menu=CreatePanel();
 	SetPanelTitle(menu,"tPoncho's Perkmod: Your perks for this round");
-	decl String:st_perk[128];
-	decl String:stDesc[128];
-	decl iPerk;
-
-	//show inf1 perk
-	iPerk = g_iInf1[iCid];
-	if (iPerk == 1
-		&& g_iBarf_enable == 1)
-	{
-		st_perk="Boomer: Barf Bagged";
-		Format(stDesc,128,"%t", "BarfBaggedDescriptionPanel");
-	}
-	else if (iPerk == 2
-		&& g_iBlind_enable == 1)
-	{
-		st_perk="Boomer: Blind Luck";
-		Format(stDesc,128,"%t", "AcidVomitDescriptionPanel");
-	}
-	else if (iPerk == 3
-		&& g_iDead_enable == 1)
-	{
-		st_perk="Boomer: Dead Wreckening";
-		Format(stDesc,128,"%t: +%i%%", "DeadWreckeningDescriptionPanel", RoundToNearest(100*g_flDead_dmgmult));
-	}
-	else if (iPerk == 4
-		&& g_iMotion_enable == 1)
-	{
-		st_perk="Boomer: Motion Sickness";
-		Format(stDesc,128,"%t", "MotionSicknessDescriptionPanel");
-	}
-	else
-	{
-		Format(st_perk,128,"Boomer: %t", "NotSet");
-		stDesc = "";
-	}
-
-	if (g_iInf1_enable==1)
-	{
-		DrawPanelItem(menu,st_perk);
-		DrawPanelText(menu,stDesc);
-	}
 
 	return menu;
 }
@@ -8138,124 +7195,6 @@ public Menu_ChooseSur3Perk (Handle:menu, MenuAction:action, param1, param2)
 
 	if (IsClientInGame(param1)==true)
 		SendPanelToClient(Menu_Top(param1),param1,Menu_ChooseSubMenu,MENU_TIME_FOREVER);
-}
-
-
-
-//=============================
-//	INF1 CHOICE (BOOMER)
-//=============================
-
-//build menu for Inf1 Perks
-public Handle:Menu_Inf1Perk (client)
-{
-	new Handle:menu = CreatePanel();
-	SetPanelTitle(menu, "tPoncho's Perkmod - Boomer");
-	decl String:st_display[128];
-	decl String:st_current[10];
-
-	//set name for perk 1
-	if (g_iBarf_enable==0)
-	{
-		DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
-	}
-	else
-	{
-		switch (g_iInf1[client])
-		{
-			case 1: st_current="(CURRENT)";
-			default: st_current="";
-		}
-		Format(st_display,64,"Barf Bagged %s",st_current);
-		DrawPanelItem(menu,st_display);
-		Format(st_display,128,"%t", "BarfBaggedDescriptionPanel");
-		DrawPanelText(menu,st_display);
-	}
-
-	//set name for perk 2
-	if (g_iBlind_enable==0)
-	{
-		DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
-	}
-	else
-	{
-		switch (g_iInf1[client])
-		{
-			case 2: st_current="(CURRENT)";
-			default: st_current="";
-		}
-		Format(st_display,64,"Blind Luck %s",st_current);
-		DrawPanelItem(menu,st_display);
-		Format(st_display,128,"%t: %i%%", "AcidVomitDescriptionPanel", RoundToNearest(100 - g_flBlind_cdmult*100) );
-		DrawPanelText(menu,st_display);
-		DrawPanelText(menu,"(thanks to Grandwazir for this perk!)");
-	}
-
-	//set name for perk 3
-	if (g_iDead_enable==0)
-	{
-		DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
-	}
-	else
-	{
-		switch (g_iInf1[client])
-		{
-			case 3: st_current="(CURRENT)";
-			default: st_current="";
-		}
-		Format(st_display,64,"Dead Wreckening %s",st_current);
-		DrawPanelItem(menu,st_display);
-		Format(st_display,128,"%t: +%i%%", "DeadWreckeningDescriptionPanel", RoundToNearest(100*g_flDead_dmgmult));
-		DrawPanelText(menu,st_display);
-		DrawPanelText(menu,"survivors are vomited upon");
-	}
-
-	//set name for perk 4
-	if (g_iMotion_enable==0)
-	{
-		DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
-	}
-	else
-	{
-		switch (g_iInf1[client])
-		{
-			case 4: st_current="(CURRENT)";
-			default: st_current="";
-		}
-		Format(st_display,64,"Motion Sickness %s",st_current);
-		DrawPanelItem(menu,st_display);
-		Format(st_display,128,"%t", "MotionSicknessDescriptionPanel");
-		DrawPanelText(menu,st_display);
-	}
-
-	return menu;
-}
-
-//setting Inf1 perk and returning to top menu
-public Menu_ChooseInf1Perk (Handle:menu, MenuAction:action, param1, param2)
-{
-	if (menu!=INVALID_HANDLE) CloseHandle(menu);
-	if (action==MenuAction_Select)
-	{
-		switch(param2)
-		{
-			//barf bagged
-			case 1:
-				g_iInf1[param1]=1;
-			//blind luck
-			case 2:
-				g_iInf1[param1]=2;
-			//dead wreckening
-			case 3:
-				g_iInf1[param1]=3;
-			//motion sickness
-			case 4:
-				g_iInf1[param1]=4;
-		}
-	}
-
-	if (IsClientInGame(param1)==true)
-		SendPanelToClient(Menu_Top_Inf(param1),param1,Menu_ChooseSubMenu_Inf,MENU_TIME_FOREVER);
 }
 
 
