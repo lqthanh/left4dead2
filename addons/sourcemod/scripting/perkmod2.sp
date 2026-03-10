@@ -1290,13 +1290,13 @@ CreateConvars()
 	g_hBot_Sur2 = CreateConVar(
 		"l4d_perkmod_bot_survivor2" ,
 		"1,2,3" ,
-		"Bot preferences for Survivor 2 perks: 1 = unbreakable, 2 = spirit, 3 = helping hand, 4 = martial artist" ,
+		"Bot preferences for Survivor 2 perks: 1 = unbreakable, 2 = spirit, 3 = helping hand" ,
 		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
 
 	g_hBot_Sur3 = CreateConVar(
 		"l4d_perkmod_bot_survivor3" ,
-		"1,2" ,
-		"Bot preferences for Survivor 3 perks: 1 = pack rat, 2 = hard to kill" ,
+		"1,3" ,
+		"Bot preferences for Survivor 3 perks: 1 = pack rat, 3 = hard to kill" ,
 		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
 
 	//default perks
@@ -3371,14 +3371,6 @@ Bot_Sur2_PickRandom ()
 		iPerkType[iPerkCount]=3;
 	}
 
-	//martial artist
-	if (StrContains(stPerk,"4",false) != -1
-		&& g_iMA_enable==1)
-	{
-		iPerkCount++;
-		iPerkType[iPerkCount]=4;
-	}
-
 	//randomize
 	if (iPerkCount>0)
 		return iPerkType[ GetRandomInt(1,iPerkCount) ];
@@ -3388,7 +3380,7 @@ Bot_Sur2_PickRandom ()
 
 Bot_Sur3_PickRandom ()
 {
-	//stop if sur2 perks are disabled
+	//stop if sur3 perks are disabled
 	if (g_iSur3_enable==0)
 		return 0;
 
@@ -3399,7 +3391,7 @@ Bot_Sur3_PickRandom ()
 	if (g_hBot_Sur3 != INVALID_HANDLE)
 		GetConVarString(g_hBot_Sur3,stPerk,24);
 	else
-		stPerk = "1,2";
+		stPerk = "1,3";
 
 	//pack rat
 	if (StrContains(stPerk,"1",false) != -1
@@ -3410,7 +3402,7 @@ Bot_Sur3_PickRandom ()
 	}
 
 	//hard to kill
-	if (StrContains(stPerk,"2",false) != -1
+	if (StrContains(stPerk,"3",false) != -1
 		&& g_iHard_enable==1)
 	{
 		iPerkCount++;
