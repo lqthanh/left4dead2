@@ -1,3 +1,6 @@
+// =======================================================================
+// #region Information
+
 /*========================================================================
 ==========================================================================
 
@@ -264,7 +267,7 @@
 			Fix, Update Menu.
 			Added Native Function.
 
-- version 2.2.2.LQT
+- version 1.1.rw:
 		Perks:
 			Change Pyrotechnician: 
 				For a set amount of time, you will be given a ( pipe bomb -> random type )
@@ -274,9 +277,7 @@
 ==========================================================================
 ========================================================================*/
 
-
-//info
-#define PLUGIN_VERSION "2.2.2.LQT"
+#define PLUGIN_VERSION "1.1.rw"
 public Plugin:myinfo=
 {
 	name="PerkMod Rework",
@@ -286,21 +287,21 @@ public Plugin:myinfo=
 	url=""
 }
 
-//=============================
-// Start
-//=============================
+// #endregion
+// =======================================================================
+
+// ============================================================================
+// #region Imports and Defines
 
 #pragma semicolon 1
 #include <sourcemod>
 #include <sdktools>
 
-public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
-{
-	RegPluginLibrary("perkmod2");
-	
-	CreateNative("perkmod2_Pyro_OnWeaponFire", Native_Pyro_OnWeaponFire);
-	return APLRes_Success;
-}
+// #endregion
+// ============================================================================
+
+// ============================================================================
+// #region Variables
 
 //=============================
 // Declare Global Variables
@@ -688,11 +689,20 @@ new g_iMA_meta_enable = 1;
 //controls whether menu automatically shows
 new Handle:g_hMenuAutoShow_enable;
 
-
+// #endregion
+// ============================================================================
 
 //=============================
 // Hooking, Initialize Vars
 //=============================
+
+public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
+{
+	RegPluginLibrary("perkmod2");
+	
+	CreateNative("perkmod2_Pyro_OnWeaponFire", Native_Pyro_OnWeaponFire);
+	return APLRes_Success;
+}
 
 public OnPluginStart()
 {
@@ -752,8 +762,6 @@ public OnPluginStart()
 	HookEvent("round_start", Event_RoundStart);
 	HookEvent("player_death", Event_PlayerDeath);
 	HookEvent("round_end", Event_RoundEnd);
-	//RegConsoleCmd("say", MenuOpen_OnSay);
-	//RegConsoleCmd("say_team", MenuOpen_OnSay);
 	RegConsoleCmd("sm_perks", MenuOpen_OnSay);
 	RegConsoleCmd("sm_setperks", SS_SetPerks);
 	HookConVarChange(FindConVar("mp_gamemode"),Convar_GameMode);
@@ -766,7 +774,6 @@ public OnPluginStart()
 		HookEvent("charger_pummel_start", Event_ChargerPummelStart);
 		HookEvent("charger_pummel_end", Event_ChargerPummelEnd);
 		HookEvent("adrenaline_used", Event_PillsUsed, EventHookMode_Pre);
-		HookEvent("player_jump", Event_Jump);
 	}
 
 	//debug
@@ -2282,15 +2289,6 @@ public Event_AbilityUse (Handle:event, const String:name[], bool:dontBroadcast)
 
 	//----DEBUG----
 	//PrintToChatAll("\x03ability used: \x01%s", stAb);
-
-}
-
-public Event_Jump (Handle:event, const String:name[], bool:dontBroadcast)
-{
-	new iCid=GetClientOfUserId(GetEventInt(event,"userid"));
-	if (iCid==0)
-		return;
-
 }
 
 public Action:Event_TongueGrabPre (Handle:event, const String:name[], bool:dontBroadcast)
@@ -6764,9 +6762,8 @@ public Action:Debug_StaminaTimer (Handle:timer, any:iCid)
 	PrintToChat(iCid,"\x03 - value \x01%f", GetEntDataFloat(iCid,iStaminaO));
 }*/
 
-// ====================================================================================================
-//					Native
-// ====================================================================================================
+// =======================================================================
+// #region Native
 
 any Native_Pyro_OnWeaponFire(Handle plugin, int numParams)
 {
@@ -6778,3 +6775,6 @@ any Native_Pyro_OnWeaponFire(Handle plugin, int numParams)
 
 	return 0;
 }
+
+// #endregion
+// =======================================================================
