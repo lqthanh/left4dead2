@@ -510,11 +510,13 @@ new Handle:g_hUnbreak_enable;
 new Handle:g_hUnbreak_enable_sur;
 new Handle:g_hUnbreak_enable_vs;
 new Handle:g_hUnbreak_hp;
+new Handle:g_hUnbreak_hr;
 //associated var
 new g_iUnbreak_enable;
 new g_iUnbreak_enable_sur;
 new g_iUnbreak_enable_vs;
 new g_iUnbreak_hp;
+new Float:g_fUnbreak_hr;
 
 //spirit, bonus buffer and cooldown
 //campaign, survival, versus
@@ -935,6 +937,14 @@ CreateConvars()
 		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
 	HookConVarChange(g_hUnbreak_hp, Convar_Unbreak);
 	g_iUnbreak_hp = 20;
+
+	g_hUnbreak_hr = CreateConVar(
+		"l4d_perkmod_unbreakable_healrate" ,
+		"0.8" ,
+		"Unbreakable perk: The rate at which health is restored (clamped between 0.8 < 1.0)",
+		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
+	HookConVarChange(g_hUnbreak_hr, Convar_Unbreak_hr);
+	g_fUnbreak_hr = 0.8;
 
 	g_hUnbreak_enable = CreateConVar(
 		"l4d_perkmod_unbreakable_enable" ,
@@ -1549,6 +1559,16 @@ public Convar_Unbreak (Handle:convar, const String:oldValue[], const String:newV
 	else if (iI>100)
 		iI=100;
 	g_iUnbreak_hp = iI;
+}
+
+public Convar_Unbreak_hr (Handle:convar, const String:oldValue[], const String:newValue[])
+{
+	new Float:flF=StringToFloat(newValue);
+	if (flF<0.8)
+		flF=0.8;
+	else if (flF>1.0)
+		flF=1.0;
+	g_fUnbreak_hr = flF;
 }
 
 public Convar_Unbreak_en (Handle:convar, const String:oldValue[], const String:newValue[])
@@ -4807,7 +4827,7 @@ public Action:Unbreakable_Delayed_Heal (Handle:timer, any:iCid)
 		&& IsValidEntity(iCid)==true
 		&& IsClientInGame(iCid)==true)
 	{
-		SetEntProp(iCid,Prop_Data,"m_iHealth", GetEntProp(iCid,Prop_Data,"m_iHealth") + (g_iUnbreak_hp) );
+		SetEntProp(iCid,Prop_Data,"m_iHealth", GetEntProp(iCid,Prop_Data,"m_iHealth") + (g_iUnbreak_hp*g_fUnbreak_hr) );
 
 		if (GetEntProp(iCid,Prop_Data,"m_iHealth") > (100+g_iUnbreak_hp) )
 			SetEntProp(iCid,Prop_Data,"m_iHealth", 100+g_iUnbreak_hp );
