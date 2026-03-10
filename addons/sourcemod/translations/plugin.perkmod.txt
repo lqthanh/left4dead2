@@ -80,11 +80,6 @@
 		"en"	"self-revive on teammate incap, cooldown"
 	}
 
-	"DoubleTapDescriptionPanel"
-	{
-		"en"	"fire faster"
-	}
-
 	"SleighOfHandDescriptionPanel"
 	{
 		"en"	"reload faster"
@@ -240,11 +235,6 @@
 		"en"	"tPoncho's Perkmod: Your perks for this round"
 	}
 
-	"DoubleTapDescriptionText"
-	{
-		"en"	"faster Firerate (not on miniguns)"
-	}
-
 	"DisplayDisabledText"
 	{
 		"en"	"disabled"
@@ -323,11 +313,6 @@
 	}
 
 
-	"DoubleTapRestrictionWarning"
-	{
-		"en"	"SEMI AUTO ONLY"
-	}
-	
 	"MartialArtistDescriptionPanel_noreduc"
 	{
 		"en"	"triple swing"

@@ -259,6 +259,7 @@
 
 - version 1.0.rw:
 		Remove SI perks.
+		Remove Survivor Primary Double Tap perk.
 		QOL:
 			Fix, Update Menu.
 			Added Native Function.
@@ -340,26 +341,6 @@ new g_iSpiritCooldown[MAXPLAYERS+1];
 //used to track the timers themselves
 new Handle:g_iSpiritTimer[MAXPLAYERS+1];
 
-//DOUBLE TAP PERK
-//used to track who has the double tap perk.
-//The index goes up to 18, but each index has
-//a value indicating a client index with DT
-//so the plugin doesn't have to cycle a full
-//18 times per game frame just for double tap.
-new g_iDTRegisterIndex[MAXPLAYERS+1];
-//and this tracks how many have DT
-new g_iDTRegisterCount = 0;
-//this tracks the current active weapon id
-//in case the player changes guns
-new g_iDTEntid[MAXPLAYERS+1];
-//this tracks the engine time of the next
-//attack for the weapon, after modification
-//(modified interval + engine time)
-new Float:g_flDTNextTime[MAXPLAYERS+1];
-//this tracks whether the equipped gun is
-//a semi auto weapon, saves us a lot of processing time
-new bool:g_bDTsemiauto[MAXPLAYERS+1];
-
 //SLEIGHT OF HAND PERK
 //this keeps track of the default values for
 //reload speeds for the different shotgun types
@@ -411,7 +392,6 @@ new g_iHPBuffTimeO		= -1;
 new g_iRevCountO		= -1;
 new g_iMeleeFatigueO	= -1;
 new g_iNextPAttO		= -1;
-new g_iNextSAttO		= -1;
 new g_iActiveWO			= -1;
 new g_iShotStartDurO	= -1;
 new g_iShotInsertDurO	= -1;
@@ -527,20 +507,6 @@ new g_iUnbreak_enable;
 new g_iUnbreak_enable_sur;
 new g_iUnbreak_enable_vs;
 new g_iUnbreak_hp;
-
-//double tap, fire rate
-//one-size-fits-all
-new Handle:g_hDT_enable;
-new Handle:g_hDT_enable_sur;
-new Handle:g_hDT_enable_vs;
-new Handle:g_hDT_rate;
-new Handle:g_hDT_rate_reload;
-//associated var
-new g_iDT_enable;
-new g_iDT_enable_sur;
-new g_iDT_enable_vs;
-new Float:g_flDT_rate;
-new Float:g_flDT_rate_reload;
 
 //sleight of hand, reload rate
 //one-size-fits-all
@@ -712,11 +678,10 @@ new g_iSurAll_enable;
 new g_iInfAll_enable;
 
 //this var keeps track of whether
-//to enable DT and Stopping or not, so we don't
+//to enable Stopping or not, so we don't
 //have to do the checks every game frame, or
 //every time someone gets hurt
 
-new g_iDT_meta_enable = 1;
 new g_iStopping_meta_enable = 1;
 new g_iMA_meta_enable = 1;
 
@@ -817,7 +782,6 @@ public OnPluginStart()
 	g_iRevCountO		=	FindSendPropInfo("CTerrorPlayer","m_currentReviveCount");
 	g_iMeleeFatigueO	=	FindSendPropInfo("CTerrorPlayer","m_iShovePenalty");
 	g_iNextPAttO		=	FindSendPropInfo("CBaseCombatWeapon","m_flNextPrimaryAttack");
-	g_iNextSAttO		=	FindSendPropInfo("CBaseCombatWeapon","m_flNextSecondaryAttack");
 	g_iActiveWO			=	FindSendPropInfo("CBaseCombatCharacter","m_hActiveWeapon");
 	g_iShotStartDurO	=	FindSendPropInfo("CBaseShotgun","m_reloadStartDuration");
 	g_iShotInsertDurO	=	FindSendPropInfo("CBaseShotgun","m_reloadInsertDuration");
@@ -845,7 +809,7 @@ public OnPluginStart()
 
 	//finally, run a command to exec the .cfg file
 	//to load the server's preferences for these cvars
-	AutoExecConfig(true , "perkmod");
+	AutoExecConfig(true , "perkmod2_rw");
 
 	//and load translations
 	LoadTranslations("plugin.perkmod");
@@ -978,47 +942,6 @@ CreateConvars()
 		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
 	HookConVarChange(g_hSpirit_enable_vs, Convar_Spirit_en_vs);
 	g_iSpirit_enable_vs = 1;
-
-	//double tap
-	g_hDT_rate = CreateConVar(
-		"l4d_perkmod_doubletap_rate" ,
-		"0.6667" ,
-		"Double Tap perk: The interval between bullets fired is multiplied by this value. NOTE: a short enough interval will make the gun fire at only normal speed! (clamped between 0.2 < 0.9)" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hDT_rate, Convar_DT);
-	g_flDT_rate=			0.6667;
-
-	g_hDT_rate_reload = CreateConVar(
-		"l4d_perkmod_doubletap_rate_reload" ,
-		"0.8" ,
-		"Double Tap perk: The interval incurred by reloading is multiplied by this value (clamped between 0.2 < 1.0)" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hDT_rate_reload, Convar_DT_rate_reload);
-	g_flDT_rate_reload=			0.8;
-
-	g_hDT_enable = CreateConVar(
-		"l4d_perkmod_doubletap_enable" ,
-		"1" ,
-		"Double Tap perk: Allows the perk to be chosen by players in campaign, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hDT_enable, Convar_DT_en);
-	g_iDT_enable = 1;
-
-	g_hDT_enable_sur = CreateConVar(
-		"l4d_perkmod_doubletap_enable_survival" ,
-		"1" ,
-		"Double Tap perk: Allows the perk to be chosen by players in survival, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hDT_enable_sur, Convar_DT_en_sur);
-	g_iDT_enable_sur = 1;
-
-	g_hDT_enable_vs = CreateConVar(
-		"l4d_perkmod_doubletap_enable_versus" ,
-		"1" ,
-		"Double Tap perk: Allows the perk to be chosen by players in versus, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hDT_enable_vs, Convar_DT_en_vs);
-	g_iDT_enable_vs = 1;
 
 	//sleight of hand
 	g_hSoH_rate = CreateConVar(
@@ -1339,8 +1262,8 @@ CreateConvars()
 	//bot preferences for perks
 	g_hBot_Sur1 = CreateConVar(
 		"l4d_perkmod_bot_survivor1" ,
-		"1,2,3" ,
-		"Bot preferences for Survivor 1 perks: 1 = stopping power, 2 = double tap, 3 = sleight of hand" ,
+		"1,2" ,
+		"Bot preferences for Survivor 1 perks: 1 = stopping power, 2 = sleight of hand" ,
 		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
 
 	g_hBot_Sur2 = CreateConVar(
@@ -1352,14 +1275,14 @@ CreateConvars()
 	g_hBot_Sur3 = CreateConVar(
 		"l4d_perkmod_bot_survivor3" ,
 		"1,2" ,
-		"Bot preferences for Survivor 2 perks: 1 = pack rat, 2 = hard to kill" ,
+		"Bot preferences for Survivor 3 perks: 1 = pack rat, 2 = hard to kill" ,
 		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
 
 	//default perks
 	g_hSur1_default = CreateConVar(
 		"l4d_perkmod_default_survivor1" ,
 		"1" ,
-		"Default selected perk for Survivor, Primary: 1 = stopping power, 2 = double tap, 3 = sleight of hand, 4 = pyrotechnician" ,
+		"Default selected perk for Survivor, Primary: 1 = stopping power, 2 = sleight of hand, 3 = pyrotechnician" ,
 		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
 	HookConVarChange(g_hSur1_default, Convar_Def_Sur1);
 	g_iSur1_default = 1;
@@ -1708,65 +1631,6 @@ public Convar_Unbreak_en_vs (Handle:convar, const String:oldValue[], const Strin
 	else
 		iI=1;
 	g_iUnbreak_enable_vs = iI;
-}
-
-//double tap
-//the enable/disable functions also call
-//for the run-on-game-frame-check function
-public Convar_DT (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new Float:flF=StringToFloat(newValue);
-	if (flF<0.02)
-		flF=0.02;
-	else if (flF>0.9)
-		flF=0.9;
-	g_flDT_rate = flF;
-}
-
-public Convar_DT_rate_reload (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new Float:flF=StringToFloat(newValue);
-	if (flF<0.2)
-		flF=0.2;
-	else if (flF>1.0)
-		flF=1.0;
-	g_flDT_rate_reload = flF;
-}
-
-public Convar_DT_en (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iDT_enable = iI;
-
-	DT_RunChecks();
-}
-
-public Convar_DT_en_sur (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iDT_enable_sur = iI;
-
-	DT_RunChecks();
-}
-
-public Convar_DT_en_vs (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iDT_enable_vs = iI;
-
-	DT_RunChecks();
 }
 
 //sleight of hand
@@ -2293,7 +2157,7 @@ public Event_PlayerRescued (Handle:event, const String:name[], bool:dontBroadcas
 	g_iMyDisabler[iCid] = -1;
 	g_iPIncap[iCid]=0;
 	g_iSpiritCooldown[iCid]=0;
-	//rebuilds double tap registry
+	//rebuilds pyrotechnician registry
 	CreateTimer(0.3,Delayed_Rebuild,0);
 
 	//checks for unbreakable health bonus
@@ -2316,7 +2180,6 @@ public OnGameFrame()
 		|| g_bIsRoundStart == true)
 		return;
 
-	DT_OnGameFrame();
 	MA_OnGameFrame();
 }
 
@@ -2929,7 +2792,7 @@ public Event_PlayerDeath (Handle:event, const String:name[], bool:dontBroadcast)
 		SetEntProp(iCid, Prop_Send, "m_iHideHUD", 0);
 	}
 
-	//rebuild registries for double tap and martial artist
+	//rebuild registries for martial artist
 	RebuildAll();
 
 	//and while we're at it, the player just died so reset pyro's tick count
@@ -3149,7 +3012,6 @@ RunChecksAll ()
 		return;
 
 	Stopping_RunChecks();
-	DT_RunChecks();
 	MA_RunChecks();
 }
 
@@ -3166,7 +3028,6 @@ public Action:Delayed_Rebuild (Handle:timer, any:data)
 
 RebuildAll ()
 {
-	DT_Rebuild();
 	MA_Rebuild();
 	Extreme_Rebuild();
 	Pyro_Rebuild();
@@ -3176,7 +3037,6 @@ RebuildAll ()
 //round ends, and plugin end, so yeah (important for Pyro's tick counter)
 ClearAll ()
 {
-	DT_Clear();
 	MA_Clear();
 	Extreme_Rebuild();
 	Pyro_Clear(true);
@@ -3278,31 +3138,22 @@ AssignRandomPerks (iCid)
 		iPerkType[iPerkCount]=1;
 	}
 
-	//2 double tap
-	if (g_iDT_enable==1			&&	g_iL4D_GameMode==0
-		|| g_iDT_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iDT_enable_vs==1	&&	g_iL4D_GameMode==2)
-	{
-		iPerkCount++;
-		iPerkType[iPerkCount]=2;
-	}	
-
-	//3 sleight of hand
+	//2 sleight of hand
 	if (g_iSoH_enable==1		&&	g_iL4D_GameMode==0
 		|| g_iSoH_enable_sur==1	&&	g_iL4D_GameMode==1
 		|| g_iSoH_enable_vs==1	&&	g_iL4D_GameMode==2)
 	{
 		iPerkCount++;
-		iPerkType[iPerkCount]=3;
+		iPerkType[iPerkCount]=2;
 	}
 
-	//4 pyrotechnician
+	//3 pyrotechnician
 	if (g_iPyro_enable==1			&&	g_iL4D_GameMode==0
 		|| g_iPyro_enable_sur==1	&&	g_iL4D_GameMode==1
 		|| g_iPyro_enable_vs==1		&&	g_iL4D_GameMode==2)
 	{
 		iPerkCount++;
-		iPerkType[iPerkCount]=4;
+		iPerkType[iPerkCount]=3;
 	}
 
 	//randomize a perk
@@ -3409,7 +3260,6 @@ AssignRandomPerks (iCid)
 	Event_Confirm_Unbreakable(iCid);
 	Event_Confirm_Grenadier(iCid);
 	Event_Confirm_ChemReliant(iCid);
-	Event_Confirm_DT(iCid);
 	Event_Confirm_MA(iCid);
 	Extreme_Rebuild();
 
@@ -3433,7 +3283,7 @@ Bot_Sur1_PickRandom ()
 	if (g_hBot_Sur1 != INVALID_HANDLE)
 		GetConVarString(g_hBot_Sur1,stPerk,24);
 	else
-		stPerk = "1,2,3";
+		stPerk = "1,2";
 
 	//stopping power
 	if (StrContains(stPerk,"1",false) != -1
@@ -3443,20 +3293,12 @@ Bot_Sur1_PickRandom ()
 		iPerkType[iPerkCount]=1;
 	}
 
-	//double tap
-	if (StrContains(stPerk,"2",false) != -1
-		&& g_iDT_enable==1)
-	{
-		iPerkCount++;
-		iPerkType[iPerkCount]=2;
-	}
-
 	//sleight of hand
-	if (StrContains(stPerk,"3",false) != -1
+	if (StrContains(stPerk,"2",false) != -1
 		&& g_iSoH_enable==1)
 	{
 		iPerkCount++;
-		iPerkType[iPerkCount]=3;
+		iPerkType[iPerkCount]=2;
 	}
 
 	//randomize
@@ -3660,306 +3502,9 @@ public Event_InfectedHurtPre (Handle:event, const String:name[], bool:dontBroadc
 }
 
 
-//=============================
-// Sur1: Double Tap
-//=============================
-
-//called on round starts and on convar changes
-//does the checks to determine whether DT
-//should be run every game frame
-DT_RunChecks ()
-{
-	if (g_iSur1_enable==1
-		&& (g_iDT_enable==1		&&	g_iL4D_GameMode==0
-		|| g_iDT_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iDT_enable_vs==1	&&	g_iL4D_GameMode==2))
-		g_iDT_meta_enable=1;
-	else
-		g_iDT_meta_enable=0;
-}
-
-//called on confirming perks
-//simply adds player to registry of DT users
-Event_Confirm_DT (iCid)
-{
-	if (g_iDTRegisterCount<0)
-		g_iDTRegisterCount=0;
-	if (IsClientInGame(iCid)==true
-		&& IsPlayerAlive(iCid)==true
-		&& g_iSur1[iCid]==2
-		&& g_iConfirm[iCid]==1
-		&& GetClientTeam(iCid)==2)
-	{
-		g_iDTRegisterCount++;
-		g_iDTRegisterIndex[g_iDTRegisterCount]=iCid;
-
-		//----DEBUG----
-		//PrintToChatAll("\x03double tap on confirm, registering \x01%i",iCid);
-	}	
-}
-
-//called whenever the registry needs to be rebuilt
-//to cull any players who have left or died, etc.
-//(called on: player death, player disconnect,
-//closet rescue, change teams)
-DT_Rebuild ()
-{
-	//clears all DT-related vars
-	DT_Clear();
-
-	//if the server's not running or
-	//is in the middle of loading, stop
-	if (IsServerProcessing()==false)
-		return;
-
-	//----DEBUG----
-	//PrintToChatAll("\x03double tap rebuilding registry");
-
-	for (new iI=1 ; iI<=MaxClients ; iI++)
-	{
-		if (IsClientInGame(iI)==true
-			&& IsPlayerAlive(iI)==true
-			&& g_iSur1[iI]==2
-			&& g_iConfirm[iI]==1
-			&& GetClientTeam(iI)==2)
-		{
-			g_iDTRegisterCount++;
-			g_iDTRegisterIndex[g_iDTRegisterCount]=iI;
-
-			//----DEBUG----
-			//PrintToChatAll("\x03-registering \x01%i",iI);
-		}
-	}
-}
-
-//called to clear out DT registry
-//(called on: round start, round end, map end)
-DT_Clear ()
-{
-	g_iDTRegisterCount=0;
-	for (new iI=1 ; iI<=MaxClients ; iI++)
-	{
-		g_iDTRegisterIndex[iI]= -1;
-		g_iDTEntid[iI] = -1;
-		g_flDTNextTime[iI]= -1.0;
-		g_bDTsemiauto[iI] = false;
-	}
-}
-
-//this is the big momma!
-//since this is called EVERY game frame,
-//we need to be careful not to run too many functions
-//kinda hard, though, considering how many things
-//we have to check for =.=
-DT_OnGameFrame()
-{
-	//or if no one has DT, don't bother either
-	if (g_iDTRegisterCount==0)
-		return;
-
-	//stop if perk is disabled
-	if (g_iDT_meta_enable==0)
-		return;
-
-	//this tracks the player's id, just to
-	//make life less painful...
-	decl iCid;
-	//this tracks the player's gun id
-	//since we adjust numbers on the gun,
-	//not the player
-	decl iEntid;
-	//this tracks the calculated next attack
-	decl Float:flNextTime_calc;
-	//this, on the other hand, tracks the current next attack
-	decl Float:flNextTime_ret;
-	//and this tracks next melee attack times
-	decl Float:flNextTime2_ret;
-	//and this tracks the game time
-	new Float:flGameTime=GetGameTime();
-
-	//theoretically, to get on the DT registry
-	//all the necessary checks would have already
-	//been run, so we don't bother with any checks here
-	for (new iI=1; iI<=g_iDTRegisterCount; iI++)
-	{
-		//PRE-CHECKS: RETRIEVE VARS
-		//-------------------------
-
-		iCid = g_iDTRegisterIndex[iI];
-		//stop on this client
-		//when the next client id is null
-		if (iCid <= 0
-			|| IsValidEntity(iCid)==false)
-			return;
-		//skip this client if they're disabled
-		//if (g_iMyDisabler[iCid] != -1) continue;
-
-		//we have to adjust numbers on the gun, not the player
-		//so we get the active weapon id here
-		iEntid = GetEntDataEnt2(iCid,g_iActiveWO);
-		//if the retrieved gun id is -1, then...
-		//wtf mate? just move on
-		if (iEntid == -1
-			|| IsValidEntity(iEntid)==false)
-			continue;
-
-		//----DEBUG----
-		/*
-		new iNextAttO=	FindSendPropInfo("CTerrorPlayer","m_flNextAttack");
-		new iIdleTimeO=	FindSendPropInfo("CTerrorGun","m_flTimeWeaponIdle");
-		PrintToChatAll("\x03DT, NextAttack \x01%i %f\x03, TimeIdle \x01%i %f",
-			iNextAttO,
-			GetEntDataFloat(iCid,iNextAttO),
-			iIdleTimeO,
-			GetEntDataFloat(iEntid,iIdleTimeO)
-			);
-		*/
-
-
-		//PRE-CHECK 1
-		//-----------
-		new iEntid_stored = g_iDTEntid[iCid];
-		new Float:flNextTime_stored = g_flDTNextTime[iCid];
-		//and here is the retrieved next attack time
-		flNextTime_ret = GetEntDataFloat(iEntid,g_iNextPAttO);
-
-
-		//CHECK 1: BEFORE ADJUSTED SHOT IS MADE
-		//------------------------------------
-		//since this will probably be the case most of
-		//the time, we run this first
-		//checks: gun is unchanged; time of shot has not passed
-		//actions: skip this player
-		if (iEntid_stored == iEntid
-			&& flNextTime_stored >= flNextTime_ret)
-		{
-			//----DEBUG----
-			//PrintToChatAll("\x03DT client \x01%i\x03; before shot made",iCid );
-
-			continue;
-		}
-
-
-		//PRE-CHECK 2
-		//-----------
-		//and for retrieved next melee time
-		flNextTime2_ret = GetEntDataFloat(iEntid,g_iNextSAttO);
-
-		//CHECK 2: INFER IF MELEEING
-		//--------------------------
-		//since we don't want to shorten the interval
-		//incurred after shoving, we try to guess when
-		//a melee attack is made
-		//checks: if melee attack time > engine time
-		//actions: skip this player
-		if (flNextTime2_ret > flGameTime)
-		{
-			//----DEBUG----
-			//PrintToChatAll("\x03DT client \x01%i\x03; melee attack inferred",iCid );
-
-			g_flDTNextTime[iCid]=flNextTime_ret;
-
-			continue;
-		}
-
-
-		//CHECK 3: AFTER ADJUSTED SHOT IS MADE
-		//------------------------------------
-		//at this point, either a gun was swapped, or
-		//the attack time needs to be adjusted
-		//checks: stored gun id same as retrieved gun id,
-		// and retrieved next attack time is after stored value
-		if (iEntid_stored == iEntid
-			&& flNextTime_stored < flNextTime_ret)
-		{
-			//----DEBUG----
-			//PrintToChatAll("\x03DT after adjusted shot\n-pre, client \x01%i\x03; entid \x01%i\x03; enginetime\x01 %f\x03; NextTime_orig \x01 %f\x03; interval \x01%f",iCid,iEntid,flGameTime,flNextTime_ret, flNextTime_ret-flGameTime );
-
-			//first, check if the weapon is a valid semi-auto
-			//these checks are run on CHECK 4 below
-			if (g_bDTsemiauto[iCid] == false)
-			{
-				//----DEBUG----
-				//PrintToChatAll("\x03 - non semi auto used!");
-
-				continue;
-			}
-
-			//this is a calculation of when the next primary attack
-			//will be after applying double tap values
-			flNextTime_calc = ( flNextTime_ret - flGameTime ) * g_flDT_rate + flGameTime;
-
-			//then we store the value
-			g_flDTNextTime[iCid] = flNextTime_calc;
-
-			//and finally adjust the value in the gun
-			SetEntDataFloat(iEntid, g_iNextPAttO, flNextTime_calc, true);
-
-			//----DEBUG----
-			//PrintToChatAll("\x03-post, NextTime_calc \x01 %f\x03; new interval \x01%f",GetEntDataFloat(iEntid,g_iNextPAttO), GetEntDataFloat(iEntid,g_iNextPAttO)-flGameTime );
-
-			continue;
-		}
-
-
-		//CHECK 4: ON WEAPON SWITCH
-		//-------------------------
-		//at this point, the only reason DT hasn't fired
-		//should be that the weapon had switched
-		//checks: retrieved gun id doesn't match stored id
-		// or stored id is null
-		//actions: updates stored gun id
-		// and sets stored next attack time to retrieved value
-		if (iEntid_stored != iEntid)
-		{
-			//----DEBUG----
-			//PrintToChatAll("\x03DT client \x01%i\x03; weapon switch inferred",iCid );
-
-			//now we update the stored vars
-			g_iDTEntid[iCid]=iEntid;
-			g_flDTNextTime[iCid]=flNextTime_ret;
-
-			//and now we check whether the equipped weapon is a semi auto or not
-			new String:stWpn[32];
-			GetEntityNetClass(iEntid, stWpn, 32);
-			if (StrContains(stWpn, "CSMG_", false)!= -1
-				|| StrContains(stWpn, "CSub", false)!= -1)
-			{
-				//----DEBUG----
-				//PrintToChatAll("\x03 - smg detected, weaponid:\x01 %s", stWpn);
-
-				g_bDTsemiauto[iCid] = false;
-			}
-			else if (StrContains(stWpn, "CRifle_", false)!= -1
-				|| StrContains(stWpn, "CAssault", false)!= -1)
-			{
-				//----DEBUG----
-				//PrintToChatAll("\x03 - assault rifle detected, weaponid:\x01 %s", stWpn);
-
-				g_bDTsemiauto[iCid] = false;
-			}
-			else
-			{
-				//----DEBUG----
-				//PrintToChatAll("\x03 - VALID weapon detected! weaponid:\x01 %s", stWpn);
-
-				g_bDTsemiauto[iCid] = true;
-			}
-
-			continue;
-		}
-
-		//----DEBUG----
-		//PrintToChatAll("\x03DT client \x01%i\x03; reached end of checklist...",iCid );
-	}
-}
-
-
-
-
 //==================================
-// Sur1: Sleight of Hand, Double Tap
-//==================================
+// Sur1: Sleight of Hand
+//=================================
 
 //on the start of a reload
 SoH_OnReload (iCid)
@@ -3972,7 +3517,7 @@ SoH_OnReload (iCid)
 		return;
 
 	new iSur1 = g_iSur1[iCid];
-	if ((iSur1 == 3 || iSur1 == 2)
+	if (iSur1 == 2
 		&& g_iConfirm[iCid]==1
 		&& GetClientTeam(iCid)==2)
 	{
@@ -3985,23 +3530,7 @@ SoH_OnReload (iCid)
 		decl String:stClass[32];
 		GetEntityNetClass(iEntid,stClass,32);
 
-		new Float:flRate = 0.0;
-		if (iSur1 == 2)
-		{
-			//if (g_bDTsemiauto[iCid] == false) return;
-
-			//----DEBUG----
-			//PrintToChatAll("\x03 - using DT values");
-
-			flRate = g_flDT_rate_reload;
-		}
-		else
-		{
-			//----DEBUG----
-			//PrintToChatAll("\x03 - using SoH values");
-
-			flRate = g_flSoH_rate;
-		}
+		new Float:flRate = g_flSoH_rate;
 
 		//----DEBUG----
 		//PrintToChatAll("\x03-class of gun: \x01%s",stClass );
@@ -4458,7 +3987,7 @@ public Action:SoH_ShotgunEndCock (Handle:timer, any:hPack)
 //on pickup
 Pyro_Pickup(iCid, String:stWpn[])
 {
-	if (g_iSur1[iCid]==4
+	if (g_iSur1[iCid]==3
 		&& g_iSur1_enable==1
 		&& (g_iPyro_enable==1		&&	g_iL4D_GameMode==0
 		|| g_iPyro_enable_sur==1	&&	g_iL4D_GameMode==1
@@ -4514,7 +4043,7 @@ Pyro_OnWeaponFire(iCid, String:stWpn[])
 		return;
 
 	if (g_iConfirm[iCid]==0
-		|| g_iSur1[iCid]!=4) return;
+		|| g_iSur1[iCid]!=3) return;
 
 	//----DEBUG----
 	//PrintToChatAll("\x03 weapon fired: \x01%s", st_wpn);
@@ -4561,7 +4090,7 @@ public Action:Grenadier_DelayedGive (Handle:timer,any:iCid)
 
 	if (iCid==0
 		|| g_iConfirm[iCid]==0
-		|| g_iSur1[iCid]!=4)
+		|| g_iSur1[iCid]!=3)
 		return Plugin_Continue;
 
 	new iflags=GetCommandFlags("give");
@@ -4592,7 +4121,7 @@ Event_Confirm_Grenadier (iCid)
 		|| GetClientTeam(iCid)!=2
 		|| IsPlayerAlive(iCid)==false
 		|| g_iConfirm[iCid]==0
-		|| g_iSur1[iCid]!=4)
+		|| g_iSur1[iCid]!=3)
 		return;
 
 	//check if perk is enabled
@@ -4743,7 +4272,7 @@ Pyro_Rebuild ()
 	{
 		if (IsClientInGame(iI)==true
 			&& IsPlayerAlive(iI)==true
-			&& g_iSur1[iI]==4
+			&& g_iSur1[iI]==3
 			&& g_iConfirm[iI]==1
 			&& GetClientTeam(iI)==2)
 		{
@@ -6273,7 +5802,6 @@ public Menu_ChooseInit (Handle:topmenu, MenuAction:action, param1, param2)
 					Event_Confirm_Unbreakable(param1);
 					Event_Confirm_Grenadier(param1);
 					Event_Confirm_ChemReliant(param1);
-					Event_Confirm_DT(param1);
 					Event_Confirm_MA(param1);
 					Event_Confirm_LittleLeaguer(param1);
 					Extreme_Rebuild();
@@ -6309,16 +5837,11 @@ public Handle:Menu_Top (iCid)
 		|| g_iStopping_enable_vs==1		&&	g_iL4D_GameMode==2))
 		st_perk="Stopping Power";
 	else if (g_iSur1[iCid]==2
-		&& (g_iDT_enable==1		&&	g_iL4D_GameMode==0
-		|| g_iDT_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iDT_enable_vs==1	&&	g_iL4D_GameMode==2))
-		st_perk="Double Tap";
-	else if (g_iSur1[iCid]==3
 		&& (g_iSoH_enable==1		&&	g_iL4D_GameMode==0
 		|| g_iSoH_enable_sur==1		&&	g_iL4D_GameMode==1
 		|| g_iSoH_enable_vs==1		&&	g_iL4D_GameMode==2))
 		st_perk="Sleight of Hand";
-	else if (g_iSur1[iCid]==4
+	else if (g_iSur1[iCid]==3
 		&& (g_iPyro_enable==1		&&	g_iL4D_GameMode==0
 		|| g_iPyro_enable_sur==1	&&	g_iL4D_GameMode==1
 		|| g_iPyro_enable_vs==1		&&	g_iL4D_GameMode==2))
@@ -6486,7 +6009,6 @@ public Menu_ChooseConfirm (Handle:topmenu, MenuAction:action, param1, param2)
 				Event_Confirm_Unbreakable(param1);
 				Event_Confirm_Grenadier(param1);
 				Event_Confirm_ChemReliant(param1);
-				Event_Confirm_DT(param1);
 				Event_Confirm_MA(param1);
 				Extreme_Rebuild();
 				Event_Confirm_LittleLeaguer(param1);
@@ -6528,16 +6050,11 @@ public Handle:Menu_ShowChoices (iCid)
 		|| g_iStopping_enable_vs==1		&&	g_iL4D_GameMode==2))
 		Format(st_perk,128,"Stopping Power (+%i%% %t)", RoundToNearest(g_flStopping_dmgmult*100), "BonusDamageText" );
 	else if (iPerk == 2
-		&& (g_iDT_enable==1		&&	g_iL4D_GameMode==0
-		|| g_iDT_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iDT_enable_vs==1	&&	g_iL4D_GameMode==2))
-		Format(st_perk,128,"Double Tap (%t, %t, %t)", "DoubleTapDescriptionPanel", "SleighOfHandDescriptionPanel", "DoubleTapRestrictionWarning" ) ;
-	else if (iPerk == 3
 		&& (g_iSoH_enable==1		&&	g_iL4D_GameMode==0
 		|| g_iSoH_enable_sur==1	&&	g_iL4D_GameMode==1
 		|| g_iSoH_enable_vs==1	&&	g_iL4D_GameMode==2))
 		Format(st_perk,128,"Sleight of Hand (%t +%i%%)", "SleighOfHandDescriptionPanel", RoundToNearest(100 * ((1/g_flSoH_rate)-1) ) ) ;
-	else if (iPerk == 4
+	else if (iPerk == 3
 		&& (g_iPyro_enable==1		&&	g_iL4D_GameMode==0
 		|| g_iPyro_enable_sur==1	&&	g_iL4D_GameMode==1
 		|| g_iPyro_enable_vs==1		&&	g_iL4D_GameMode==2))
@@ -6682,33 +6199,6 @@ public Handle:Menu_Sur1Perk (client)
 	}
 
 	//set name for perk 2
-	if (g_iDT_enable==0			&&	g_iL4D_GameMode==0
-		|| g_iDT_enable_sur==0	&&	g_iL4D_GameMode==1
-		|| g_iDT_enable_vs==0	&&	g_iL4D_GameMode==2)
-	{
-		DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
-	}
-	else
-	{
-		switch (g_iSur1[client])
-		{
-			case 2: st_current="(CURRENT)";
-			default: st_current="";
-		}
-		Format(st_display,64,"Double Tap %s",st_current);
-		DrawPanelItem(menu,st_display);
-		Format(st_display,64,"%t +%i%%", "DoubleTapDescriptionPanel", RoundToNearest(100 * ((1/g_flDT_rate)-1) ) );
-		DrawPanelText(menu,st_display);
-		if (g_flDT_rate_reload < 1.0)
-		{
-			Format(st_display,64,"%t +%i%%", "SleighOfHandDescriptionPanel", RoundToNearest(100 * ((1/g_flDT_rate_reload)-1) ) );
-			DrawPanelText(menu,st_display);
-		}
-		Format(st_display,64,"%t", "DoubleTapRestrictionWarning");
-		DrawPanelText(menu,st_display);
-	}
-
-	//set name for perk 3
 	if (g_iSoH_enable==0			&&	g_iL4D_GameMode==0
 		|| g_iSoH_enable_sur==0		&&	g_iL4D_GameMode==1
 		|| g_iSoH_enable_vs==0		&&	g_iL4D_GameMode==2)
@@ -6719,7 +6209,7 @@ public Handle:Menu_Sur1Perk (client)
 	{
 		switch (g_iSur1[client])
 		{
-			case 3: st_current="(CURRENT)";
+			case 2: st_current="(CURRENT)";
 			default: st_current="";
 		}
 		Format(st_display,64,"Sleight of Hand %s",st_current);
@@ -6728,7 +6218,7 @@ public Handle:Menu_Sur1Perk (client)
 		DrawPanelText(menu,st_display);
 	}
 
-	//set name for perk 4
+	//set name for perk 3
 	if (g_iPyro_enable==0			&&	g_iL4D_GameMode==0
 		|| g_iPyro_enable_sur==0	&&	g_iL4D_GameMode==1
 		|| g_iPyro_enable_vs==0		&&	g_iL4D_GameMode==2)
@@ -6739,7 +6229,7 @@ public Handle:Menu_Sur1Perk (client)
 	{
 		switch (g_iSur1[client])
 		{
-			case 4: st_current="(CURRENT)";
+			case 3: st_current="(CURRENT)";
 			default: st_current="";
 		}
 		Format(st_display,64,"Pyrotechnician %s",st_current);
@@ -6764,15 +6254,12 @@ public Menu_ChooseSur1Perk (Handle:menu, MenuAction:action, param1, param2)
 			//stopping power
 			case 1:
 				g_iSur1[param1]=1;
-			//double tap
+			//sleight of hand
 			case 2:
 				g_iSur1[param1]=2;
-			//sleight of hand
+			//pyrotechnician
 			case 3:
 				g_iSur1[param1]=3;
-			//pyrotechnician
-			case 4:
-				g_iSur1[param1]=4;
 		}
 	}
 

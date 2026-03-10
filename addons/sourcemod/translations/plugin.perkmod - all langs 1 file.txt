@@ -160,16 +160,6 @@
 		"fr"	"se relancer quand un ami tombe, temps de recharge"
 	}
 
-	"DoubleTapDescriptionPanel"
-	{
-		"en"	"fire faster"
-		"de"	"schneller feuern"
-		"it"	"maggior velocitа di fuoco"
-		"da"	"Skyd hurtigere"
-		"ru"	"Стрелять быстрее"
-		"fr"	"tirer plus vite"
-	}
-
 	"SleighOfHandDescriptionPanel"
 	{
 		"en"	"reload faster"
@@ -489,16 +479,6 @@
 		"fr"	"tPoncho's Perkmod: Votre perks pour cette ronde"
 	}
 
-	"DoubleTapDescriptionText"
-	{
-		"en"	"faster Firerate (not on miniguns)"
-		"de"	"hoehere Schussrate (nicht an Miniguns)"
-		"it"	"maggior velocitа di fuoco (non sulle Minigun)"
-		"da"	"hurtigere skyderate (ikke for miniguns)
-		"ru"	"быстрая скорость стрельбы (не для миниганов)"
-		"fr"	"tirer plus vite (pas pour miniguns)"
-	}
-
 	"DisplayDisabledText"
 	{
 		"en"	"disabled"
@@ -639,16 +619,6 @@
 		"fr"	""
 		"it"	"recois un batte de katana"
 	}
-	"DoubleTapRestrictionWarning"
-	{
-		"en"	"SEMI AUTO ONLY"
-		"it"	"SEMI AUTO ONLY"
-		"ru"	"SEMI AUTO ONLY"
-		"de"	"SEMI AUTO ONLY"
-		"da"	"SEMI AUTO ONLY"
-		"fr"	"SEMI AUTO ONLY"
-	}
-	
 	"MartialArtistDescriptionPanel_noreduc"
 	{
 		"en"	"triple swing"
