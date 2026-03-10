@@ -479,36 +479,6 @@ new g_iStopping_enable_sur;
 new g_iStopping_enable_vs;
 new Float:g_flStopping_dmgmult;
 
-//spirit, bonus buffer and cooldown
-//campaign, survival, versus
-new Handle:g_hSpirit_enable;
-new Handle:g_hSpirit_enable_sur;
-new Handle:g_hSpirit_enable_vs;
-new Handle:g_hSpirit_buff;
-new Handle:g_hSpirit_cd;
-new Handle:g_hSpirit_cd_sur;
-new Handle:g_hSpirit_cd_vs;
-//associated vars
-new g_iSpirit_enable;
-new g_iSpirit_enable_sur;
-new g_iSpirit_enable_vs;
-new g_iSpirit_buff;
-new g_iSpirit_cd;
-new g_iSpirit_cd_sur;
-new g_iSpirit_cd_vs;
-
-//unbreakable, bonus hp
-//one-size-fits-all
-new Handle:g_hUnbreak_enable;
-new Handle:g_hUnbreak_enable_sur;
-new Handle:g_hUnbreak_enable_vs;
-new Handle:g_hUnbreak_hp;
-//associated var
-new g_iUnbreak_enable;
-new g_iUnbreak_enable_sur;
-new g_iUnbreak_enable_vs;
-new g_iUnbreak_hp;
-
 //sleight of hand, reload rate
 //one-size-fits-all
 new Handle:g_hSoH_enable;
@@ -534,17 +504,35 @@ new g_iPyro_maxticks;
 
 
 //SUR2 PERKS
-//chem reliant, bonus buffer
+//unbreakable, bonus hp
 //one-size-fits-all
-new Handle:g_hChem_enable;
-new Handle:g_hChem_enable_sur;
-new Handle:g_hChem_enable_vs;
-new Handle:g_hChem_buff;
+new Handle:g_hUnbreak_enable;
+new Handle:g_hUnbreak_enable_sur;
+new Handle:g_hUnbreak_enable_vs;
+new Handle:g_hUnbreak_hp;
 //associated var
-new g_iChem_enable;
-new g_iChem_enable_sur;
-new g_iChem_enable_vs;
-new g_iChem_buff;
+new g_iUnbreak_enable;
+new g_iUnbreak_enable_sur;
+new g_iUnbreak_enable_vs;
+new g_iUnbreak_hp;
+
+//spirit, bonus buffer and cooldown
+//campaign, survival, versus
+new Handle:g_hSpirit_enable;
+new Handle:g_hSpirit_enable_sur;
+new Handle:g_hSpirit_enable_vs;
+new Handle:g_hSpirit_buff;
+new Handle:g_hSpirit_cd;
+new Handle:g_hSpirit_cd_sur;
+new Handle:g_hSpirit_cd_vs;
+//associated vars
+new g_iSpirit_enable;
+new g_iSpirit_enable_sur;
+new g_iSpirit_enable_vs;
+new g_iSpirit_buff;
+new g_iSpirit_cd;
+new g_iSpirit_cd_sur;
+new g_iSpirit_cd_vs;
 
 //helping hand, bonus buffer and time multiplier
 //versus, non-versus
@@ -564,6 +552,19 @@ new Float:g_flHelpHand_timemult;
 new g_iHelpHand_buff;
 new g_iHelpHand_buff_vs;
 
+//martial artist, movement rate
+//campaign, non-campaign
+new Handle:g_hMA_enable;
+new Handle:g_hMA_enable_sur;
+new Handle:g_hMA_enable_vs;
+new Handle:g_hMA_maxpenalty;
+//associated var
+new g_iMA_enable;
+new g_iMA_enable_sur;
+new g_iMA_enable_vs;
+new g_iMA_maxpenalty;
+
+//SUR3 PERKS
 //pack rat, bonus ammo multiplier
 //one-size-fits-all
 new Handle:g_hPack_enable;
@@ -576,6 +577,18 @@ new g_iPack_enable_sur;
 new g_iPack_enable_vs;
 new Float:g_flPack_ammomult;
 
+//chem reliant, bonus buffer
+//one-size-fits-all
+new Handle:g_hChem_enable;
+new Handle:g_hChem_enable_sur;
+new Handle:g_hChem_enable_vs;
+new Handle:g_hChem_buff;
+//associated var
+new g_iChem_enable;
+new g_iChem_enable_sur;
+new g_iChem_enable_vs;
+new g_iChem_buff;
+
 //hard to kill, hp multiplier
 //one-size-fits-all
 new Handle:g_hHard_enable;
@@ -587,18 +600,6 @@ new g_iHard_enable;
 new g_iHard_enable_sur;
 new g_iHard_enable_vs;
 new Float:g_flHard_hpmult;
-
-//martial artist, movement rate
-//campaign, non-campaign
-new Handle:g_hMA_enable;
-new Handle:g_hMA_enable_sur;
-new Handle:g_hMA_enable_vs;
-new Handle:g_hMA_maxpenalty;
-//associated var
-new g_iMA_enable;
-new g_iMA_enable_sur;
-new g_iMA_enable_vs;
-new g_iMA_maxpenalty;
 
 //extreme conditioning, movement rate
 //campaign, non-campaign
@@ -860,6 +861,39 @@ CreateConvars()
 	HookConVarChange(g_hStopping_enable_vs, Convar_Stopping_en_vs);
 	g_iStopping_enable_vs = 1;
 
+	//sleight of hand
+	g_hSoH_rate = CreateConVar(
+		"l4d_perkmod_sleightofhand_rate" ,
+		"0.5714" ,
+		"Sleight of Hand perk: The interval incurred by reloading is multiplied by this value (clamped between 0.2 < 0.9)" ,
+		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
+	HookConVarChange(g_hSoH_rate, Convar_SoH);
+	g_flSoH_rate=			0.5714;
+
+	g_hSoH_enable = CreateConVar(
+		"l4d_perkmod_sleightofhand_enable" ,
+		"1" ,
+		"Sleight of Hand perk: Allows the perk to be chosen by players in campaign, 0=disabled, 1=enabled" ,
+		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
+	HookConVarChange(g_hSoH_enable, Convar_SoH_en);
+	g_iSoH_enable = 1;
+
+	g_hSoH_enable_sur = CreateConVar(
+		"l4d_perkmod_sleightofhand_enable_survival" ,
+		"1" ,
+		"Sleight of Hand perk: Allows the perk to be chosen by players in survival, 0=disabled, 1=enabled" ,
+		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
+	HookConVarChange(g_hSoH_enable_sur, Convar_SoH_en_sur);
+	g_iSoH_enable_sur = 1;
+
+	g_hSoH_enable_vs = CreateConVar(
+		"l4d_perkmod_sleightofhand_enable_versus" ,
+		"1" ,
+		"Sleight of Hand perk: Allows the perk to be chosen by players in versus, 0=disabled, 1=enabled" ,
+		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
+	HookConVarChange(g_hSoH_enable_vs, Convar_SoH_en_vs);
+	g_iSoH_enable_vs = 1;
+
 	//pyrotechnician
 	g_hPyro_maxticks = CreateConVar(
 		"l4d_perkmod_pyrotechnician_maxticks" ,
@@ -892,6 +926,39 @@ CreateConvars()
 		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
 	HookConVarChange(g_hPyro_enable_vs, Convar_Pyro_en_vs);
 	g_iPyro_enable_vs = 1;
+
+	//unbreakable
+	g_hUnbreak_hp = CreateConVar(
+		"l4d_perkmod_unbreakable_bonushealth" ,
+		"20" ,
+		"Unbreakable perk: Bonus health given for Unbreakable; this value is also given as bonus health buffer on being revived (clamped between 1 < 100)" ,
+		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
+	HookConVarChange(g_hUnbreak_hp, Convar_Unbreak);
+	g_iUnbreak_hp = 20;
+
+	g_hUnbreak_enable = CreateConVar(
+		"l4d_perkmod_unbreakable_enable" ,
+		"1" ,
+		"Unbreakable perk: Allows the perk to be chosen by players in campaign, 0=disabled, 1=enabled" ,
+		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
+	HookConVarChange(g_hUnbreak_enable, Convar_Unbreak_en);
+	g_iUnbreak_enable = 1;
+
+	g_hUnbreak_enable_sur = CreateConVar(
+		"l4d_perkmod_unbreakable_enable_survival" ,
+		"1" ,
+		"Unbreakable perk: Allows the perk to be chosen by players in survival, 0=disabled, 1=enabled" ,
+		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
+	HookConVarChange(g_hUnbreak_enable_sur, Convar_Unbreak_en_sur);
+	g_iUnbreak_enable_sur = 1;
+
+	g_hUnbreak_enable_vs = CreateConVar(
+		"l4d_perkmod_unbreakable_enable_versus" ,
+		"1" ,
+		"Unbreakable perk: Allows the perk to be chosen by players in versus, 0=disabled, 1=enabled" ,
+		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
+	HookConVarChange(g_hUnbreak_enable_vs, Convar_Unbreak_en_vs);
+	g_iUnbreak_enable_vs = 1;
 
 	//spirit
 	g_hSpirit_buff = CreateConVar(
@@ -950,105 +1017,6 @@ CreateConvars()
 	HookConVarChange(g_hSpirit_enable_vs, Convar_Spirit_en_vs);
 	g_iSpirit_enable_vs = 1;
 
-	//sleight of hand
-	g_hSoH_rate = CreateConVar(
-		"l4d_perkmod_sleightofhand_rate" ,
-		"0.5714" ,
-		"Sleight of Hand perk: The interval incurred by reloading is multiplied by this value (clamped between 0.2 < 0.9)" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hSoH_rate, Convar_SoH);
-	g_flSoH_rate=			0.5714;
-
-	g_hSoH_enable = CreateConVar(
-		"l4d_perkmod_sleightofhand_enable" ,
-		"1" ,
-		"Sleight of Hand perk: Allows the perk to be chosen by players in campaign, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hSoH_enable, Convar_SoH_en);
-	g_iSoH_enable = 1;
-
-	g_hSoH_enable_sur = CreateConVar(
-		"l4d_perkmod_sleightofhand_enable_survival" ,
-		"1" ,
-		"Sleight of Hand perk: Allows the perk to be chosen by players in survival, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hSoH_enable_sur, Convar_SoH_en_sur);
-	g_iSoH_enable_sur = 1;
-
-	g_hSoH_enable_vs = CreateConVar(
-		"l4d_perkmod_sleightofhand_enable_versus" ,
-		"1" ,
-		"Sleight of Hand perk: Allows the perk to be chosen by players in versus, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hSoH_enable_vs, Convar_SoH_en_vs);
-	g_iSoH_enable_vs = 1;
-
-	//unbreakable
-	g_hUnbreak_hp = CreateConVar(
-		"l4d_perkmod_unbreakable_bonushealth" ,
-		"20" ,
-		"Unbreakable perk: Bonus health given for Unbreakable; this value is also given as bonus health buffer on being revived (clamped between 1 < 100)" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hUnbreak_hp, Convar_Unbreak);
-	g_iUnbreak_hp = 20;
-
-	g_hUnbreak_enable = CreateConVar(
-		"l4d_perkmod_unbreakable_enable" ,
-		"1" ,
-		"Unbreakable perk: Allows the perk to be chosen by players in campaign, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hUnbreak_enable, Convar_Unbreak_en);
-	g_iUnbreak_enable = 1;
-
-	g_hUnbreak_enable_sur = CreateConVar(
-		"l4d_perkmod_unbreakable_enable_survival" ,
-		"1" ,
-		"Unbreakable perk: Allows the perk to be chosen by players in survival, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hUnbreak_enable_sur, Convar_Unbreak_en_sur);
-	g_iUnbreak_enable_sur = 1;
-
-	g_hUnbreak_enable_vs = CreateConVar(
-		"l4d_perkmod_unbreakable_enable_versus" ,
-		"1" ,
-		"Unbreakable perk: Allows the perk to be chosen by players in versus, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hUnbreak_enable_vs, Convar_Unbreak_en_vs);
-	g_iUnbreak_enable_vs = 1;
-
-	//chem reliant
-	g_hChem_buff = CreateConVar(
-		"l4d_perkmod_chemreliant_bonusbuffer" ,
-		"0" ,
-		"Chem Reliant perk: Bonus health buffer given when taking pills (clamped between 0 < 150)" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hChem_buff, Convar_Chem);
-	g_iChem_buff = 0;
-
-	g_hChem_enable = CreateConVar(
-		"l4d_perkmod_chemreliant_enable" ,
-		"1" ,
-		"Chem Reliant perk: Allows the perk to be chosen by players in campaign, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hChem_enable, Convar_Chem_en);
-	g_iChem_enable = 1;
-
-	g_hChem_enable_sur = CreateConVar(
-		"l4d_perkmod_chemreliant_enable_survival" ,
-		"1" ,
-		"Chem Reliant perk: Allows the perk to be chosen by players in survival, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hChem_enable_sur, Convar_Chem_en_sur);
-	g_iChem_enable_sur = 1;
-
-	g_hChem_enable_vs = CreateConVar(
-		"l4d_perkmod_chemreliant_enable_versus" ,
-		"1" ,
-		"Chem Reliant perk: Allows the perk to be chosen by players in versus, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hChem_enable_vs, Convar_Chem_en_vs);
-	g_iChem_enable_vs = 1;
-
 	//helping hand
 	g_hHelpHand_timemult = CreateConVar(
 		"l4d_perkmod_helpinghand_timemultiplier" ,
@@ -1106,6 +1074,39 @@ CreateConvars()
 	HookConVarChange(g_hHelpHand_convar, Convar_Help_convar);
 	g_iHelpHand_convar = 1;
 
+	//martial artist
+	g_hMA_maxpenalty = CreateConVar(
+		"l4d_perkmod_martialartist_maximumpenalty" ,
+		"4" ,
+		"Martial Artist perk: The maximum shove penalty applied to survivors. It's Valve's coding, so I don't know what each value exactly translates to, but 6 is the maximum shove penalty (~1.5s)" ,
+		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
+	HookConVarChange(g_hMA_maxpenalty, Convar_MA_maxpenalty);
+	g_iMA_maxpenalty = 6;
+
+	g_hMA_enable = CreateConVar(
+		"l4d_perkmod_martialartist_enable" ,
+		"1" ,
+		"Martial Artist perk: Allows the perk to be chosen by players in campaign, 0=disabled, 1=enabled" ,
+		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
+	HookConVarChange(g_hMA_enable, Convar_MA_en);
+	g_iMA_enable = 1;
+
+	g_hMA_enable_sur = CreateConVar(
+		"l4d_perkmod_martialartist_enable_survival" ,
+		"1" ,
+		"Martial Artist perk: Allows the perk to be chosen by players in survival, 0=disabled, 1=enabled" ,
+		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
+	HookConVarChange(g_hMA_enable_sur, Convar_MA_en_sur);
+	g_iMA_enable_sur = 1;
+
+	g_hMA_enable_vs = CreateConVar(
+		"l4d_perkmod_martialartist_enable_versus" ,
+		"1" ,
+		"Martial Artist perk: Allows the perk to be chosen by players in versus, 0=disabled, 1=enabled" ,
+		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
+	HookConVarChange(g_hMA_enable_vs, Convar_MA_en_vs);
+	g_iMA_enable_vs = 1;
+
 	//pack rat
 	g_hPack_ammomult = CreateConVar(
 		"l4d_perkmod_packrat_ammomultiplier" ,
@@ -1139,6 +1140,39 @@ CreateConvars()
 	HookConVarChange(g_hPack_enable_vs, Convar_Pack_en_vs);
 	g_iPack_enable_vs = 1;
 
+	//chem reliant
+	g_hChem_buff = CreateConVar(
+		"l4d_perkmod_chemreliant_bonusbuffer" ,
+		"0" ,
+		"Chem Reliant perk: Bonus health buffer given when taking pills (clamped between 0 < 150)" ,
+		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
+	HookConVarChange(g_hChem_buff, Convar_Chem);
+	g_iChem_buff = 0;
+
+	g_hChem_enable = CreateConVar(
+		"l4d_perkmod_chemreliant_enable" ,
+		"1" ,
+		"Chem Reliant perk: Allows the perk to be chosen by players in campaign, 0=disabled, 1=enabled" ,
+		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
+	HookConVarChange(g_hChem_enable, Convar_Chem_en);
+	g_iChem_enable = 1;
+
+	g_hChem_enable_sur = CreateConVar(
+		"l4d_perkmod_chemreliant_enable_survival" ,
+		"1" ,
+		"Chem Reliant perk: Allows the perk to be chosen by players in survival, 0=disabled, 1=enabled" ,
+		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
+	HookConVarChange(g_hChem_enable_sur, Convar_Chem_en_sur);
+	g_iChem_enable_sur = 1;
+
+	g_hChem_enable_vs = CreateConVar(
+		"l4d_perkmod_chemreliant_enable_versus" ,
+		"1" ,
+		"Chem Reliant perk: Allows the perk to be chosen by players in versus, 0=disabled, 1=enabled" ,
+		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
+	HookConVarChange(g_hChem_enable_vs, Convar_Chem_en_vs);
+	g_iChem_enable_vs = 1;
+
 	//hard to kill
 	g_hHard_hpmult = CreateConVar(
 		"l4d_perkmod_hardtokill_healthmultiplier" ,
@@ -1171,39 +1205,6 @@ CreateConvars()
 		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
 	HookConVarChange(g_hHard_enable_vs, Convar_Hard_en_vs);
 	g_iHard_enable_vs = 1;
-
-	//martial artist
-	g_hMA_maxpenalty = CreateConVar(
-		"l4d_perkmod_martialartist_maximumpenalty" ,
-		"4" ,
-		"Martial Artist perk: The maximum shove penalty applied to survivors. It's Valve's coding, so I don't know what each value exactly translates to, but 6 is the maximum shove penalty (~1.5s)" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hMA_maxpenalty, Convar_MA_maxpenalty);
-	g_iMA_maxpenalty = 6;
-
-	g_hMA_enable = CreateConVar(
-		"l4d_perkmod_martialartist_enable" ,
-		"1" ,
-		"Martial Artist perk: Allows the perk to be chosen by players in campaign, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hMA_enable, Convar_MA_en);
-	g_iMA_enable = 1;
-
-	g_hMA_enable_sur = CreateConVar(
-		"l4d_perkmod_martialartist_enable_survival" ,
-		"1" ,
-		"Martial Artist perk: Allows the perk to be chosen by players in survival, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hMA_enable_sur, Convar_MA_en_sur);
-	g_iMA_enable_sur = 1;
-
-	g_hMA_enable_vs = CreateConVar(
-		"l4d_perkmod_martialartist_enable_versus" ,
-		"1" ,
-		"Martial Artist perk: Allows the perk to be chosen by players in versus, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hMA_enable_vs, Convar_MA_en_vs);
-	g_iMA_enable_vs = 1;
 
 	//extreme conditioning
 	g_hExtreme_rate = CreateConVar(
@@ -1457,6 +1458,129 @@ public Convar_Stopping_en_vs (Handle:convar, const String:oldValue[], const Stri
 	Stopping_RunChecks();
 }
 
+//sleight of hand
+public Convar_SoH (Handle:convar, const String:oldValue[], const String:newValue[])
+{
+	new Float:flF=StringToFloat(newValue);
+	if (flF<0.02)
+		flF=0.02;
+	else if (flF>0.9)
+		flF=0.9;
+	g_flSoH_rate = flF;
+}
+
+public Convar_SoH_en (Handle:convar, const String:oldValue[], const String:newValue[])
+{
+	new iI=StringToInt(newValue);
+	if (iI==0)
+		iI=0;
+	else
+		iI=1;
+	g_iSoH_enable = iI;
+}
+
+public Convar_SoH_en_sur (Handle:convar, const String:oldValue[], const String:newValue[])
+{
+	new iI=StringToInt(newValue);
+	if (iI==0)
+		iI=0;
+	else
+		iI=1;
+	g_iSoH_enable_sur = iI;
+}
+
+public Convar_SoH_en_vs (Handle:convar, const String:oldValue[], const String:newValue[])
+{
+	new iI=StringToInt(newValue);
+	if (iI==0)
+		iI=0;
+	else
+		iI=1;
+	g_iSoH_enable_vs = iI;
+}
+
+//pyrotechnician
+public Convar_Pyro (Handle:convar, const String:oldValue[], const String:newValue[])
+{
+	new iI=StringToInt(newValue);
+	if (iI<0)
+		iI=0;
+	else if (iI>300)
+		iI=300;
+	g_iPyro_maxticks = iI;
+}
+
+public Convar_Pyro_en (Handle:convar, const String:oldValue[], const String:newValue[])
+{
+	new iI=StringToInt(newValue);
+	if (iI==0)
+		iI=0;
+	else
+		iI=1;
+	g_iPyro_enable = iI;
+}
+
+public Convar_Pyro_en_sur (Handle:convar, const String:oldValue[], const String:newValue[])
+{
+	new iI=StringToInt(newValue);
+	if (iI==0)
+		iI=0;
+	else
+		iI=1;
+	g_iPyro_enable_sur = iI;
+}
+
+public Convar_Pyro_en_vs (Handle:convar, const String:oldValue[], const String:newValue[])
+{
+	new iI=StringToInt(newValue);
+	if (iI==0)
+		iI=0;
+	else
+		iI=1;
+	g_iPyro_enable_vs = iI;
+}
+
+//unbreakable
+public Convar_Unbreak (Handle:convar, const String:oldValue[], const String:newValue[])
+{
+	new iI=StringToInt(newValue);
+	if (iI<1)
+		iI=1;
+	else if (iI>100)
+		iI=100;
+	g_iUnbreak_hp = iI;
+}
+
+public Convar_Unbreak_en (Handle:convar, const String:oldValue[], const String:newValue[])
+{
+	new iI=StringToInt(newValue);
+	if (iI==0)
+		iI=0;
+	else
+		iI=1;
+	g_iUnbreak_enable = iI;
+}
+
+public Convar_Unbreak_en_sur (Handle:convar, const String:oldValue[], const String:newValue[])
+{
+	new iI=StringToInt(newValue);
+	if (iI==0)
+		iI=0;
+	else
+		iI=1;
+	g_iUnbreak_enable_sur = iI;
+}
+
+public Convar_Unbreak_en_vs (Handle:convar, const String:oldValue[], const String:newValue[])
+{
+	new iI=StringToInt(newValue);
+	if (iI==0)
+		iI=0;
+	else
+		iI=1;
+	g_iUnbreak_enable_vs = iI;
+}
+
 //spirit
 public Convar_SpiritBuff (Handle:convar, const String:oldValue[], const String:newValue[])
 {
@@ -1599,168 +1723,48 @@ public Convar_Help_convar (Handle:convar, const String:oldValue[], const String:
 	g_iHelpHand_convar = iI;
 }
 
-//unbreakable
-public Convar_Unbreak (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI<1)
-		iI=1;
-	else if (iI>100)
-		iI=100;
-	g_iUnbreak_hp = iI;
-}
-
-public Convar_Unbreak_en (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iUnbreak_enable = iI;
-}
-
-public Convar_Unbreak_en_sur (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iUnbreak_enable_sur = iI;
-}
-
-public Convar_Unbreak_en_vs (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iUnbreak_enable_vs = iI;
-}
-
-//sleight of hand
-public Convar_SoH (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new Float:flF=StringToFloat(newValue);
-	if (flF<0.02)
-		flF=0.02;
-	else if (flF>0.9)
-		flF=0.9;
-	g_flSoH_rate = flF;
-}
-
-public Convar_SoH_en (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iSoH_enable = iI;
-}
-
-public Convar_SoH_en_sur (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iSoH_enable_sur = iI;
-}
-
-public Convar_SoH_en_vs (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iSoH_enable_vs = iI;
-}
-
-//chem reliant
-public Convar_Chem (Handle:convar, const String:oldValue[], const String:newValue[])
+//martial artist
+//also rebuilds MA registry in order to
+//reassign new speed values
+public Convar_MA_maxpenalty (Handle:convar, const String:oldValue[], const String:newValue[])
 {
 	new iI=StringToInt(newValue);
 	if (iI<0)
 		iI=0;
-	else if (iI>150)
-		iI=150;
-	g_iChem_buff = iI;
+	else if (iI>6)
+		iI=6;
+	g_iMA_maxpenalty = iI;
+	MA_Rebuild();
 }
 
-public Convar_Chem_en (Handle:convar, const String:oldValue[], const String:newValue[])
+public Convar_MA_en (Handle:convar, const String:oldValue[], const String:newValue[])
 {
 	new iI=StringToInt(newValue);
 	if (iI==0)
 		iI=0;
 	else
 		iI=1;
-	g_iChem_enable = iI;
+	g_iMA_enable = iI;
 }
 
-public Convar_Chem_en_sur (Handle:convar, const String:oldValue[], const String:newValue[])
+public Convar_MA_en_sur (Handle:convar, const String:oldValue[], const String:newValue[])
 {
 	new iI=StringToInt(newValue);
 	if (iI==0)
 		iI=0;
 	else
 		iI=1;
-	g_iChem_enable_sur = iI;
+	g_iMA_enable_sur = iI;
 }
 
-public Convar_Chem_en_vs (Handle:convar, const String:oldValue[], const String:newValue[])
+public Convar_MA_en_vs (Handle:convar, const String:oldValue[], const String:newValue[])
 {
 	new iI=StringToInt(newValue);
 	if (iI==0)
 		iI=0;
 	else
 		iI=1;
-	g_iChem_enable_vs = iI;
-}
-
-//pyrotechnician
-public Convar_Pyro (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI<0)
-		iI=0;
-	else if (iI>300)
-		iI=300;
-	g_iPyro_maxticks = iI;
-}
-
-public Convar_Pyro_en (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iPyro_enable = iI;
-}
-
-public Convar_Pyro_en_sur (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iPyro_enable_sur = iI;
-}
-
-public Convar_Pyro_en_vs (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iPyro_enable_vs = iI;
+	g_iMA_enable_vs = iI;
 }
 
 //pack rat
@@ -1804,6 +1808,47 @@ public Convar_Pack_en_vs (Handle:convar, const String:oldValue[], const String:n
 	g_iPack_enable_vs = iI;
 }
 
+//chem reliant
+public Convar_Chem (Handle:convar, const String:oldValue[], const String:newValue[])
+{
+	new iI=StringToInt(newValue);
+	if (iI<0)
+		iI=0;
+	else if (iI>150)
+		iI=150;
+	g_iChem_buff = iI;
+}
+
+public Convar_Chem_en (Handle:convar, const String:oldValue[], const String:newValue[])
+{
+	new iI=StringToInt(newValue);
+	if (iI==0)
+		iI=0;
+	else
+		iI=1;
+	g_iChem_enable = iI;
+}
+
+public Convar_Chem_en_sur (Handle:convar, const String:oldValue[], const String:newValue[])
+{
+	new iI=StringToInt(newValue);
+	if (iI==0)
+		iI=0;
+	else
+		iI=1;
+	g_iChem_enable_sur = iI;
+}
+
+public Convar_Chem_en_vs (Handle:convar, const String:oldValue[], const String:newValue[])
+{
+	new iI=StringToInt(newValue);
+	if (iI==0)
+		iI=0;
+	else
+		iI=1;
+	g_iChem_enable_vs = iI;
+}
+
 //hard to kill
 public Convar_Hard (Handle:convar, const String:oldValue[], const String:newValue[])
 {
@@ -1843,50 +1888,6 @@ public Convar_Hard_en_vs (Handle:convar, const String:oldValue[], const String:n
 	else
 		iI=1;
 	g_iHard_enable_vs = iI;
-}
-
-//martial artist
-//also rebuilds MA registry in order to
-//reassign new speed values
-public Convar_MA_maxpenalty (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI<0)
-		iI=0;
-	else if (iI>6)
-		iI=6;
-	g_iMA_maxpenalty = iI;
-	MA_Rebuild();
-}
-
-public Convar_MA_en (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iMA_enable = iI;
-}
-
-public Convar_MA_en_sur (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iMA_enable_sur = iI;
-}
-
-public Convar_MA_en_vs (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iMA_enable_vs = iI;
 }
 
 //extreme conditioning
