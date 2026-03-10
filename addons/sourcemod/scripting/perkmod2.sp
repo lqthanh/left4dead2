@@ -502,6 +502,17 @@ new g_iPyro_enable_sur;
 new g_iPyro_enable_vs;
 new g_iPyro_maxticks;
 
+//martial artist, movement rate
+//campaign, non-campaign
+new Handle:g_hMA_enable;
+new Handle:g_hMA_enable_sur;
+new Handle:g_hMA_enable_vs;
+new Handle:g_hMA_maxpenalty;
+//associated var
+new g_iMA_enable;
+new g_iMA_enable_sur;
+new g_iMA_enable_vs;
+new g_iMA_maxpenalty;
 
 //SUR2 PERKS
 //unbreakable, bonus hp
@@ -553,18 +564,6 @@ new g_iHelpHand_convar;
 new Float:g_flHelpHand_timemult;
 new g_iHelpHand_buff;
 new g_iHelpHand_buff_vs;
-
-//martial artist, movement rate
-//campaign, non-campaign
-new Handle:g_hMA_enable;
-new Handle:g_hMA_enable_sur;
-new Handle:g_hMA_enable_vs;
-new Handle:g_hMA_maxpenalty;
-//associated var
-new g_iMA_enable;
-new g_iMA_enable_sur;
-new g_iMA_enable_vs;
-new g_iMA_maxpenalty;
 
 //SUR3 PERKS
 //pack rat, bonus ammo multiplier
@@ -932,6 +931,39 @@ CreateConvars()
 	HookConVarChange(g_hPyro_enable_vs, Convar_Pyro_en_vs);
 	g_iPyro_enable_vs = 1;
 
+	//martial artist
+	g_hMA_maxpenalty = CreateConVar(
+		"l4d_perkmod_martialartist_maximumpenalty" ,
+		"4" ,
+		"Martial Artist perk: The maximum shove penalty applied to survivors. It's Valve's coding, so I don't know what each value exactly translates to, but 6 is the maximum shove penalty (~1.5s)" ,
+		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
+	HookConVarChange(g_hMA_maxpenalty, Convar_MA_maxpenalty);
+	g_iMA_maxpenalty = 6;
+
+	g_hMA_enable = CreateConVar(
+		"l4d_perkmod_martialartist_enable" ,
+		"1" ,
+		"Martial Artist perk: Allows the perk to be chosen by players in campaign, 0=disabled, 1=enabled" ,
+		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
+	HookConVarChange(g_hMA_enable, Convar_MA_en);
+	g_iMA_enable = 1;
+
+	g_hMA_enable_sur = CreateConVar(
+		"l4d_perkmod_martialartist_enable_survival" ,
+		"1" ,
+		"Martial Artist perk: Allows the perk to be chosen by players in survival, 0=disabled, 1=enabled" ,
+		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
+	HookConVarChange(g_hMA_enable_sur, Convar_MA_en_sur);
+	g_iMA_enable_sur = 1;
+
+	g_hMA_enable_vs = CreateConVar(
+		"l4d_perkmod_martialartist_enable_versus" ,
+		"1" ,
+		"Martial Artist perk: Allows the perk to be chosen by players in versus, 0=disabled, 1=enabled" ,
+		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
+	HookConVarChange(g_hMA_enable_vs, Convar_MA_en_vs);
+	g_iMA_enable_vs = 1;
+
 	//unbreakable
 	g_hUnbreak_hp = CreateConVar(
 		"l4d_perkmod_unbreakable_bonushealth" ,
@@ -1086,39 +1118,6 @@ CreateConvars()
 		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
 	HookConVarChange(g_hHelpHand_convar, Convar_Help_convar);
 	g_iHelpHand_convar = 1;
-
-	//martial artist
-	g_hMA_maxpenalty = CreateConVar(
-		"l4d_perkmod_martialartist_maximumpenalty" ,
-		"4" ,
-		"Martial Artist perk: The maximum shove penalty applied to survivors. It's Valve's coding, so I don't know what each value exactly translates to, but 6 is the maximum shove penalty (~1.5s)" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hMA_maxpenalty, Convar_MA_maxpenalty);
-	g_iMA_maxpenalty = 6;
-
-	g_hMA_enable = CreateConVar(
-		"l4d_perkmod_martialartist_enable" ,
-		"1" ,
-		"Martial Artist perk: Allows the perk to be chosen by players in campaign, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hMA_enable, Convar_MA_en);
-	g_iMA_enable = 1;
-
-	g_hMA_enable_sur = CreateConVar(
-		"l4d_perkmod_martialartist_enable_survival" ,
-		"1" ,
-		"Martial Artist perk: Allows the perk to be chosen by players in survival, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hMA_enable_sur, Convar_MA_en_sur);
-	g_iMA_enable_sur = 1;
-
-	g_hMA_enable_vs = CreateConVar(
-		"l4d_perkmod_martialartist_enable_versus" ,
-		"1" ,
-		"Martial Artist perk: Allows the perk to be chosen by players in versus, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hMA_enable_vs, Convar_MA_en_vs);
-	g_iMA_enable_vs = 1;
 
 	//pack rat
 	g_hPack_ammomult = CreateConVar(
@@ -1303,7 +1302,7 @@ CreateConvars()
 	g_hSur1_default = CreateConVar(
 		"l4d_perkmod_default_survivor1" ,
 		"1" ,
-		"Default selected perk for Survivor, Primary: 1 = stopping power, 2 = sleight of hand, 3 = pyrotechnician" ,
+		"Default selected perk for Survivor, Primary: 1 = stopping power, 2 = sleight of hand, 3 = pyrotechnician, 4 = martial artist" ,
 		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
 	HookConVarChange(g_hSur1_default, Convar_Def_Sur1);
 	g_iSur1_default = 1;
@@ -1311,7 +1310,7 @@ CreateConvars()
 	g_hSur2_default = CreateConVar(
 		"l4d_perkmod_default_survivor2" ,
 		"1" ,
-		"Default selected perk for Survivor, Secondary: 1 = unbreakable, 2 = spirit, 3 = helping hand, 4 = martial artist" ,
+		"Default selected perk for Survivor, Secondary: 1 = unbreakable, 2 = spirit, 3 = helping hand" ,
 		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
 	HookConVarChange(g_hSur2_default, Convar_Def_Sur2);
 	g_iSur2_default = 1;
@@ -1553,6 +1552,50 @@ public Convar_Pyro_en_vs (Handle:convar, const String:oldValue[], const String:n
 	g_iPyro_enable_vs = iI;
 }
 
+//martial artist
+//also rebuilds MA registry in order to
+//reassign new speed values
+public Convar_MA_maxpenalty (Handle:convar, const String:oldValue[], const String:newValue[])
+{
+	new iI=StringToInt(newValue);
+	if (iI<0)
+		iI=0;
+	else if (iI>6)
+		iI=6;
+	g_iMA_maxpenalty = iI;
+	MA_Rebuild();
+}
+
+public Convar_MA_en (Handle:convar, const String:oldValue[], const String:newValue[])
+{
+	new iI=StringToInt(newValue);
+	if (iI==0)
+		iI=0;
+	else
+		iI=1;
+	g_iMA_enable = iI;
+}
+
+public Convar_MA_en_sur (Handle:convar, const String:oldValue[], const String:newValue[])
+{
+	new iI=StringToInt(newValue);
+	if (iI==0)
+		iI=0;
+	else
+		iI=1;
+	g_iMA_enable_sur = iI;
+}
+
+public Convar_MA_en_vs (Handle:convar, const String:oldValue[], const String:newValue[])
+{
+	new iI=StringToInt(newValue);
+	if (iI==0)
+		iI=0;
+	else
+		iI=1;
+	g_iMA_enable_vs = iI;
+}
+
 //unbreakable
 public Convar_Unbreak (Handle:convar, const String:oldValue[], const String:newValue[])
 {
@@ -1744,50 +1787,6 @@ public Convar_Help_convar (Handle:convar, const String:oldValue[], const String:
 	else
 		iI=1;
 	g_iHelpHand_convar = iI;
-}
-
-//martial artist
-//also rebuilds MA registry in order to
-//reassign new speed values
-public Convar_MA_maxpenalty (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI<0)
-		iI=0;
-	else if (iI>6)
-		iI=6;
-	g_iMA_maxpenalty = iI;
-	MA_Rebuild();
-}
-
-public Convar_MA_en (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iMA_enable = iI;
-}
-
-public Convar_MA_en_sur (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iMA_enable_sur = iI;
-}
-
-public Convar_MA_en_vs (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iMA_enable_vs = iI;
 }
 
 //pack rat
@@ -3180,6 +3179,15 @@ AssignRandomPerks (iCid)
 		iPerkType[iPerkCount]=3;
 	}
 
+	//4 martial artist
+	if (g_iMA_enable==1			&&	g_iL4D_GameMode==0
+		|| g_iMA_enable_sur==1	&&	g_iL4D_GameMode==1
+		|| g_iMA_enable_vs==1	&&	g_iL4D_GameMode==2)
+	{
+		iPerkCount++;
+		iPerkType[iPerkCount]=4;
+	}
+
 	//randomize a perk
 	if (iPerkCount>0)
 		g_iSur1[iCid] = iPerkType[ GetRandomInt(1,iPerkCount) ];
@@ -3214,15 +3222,6 @@ AssignRandomPerks (iCid)
 	{
 		iPerkCount++;
 		iPerkType[iPerkCount]=3;
-	}
-
-	//4 martial artist
-	if (g_iMA_enable==1			&&	g_iL4D_GameMode==0
-		|| g_iMA_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iMA_enable_vs==1	&&	g_iL4D_GameMode==2)
-	{
-		iPerkCount++;
-		iPerkType[iPerkCount]=4;
 	}
 
 	//randomize a perk
@@ -4322,12 +4321,12 @@ Pyro_Clear (bool:bRoundStart)
 
 
 //=============================
-// Sur2: Martial Artist
+// Sur1: Martial Artist
 //=============================
 
 MA_RunChecks ()
 {
-	if (g_iSur2_enable==1
+	if (g_iSur1_enable==1
 		|| (g_iMA_enable==1		&&	g_iL4D_GameMode==0)
 		|| (g_iMA_enable_sur==1	&&	g_iL4D_GameMode==1)
 		|| (g_iMA_enable_vs==1	&&	g_iL4D_GameMode==2))
@@ -4353,7 +4352,7 @@ Event_Confirm_MA (iCid)
 
 	if (IsClientInGame(iCid)==true
 		&& IsPlayerAlive(iCid)==true
-		&& g_iSur2[iCid]==4
+		&& g_iSur1[iCid]==4
 		&& g_iConfirm[iCid]==1
 		&& GetClientTeam(iCid)==2)
 	{
@@ -4381,7 +4380,7 @@ MA_Rebuild ()
 		return;
 
 	//check if perk is enabled
-	if (g_iSur2_enable==0
+	if (g_iSur1_enable==0
 		|| g_iMA_enable==0		&&	g_iL4D_GameMode==0
 		|| g_iMA_enable_sur==0	&&	g_iL4D_GameMode==1
 		|| g_iMA_enable_vs==0	&&	g_iL4D_GameMode==2)
@@ -4394,7 +4393,7 @@ MA_Rebuild ()
 	{
 		if (IsClientInGame(iI)==true
 			&& IsPlayerAlive(iI)==true
-			&& g_iSur2[iI]==4
+			&& g_iSur1[iI]==4
 			&& g_iConfirm[iI]==1
 			&& GetClientTeam(iI)==2)
 		{
@@ -5862,6 +5861,12 @@ public Handle:Menu_Top (iCid)
 		|| g_iPyro_enable_sur==1	&&	g_iL4D_GameMode==1
 		|| g_iPyro_enable_vs==1		&&	g_iL4D_GameMode==2))
 		st_perk="Pyrotechnician";
+	else if (g_iSur1[iCid]==4
+		&& g_iL4D_12 == 2
+		&& (g_iMA_enable==1		&&	g_iL4D_GameMode==0
+		|| g_iMA_enable_sur==1	&&	g_iL4D_GameMode==1
+		|| g_iMA_enable_vs==1	&&	g_iL4D_GameMode==2))
+		st_perk="Martial Artist";
 	else
 		st_perk="Not set";
 
@@ -5888,12 +5893,6 @@ public Handle:Menu_Top (iCid)
 		|| g_iHelpHand_enable_sur==1	&&	g_iL4D_GameMode==1
 		|| g_iHelpHand_enable_vs==1		&&	g_iL4D_GameMode==2))
 		st_perk="Helping Hand";
-	else if (g_iSur2[iCid]==4
-		&& g_iL4D_12 == 2
-		&& (g_iMA_enable==1		&&	g_iL4D_GameMode==0
-		|| g_iMA_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iMA_enable_vs==1	&&	g_iL4D_GameMode==2))
-		st_perk="Martial Artist";
 	else
 		st_perk="Not set";
 
@@ -6075,6 +6074,16 @@ public Handle:Menu_ShowChoices (iCid)
 		|| g_iPyro_enable_sur==1	&&	g_iL4D_GameMode==1
 		|| g_iPyro_enable_vs==1		&&	g_iL4D_GameMode==2))
 		Format(st_perk,128,"Pyrotechnician (%t)", "PyroDescriptionPanel");
+	else if (iPerk == 4
+		&& (g_iMA_enable==1		&&	g_iL4D_GameMode==0
+		|| g_iMA_enable_sur==1	&&	g_iL4D_GameMode==1
+		|| g_iMA_enable_vs==1	&&	g_iL4D_GameMode==2))
+	{
+		if (g_iMA_maxpenalty < 6)
+			Format(st_perk,128,"Martial Artist (%t)", "MartialArtistDescriptionPanel");
+		else
+			Format(st_perk,128,"Martial Artist (%t)", "MartialArtistDescriptionPanel_noreduc");
+	}
 	else
 		Format(st_perk,128,"%t", "NotSet");
 
@@ -6119,16 +6128,6 @@ public Handle:Menu_ShowChoices (iCid)
 			Format(st_perk,128,"Helping Hand (%t +%i)", "HelpingHandDescriptionPanel2", iBuff);
 		else
 			Format(st_perk,128,"Helping Hand (%t +%i)", "HelpingHandDescriptionPanel", iBuff);
-	}
-	else if (iPerk == 4
-		&& (g_iMA_enable==1		&&	g_iL4D_GameMode==0
-		|| g_iMA_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iMA_enable_vs==1	&&	g_iL4D_GameMode==2))
-	{
-		if (g_iMA_maxpenalty < 6)
-			Format(st_perk,128,"Martial Artist (%t)", "MartialArtistDescriptionPanel");
-		else
-			Format(st_perk,128,"Martial Artist (%t)", "MartialArtistDescriptionPanel_noreduc");
 	}
 	else
 		Format(st_perk,128,"%t", "NotSet");
@@ -6256,6 +6255,32 @@ public Handle:Menu_Sur1Perk (client)
 		DrawPanelText(menu, st_display);
 	}
 
+	//set name for perk 4
+	if (g_iMA_enable==0			&&	g_iL4D_GameMode==0
+		|| g_iMA_enable_sur==0	&&	g_iL4D_GameMode==1
+		|| g_iMA_enable_vs==0	&&	g_iL4D_GameMode==2
+		|| g_iL4D_12 != 2)
+	{
+		DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
+	}
+	else
+	{
+		switch (g_iSur1[client])
+		{
+			case 4: st_current="(CURRENT)";
+			default: st_current="";
+		}
+		Format(st_display,64,"Martial Artist %s",st_current);
+		DrawPanelItem(menu,st_display);
+		Format(st_display,64,"%t", "MartialArtistDescriptionPanel1");
+		DrawPanelText(menu, st_display);
+		if (g_iMA_maxpenalty <6)
+		{
+			Format(st_display,64,"%t", "MartialArtistDescriptionPanel2");
+			DrawPanelText(menu, st_display);
+		}
+	}
+
 	return menu;
 }
 
@@ -6276,6 +6301,9 @@ public Menu_ChooseSur1Perk (Handle:menu, MenuAction:action, param1, param2)
 			//pyrotechnician
 			case 3:
 				g_iSur1[param1]=3;
+			//martial artist
+			case 4:
+				g_iSur1[param1]=4;
 		}
 	}
 
@@ -6379,33 +6407,6 @@ public Handle:Menu_Sur2Perk (client)
 			Format(st_display,64,"%t +%i", "HelpingHandDescriptionPanel", iBuff);
 			DrawPanelText(menu,st_display);
 		}
-	
-		
-		//set name for perk 4, Martial Artist
-		if (g_iMA_enable==0			&&	g_iL4D_GameMode==0
-			|| g_iMA_enable_sur==0	&&	g_iL4D_GameMode==1
-			|| g_iMA_enable_vs==0	&&	g_iL4D_GameMode==2
-			|| g_iL4D_12 != 2)
-		{
-			DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
-		}
-		else
-		{
-			switch (g_iSur2[client])
-			{
-				case 4: st_current="(CURRENT)";
-				default: st_current="";
-			}
-			Format(st_display,64,"Martial Artist %s",st_current);
-			DrawPanelItem(menu,st_display);
-			Format(st_display,64,"%t", "MartialArtistDescriptionPanel1");
-			DrawPanelText(menu, st_display);
-			if (g_iMA_maxpenalty <6)
-			{
-				Format(st_display,64,"%t", "MartialArtistDescriptionPanel2");
-				DrawPanelText(menu, st_display);
-			}
-		}
 	}
 
 	return menu;
@@ -6428,9 +6429,6 @@ public Menu_ChooseSur2Perk (Handle:menu, MenuAction:action, param1, param2)
 			//helping hand
 			case 3:
 				g_iSur2[param1]=3;
-			//martial artist
-			case 4:
-				g_iSur2[param1]=4;
 		}
 	}
 
