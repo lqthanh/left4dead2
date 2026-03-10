@@ -256,18 +256,19 @@
 		Quick hotfix for Extreme Conditioning not applying sometimes.
 - version 2.2.2
 		Another quick hotfix, this time the ability cooldown perks shouldn't be broken with every patch.
+
+- version 1.0.rw:
+		Remove SI perks.
+		QOL:
+			Fix, Update Menu.
+			Added Native Function.
+
 - version 2.2.2.LQT
 		Perks:
 			Change Pyrotechnician: 
 				For a set amount of time, you will be given a ( pipe bomb -> random type )
 			Change Unbreakable: heal full HP
 			Change Little Leaguer: gives a ( baseball bat -> katana )
-		Compatibility:
-			Native:
-				Added Native_Pyro_OnWeaponFire
-		QOL:
-			Fix bug.
-			Update Start Menu.
 
 ==========================================================================
 ========================================================================*/
@@ -277,9 +278,9 @@
 #define PLUGIN_VERSION "2.2.2.LQT"
 public Plugin:myinfo=
 {
-	name="PerkMod",
-	author="tPoncho",
-	description="Adds Call Of Duty-style perks for L4D",
+	name="PerkMod Rework",
+	author="tPoncho, LQT",
+	description="Adds Call Of Duty-style perks for L4D2",
 	version=PLUGIN_VERSION,
 	url=""
 }
@@ -3238,7 +3239,7 @@ public Action:Timer_ShowTopMenu (Handle:timer, any:iCid)
 		if (iT==2)
 			SendPanelToClient(Menu_Initial(iCid),iCid,Menu_ChooseInit,MENU_TIME_FOREVER);
 		else if (iT==3)
-			SendPanelToClient(Menu_Initial(iCid),iCid,Menu_ChooseInit_Inf,MENU_TIME_FOREVER);
+			g_iConfirm[iCid] = 1;
 	}
 	else
 		AssignRandomPerks(iCid);
@@ -6185,14 +6186,12 @@ public Action:MenuOpen_OnSay(iCid, args)
 		if (iT==2)
 			SendPanelToClient(Menu_Initial(iCid),iCid,Menu_ChooseInit,MENU_TIME_FOREVER);
 		else if (iT==3)
-			SendPanelToClient(Menu_Initial(iCid),iCid,Menu_ChooseInit_Inf,MENU_TIME_FOREVER);
+			g_iConfirm[iCid] = 1;
 		return Plugin_Continue;
 	}
 
 	if (iT==2)
 		SendPanelToClient(Menu_ShowChoices(iCid),iCid,Menu_DoNothing,15);
-	else if (iT==3)
-		SendPanelToClient(Menu_ShowChoices_Inf(iCid),iCid,Menu_DoNothing,15);
 
 	return Plugin_Continue;
 }
@@ -6291,39 +6290,6 @@ public Menu_ChooseInit (Handle:topmenu, MenuAction:action, param1, param2)
 	{
 		if (IsClientInGame(param1)==true)
 			SendPanelToClient(Menu_Initial(param1),param1,Menu_ChooseInit,MENU_TIME_FOREVER);
-	}
-}
-
-public Menu_ChooseInit_Inf (Handle:topmenu, MenuAction:action, param1, param2)
-{
-	if (topmenu!=INVALID_HANDLE) CloseHandle(topmenu);
-	if (action==MenuAction_Select)
-	{
-		switch(param2)
-		{
-			case 6:
-				SendPanelToClient(Menu_Top_Inf(param1),param1,Menu_ChooseSubMenu_Inf,MENU_TIME_FOREVER);
-			case 7:
-				{
-					AssignRandomPerks(param1);
-					PrintHintText(param1,"Perkmod: %t", "ThanksForChoosingMessage");
-				}
-			case 8:
-				{
-					g_iConfirm[param1]=1;
-					PrintHintText(param1,"Perkmod: %t", "ThanksForChoosingMessage");
-				}
-			default:
-				{
-					if (IsClientInGame(param1)==true)
-						SendPanelToClient(Menu_Initial(param1),param1,Menu_ChooseInit_Inf,MENU_TIME_FOREVER);
-				}
-		}
-	}
-	else
-	{
-		if (IsClientInGame(param1)==true)
-			SendPanelToClient(Menu_Initial(param1),param1,Menu_ChooseInit_Inf,MENU_TIME_FOREVER);
 	}
 }
 
@@ -6478,44 +6444,6 @@ public Menu_ChooseSubMenu (Handle:topmenu, MenuAction:action, param1, param2)
 }
 
 
-//build top menu,infected
-public Handle:Menu_Top_Inf (iCid)
-{
-	new Handle:menu = CreatePanel();
-	SetPanelTitle(menu, "tPoncho's Perkmod - Main Menu");
-	DrawPanelText(menu,"Select a submenu to choose a perk");
-
-	DrawPanelText(menu,"In order for your perks to work");
-	DrawPanelText(menu,"you MUST hit 'done'");
-	DrawPanelItem(menu,"DONE");
-	return menu;
-}
-
-//choose a submenu from top perk menu, infected
-public Menu_ChooseSubMenu_Inf (Handle:topmenu, MenuAction:action, param1, param2)
-{
-	if (topmenu!=INVALID_HANDLE) CloseHandle(topmenu);
-	if (action==MenuAction_Select)
-	{
-		switch(param2)
-		{
-			case 8:
-				SendPanelToClient(Menu_Confirm(param1),param1,Menu_ChooseConfirm_Inf,MENU_TIME_FOREVER);
-			default:
-				{
-					if (IsClientInGame(param1)==true)
-						SendPanelToClient(Menu_Top_Inf(param1),param1,Menu_ChooseSubMenu_Inf,MENU_TIME_FOREVER);
-				}
-		}
-	}
-
-	else
-	{
-		if (IsClientInGame(param1)==true)
-			SendPanelToClient(Menu_Top_Inf(param1),param1,Menu_ChooseSubMenu_Inf,MENU_TIME_FOREVER);
-	}
-}
-
 //menu for confirming perk choices
 public Handle:Menu_Confirm (iCid)
 {
@@ -6575,32 +6503,6 @@ public Menu_ChooseConfirm (Handle:topmenu, MenuAction:action, param1, param2)
 
 	else
 		SendPanelToClient(Menu_Top(param1),param1,Menu_ChooseSubMenu,MENU_TIME_FOREVER);
-}
-
-public Menu_ChooseConfirm_Inf (Handle:topmenu, MenuAction:action, param1, param2)
-{
-	if (topmenu!=INVALID_HANDLE) CloseHandle(topmenu);
-	if (action==MenuAction_Select)
-	{
-		switch(param2)
-		{
-			case 1:
-			{
-				g_iConfirm[param1]=1;
-				PrintToChat(param1,"\x03[SM] %t", "ConfirmedMessage");
-			}
-			case 2:
-				SendPanelToClient(Menu_Top_Inf(param1),param1,Menu_ChooseSubMenu_Inf,MENU_TIME_FOREVER);
-			default:
-			{
-				if (IsClientInGame(param1)==true)
-					SendPanelToClient(Menu_Top_Inf(param1),param1,Menu_ChooseSubMenu_Inf,MENU_TIME_FOREVER);
-			}
-		}
-	}
-
-	else
-		SendPanelToClient(Menu_Top_Inf(param1),param1,Menu_ChooseSubMenu_Inf,MENU_TIME_FOREVER);
 }
 
 //do nothing
@@ -6744,15 +6646,6 @@ public Handle:Menu_ShowChoices (iCid)
 }
 
 
-
-//shows perk choices, infected
-public Handle:Menu_ShowChoices_Inf (iCid)
-{
-	new Handle:menu=CreatePanel();
-	SetPanelTitle(menu,"tPoncho's Perkmod: Your perks for this round");
-
-	return menu;
-}
 
 
 
