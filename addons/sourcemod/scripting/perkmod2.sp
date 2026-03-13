@@ -296,6 +296,9 @@ public Plugin:myinfo=
 #pragma semicolon 1
 #include <sourcemod>
 #include <sdktools>
+#include <sdkhooks>
+#include <dhooks>
+#include <left4dhooks>
 
 // #endregion
 // =======================================================================
@@ -316,32 +319,6 @@ new g_iConfirm[MAXPLAYERS+1];	//check if perks are confirmed, to prevent mid-gam
 //timer perks handle
 new Handle:g_hTimerPerks = INVALID_HANDLE;
 
-//PYROTECHNICIAN PERK
-//track how many grenades are carried for pyrotechnician perk
-new g_iGren[MAXPLAYERS+1];
-//used so functions don't confuse legitimate grenade pickups
-//with acquisitions from grenadier perk
-new g_iGrenThrow[MAXPLAYERS+1];
-//used to track which type of grenade was used;
-//1 = pipe, 2 = molotov
-new g_iGrenType[MAXPLAYERS+1];
-//used to track how many "ticks" have passed
-//since we want to give pipe bombs after a given
-//number of ticks
-new g_iPyroTicks[MAXPLAYERS+1];
-new g_iPyroRegisterIndex[MAXPLAYERS+1];
-//and this tracks how many have DT
-new g_iPyroRegisterCount = 0;
-
-//SPIRIT PERK
-//0 = not incapped
-//1 = incapped
-new g_iPIncap[MAXPLAYERS+1];
-//used to keep track of whether cooldown is in effect
-new g_iSpiritCooldown[MAXPLAYERS+1];
-//used to track the timers themselves
-new Handle:g_iSpiritTimer[MAXPLAYERS+1];
-
 //SLEIGHT OF HAND PERK
 //this keeps track of the default values for
 //reload speeds for the different shotgun types
@@ -361,6 +338,23 @@ const Float:g_flSoHPumpS = 0.5;
 const Float:g_flSoHPumpI = 0.5;
 const Float:g_flSoHPumpE = 0.6;
 
+//PYROTECHNICIAN PERK
+//track how many grenades are carried for pyrotechnician perk
+new g_iGren[MAXPLAYERS+1];
+//used so functions don't confuse legitimate grenade pickups
+//with acquisitions from grenadier perk
+new g_iGrenThrow[MAXPLAYERS+1];
+//used to track which type of grenade was used;
+//1 = pipe, 2 = molotov
+new g_iGrenType[MAXPLAYERS+1];
+//used to track how many "ticks" have passed
+//since we want to give pipe bombs after a given
+//number of ticks
+new g_iPyroTicks[MAXPLAYERS+1];
+new g_iPyroRegisterIndex[MAXPLAYERS+1];
+//and this tracks how many have DT
+new g_iPyroRegisterCount = 0;
+
 //MARTIAL ARTIST PERK
 //similar to Double Tap
 new g_iMARegisterIndex[MAXPLAYERS+1];
@@ -372,6 +366,15 @@ new g_iMAEntid[MAXPLAYERS+1];
 new g_iMAEntid_notmelee[MAXPLAYERS+1];
 //this tracks the attack count, similar to twinSF
 new g_iMAAttCount[MAXPLAYERS+1];
+
+//SPIRIT PERK
+//0 = not incapped
+//1 = incapped
+new g_iPIncap[MAXPLAYERS+1];
+//used to keep track of whether cooldown is in effect
+new g_iSpiritCooldown[MAXPLAYERS+1];
+//used to track the timers themselves
+new Handle:g_iSpiritTimer[MAXPLAYERS+1];
 
 //PACK RAT PERK
 //prevents perk from applying multiple times within a short interval
@@ -764,9 +767,12 @@ public OnPluginStart()
 	HookEvent("player_transitioned", Event_PlayerTransitioned);
 	HookEvent("player_connect_full", Event_PConnect);
 	HookEvent("player_disconnect", Event_PDisconnect);
-	HookEvent("round_start", Event_RoundStart);
 	HookEvent("player_death", Event_PlayerDeath);
+
+	// Round
+	HookEvent("round_start", Event_RoundStart);
 	HookEvent("round_end", Event_RoundEnd);
+
 	RegConsoleCmd("sm_perks", MenuOpen_OnSay);
 	RegConsoleCmd("sm_setperks", SS_SetPerks);
 	HookConVarChange(FindConVar("mp_gamemode"),Convar_GameMode);
