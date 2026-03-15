@@ -736,30 +736,7 @@ public OnPluginStart()
 	//anything here that pertains to the actual
 	//workings of the perks (ie, events and timers)
 
-	//hooks for Sur1 perks
-	HookEvent("player_hurt", Event_PlayerHurtPre, EventHookMode_Pre);
-	HookEvent("infected_hurt", Event_InfectedHurtPre, EventHookMode_Pre);
-	HookEvent("item_pickup", Event_ItemPickup);
-	HookEvent("spawner_give_item", Event_ItemPickup);
-	HookEvent("weapon_fire", Event_WeaponFire);
-	HookEvent("lunge_pounce", Event_PounceLanded);
-	HookEvent("pounce_stopped", Event_PounceStop);
-	HookEvent("player_ledge_grab", Event_LedgeGrab);
-	HookEvent("player_team", Event_PlayerTeam);
-	HookEvent("weapon_reload", Event_Reload);
-	HookEvent("heal_success", Event_PlayerHealed);
-	HookEvent("survivor_rescued", Event_PlayerRescued);
-	HookEvent("pills_used", Event_PillsUsed, EventHookMode_Pre);
-	HookEvent("revive_begin", Event_ReviveBeginPre, EventHookMode_Pre);
-	HookEvent("revive_success", Event_ReviveSuccess);
-	HookEvent("ammo_pickup", Event_AmmoPickup);
-	HookEvent("player_incapacitated", Event_Incap);
-	HookEvent("tongue_grab", Event_TongueGrabPre, EventHookMode_Pre);
-	HookEvent("tongue_release", Event_TongueRelease);
-	HookEvent("choke_end", Event_TongueRelease);
-	HookEvent("tongue_broke_bent", Event_TongueRelease_novictimid);
-	HookEvent("choke_stopped", Event_TongueRelease_newsmokerid);
-	HookEvent("tongue_pull_stopped", Event_TongueRelease_newsmokerid);
+	// Player
 	HookEvent("player_spawn", Event_PlayerSpawn);
 	HookEvent("player_first_spawn", Event_PlayerFirstSpawn);
 	HookEvent("player_transitioned", Event_PlayerTransitioned);
@@ -770,6 +747,44 @@ public OnPluginStart()
 	// Round
 	HookEvent("round_start", Event_RoundStart);
 	HookEvent("round_end", Event_RoundEnd);
+
+	// Sur1
+	// Stopping Power
+	HookEvent("player_hurt", Event_PlayerHurtPre, EventHookMode_Pre);
+	HookEvent("infected_hurt", Event_InfectedHurtPre, EventHookMode_Pre);
+	// Sleight of Hand
+	HookEvent("weapon_reload", Event_Reload);
+	// Pyrotechnician
+	HookEvent("weapon_fire", Event_WeaponFire);
+
+	// Sur2
+	// Unbreakable
+	HookEvent("heal_success", Event_PlayerHealed);
+	HookEvent("survivor_rescued", Event_PlayerRescued);
+	// Spirit
+	HookEvent("player_team", Event_PlayerTeam);
+	HookEvent("player_ledge_grab", Event_LedgeGrab);
+	HookEvent("lunge_pounce", Event_PounceLanded);
+	HookEvent("pounce_stopped", Event_PounceStop);
+	HookEvent("tongue_grab", Event_TongueGrabPre, EventHookMode_Pre);
+	HookEvent("tongue_release", Event_TongueRelease);
+	HookEvent("tongue_broke_bent", Event_TongueRelease_novictimid);
+	HookEvent("tongue_pull_stopped", Event_TongueRelease_newsmokerid);
+	HookEvent("choke_end", Event_TongueRelease);
+	HookEvent("choke_stopped", Event_TongueRelease_newsmokerid);
+	// Helping Hand
+	HookEvent("revive_begin", Event_ReviveBeginPre, EventHookMode_Pre);
+	HookEvent("revive_success", Event_ReviveSuccess);
+
+	// Sur3
+	// Pack Rat
+	HookEvent("item_pickup", Event_ItemPickup);
+	HookEvent("spawner_give_item", Event_ItemPickup);
+	HookEvent("ammo_pickup", Event_AmmoPickup);
+	// Chem Reliant
+	HookEvent("pills_used", Event_PillsUsed, EventHookMode_Pre);
+	// Hard To Kill
+	HookEvent("player_incapacitated", Event_Incap);
 
 	RegConsoleCmd("sm_perks", MenuOpen_OnSay);
 	RegConsoleCmd("sm_setperks", SS_SetPerks);
