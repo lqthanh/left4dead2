@@ -39,7 +39,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	return APLRes_Success;
 }
 
-#define GAMEDATA "l4d2_aim_down_sight_fix"
+#define GAMEDATA "miuwiki_autoscar"
 
 #define DEFAULT_ATTACK2_TIME 	0.4
 
@@ -91,20 +91,16 @@ enum struct PlayerData
 PlayerData
 	player[MAXPLAYERS + 1];
 
-bool 
-	g_bADSPluginAvailable = false;
-
 public void OnPluginStart()
 {
 	g_WeaponHookIds = new StringMap();
-	g_bADSPluginAvailable = LibraryExists("l4d2_aim_down_sight");
 	LoadGameData();
-	cvar_l4d2_scar_cycletime    = CreateConVar("l4d2_aim_down_sight_fix_cycletime", "0.11", "Auto fire cycle time. [min 0.03, 0=Same as weapon default cycle time]", FCVAR_NOTIFY, true, 0.0);
+	cvar_l4d2_scar_cycletime    = CreateConVar("miuwiki_autoscar_cycletime", "0.11", "Auto fire cycle time. [min 0.03, 0=Same as weapon default cycle time]", FCVAR_NOTIFY, true, 0.0);
 
 	GetCvars();
 	cvar_l4d2_scar_cycletime.AddChangeHook(ConVarChanged_Cvars);
 
-	AutoExecConfig(true, "l4d2_aim_down_sight_fix");
+	AutoExecConfig(true, "miuwiki_autoscar");
 
 	HookEvent("round_start", Event_RoundStart, EventHookMode_PostNoCopy);
 	
@@ -198,27 +194,6 @@ public void OnConfigsExecuted()
 void GetCvars()
 {
 	cvar.scarcycletime 		= cvar_l4d2_scar_cycletime.FloatValue;
-}
-
-public void OnAllPluginsLoaded()
-{
-	g_bADSPluginAvailable = LibraryExists("l4d2_aim_down_sight");
-}
-
-public void OnLibraryAdded(const char[] name)
-{
-	if(StrEqual(name, "l4d2_aim_down_sight"))
-	{
-		g_bADSPluginAvailable = true;
-	}
-}
-
-public void OnLibraryRemoved(const char[] name)
-{
-	if(StrEqual(name, "l4d2_aim_down_sight"))
-	{
-		g_bADSPluginAvailable = false;
-	}
 }
 
 public void OnMapStart()

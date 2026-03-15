@@ -76,7 +76,7 @@ enum struct PlayerData
 
 	// Per-player weapon attributes
 	float cycleTime;
-	char  weaponClass[64];
+	int weaponWorldModelIndex;
 }
 PlayerData
 	player[MAXPLAYERS + 1];
@@ -332,8 +332,8 @@ void Event_WeaponDrop(Event event, const char[] name, bool dontBroadcast)
 {
 	int propid = event.GetInt("propid");
 	EntStore[propid] = 0;
-	int owner = GetWeaponOwner(propid);
-	if (owner > 0 && player[owner].bZoom)
+	int owner = GetClientOfUserId(event.GetInt("userid"));
+	if (owner > 0)
 	{
 		ToggleAdsFix(owner, propid, false);
 	}
@@ -391,20 +391,13 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 		if (viewModel > 0)
 		{
 			int layerSequence = GetEntProp(viewModel, Prop_Send, "m_nLayerSequence");
-			int activeWeapon = GetPlayerWeapon(client);
-			char weaponClass[64];
 			char activityName[128];
-			
-			if (activeWeapon > 0)
-				GetEntityClassname(activeWeapon, weaponClass, sizeof(weaponClass));
-			else
-				Format(weaponClass, sizeof(weaponClass), "none");
 			
 			// Get real activity name from activity ID
 			GetActivityName(currentActivity[client], activityName, sizeof(activityName));
 			
-			PrintToServer("[ADS DEBUG] Client %N - Activity: %s (%d), m_nLayerSequence: %d, Weapon: %s, ADS: %s", 
-				client, activityName, currentActivity[client], layerSequence, weaponClass, player[client].bZoom ? "ON" : "OFF");
+			PrintToServer("[ADS DEBUG] Client %N - Activity: %s (%d), m_nLayerSequence: %d, ADS: %s", 
+				client, activityName, currentActivity[client], layerSequence, player[client].bZoom ? "ON" : "OFF");
 		}
 	}
 	
@@ -524,7 +517,6 @@ public MRESReturn DH_OnSelectWeightedSequence(int weapon, Handle hReturn, Handle
 			}
 			if (owner > 0)
 				player[owner].bZoom = false;
-				ToggleAdsFix(owner, weapon, false);
 		}
 	}
 	
@@ -606,7 +598,7 @@ MRESReturn DhookCallback_ItemPostFrame(int weapon)
 			
 			// Determine cycle time: SCAR uses cvar if > 0, others use weapon default
 			float nextAttackTime;
-			if(cvar.ads_scar_cycletime > 0.0 && StrEqual(player[client].weaponClass, "weapon_rifle_desert"))
+			if(cvar.ads_scar_cycletime > 0.0 && player[client].weaponWorldModelIndex == g_scar_precache_index )
 			{
 				nextAttackTime = cvar.ads_scar_cycletime;
 				// PrintToServer("[ADS] Fire (SCAR): nextAttack in %.3fs", nextAttackTime);
@@ -906,7 +898,7 @@ void LoadPlayerWeaponAttributes(int client, int weapon)
 	
 	// Load attributes using Left4DHooks
 	player[client].cycleTime = L4D2_GetFloatWeaponAttribute(classname, L4D2FWA_CycleTime);
-	strcopy(player[client].weaponClass, sizeof(player[].weaponClass), classname);
+	player[client].weaponWorldModelIndex = GetEntProp(weapon, Prop_Send, "m_iWorldModelIndex");
 }
 
 void ToggleAdsFix(int client, int weapon, bool enable)
@@ -916,7 +908,7 @@ void ToggleAdsFix(int client, int weapon, bool enable)
 	
 	if (weapon < 1 || !IsValidEntity(weapon))
 		return;
-
+	
 	SetEntProp(client, Prop_Data, "m_bPredictWeapons", enable ? 0 : 1);
 	
 	if (enable)
