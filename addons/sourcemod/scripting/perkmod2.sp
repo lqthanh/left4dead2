@@ -831,6 +831,12 @@ public OnPluginStart()
 	LoadTranslations("plugin.perkmod");
 }
 
+// #endregion
+// =======================================================================
+
+// =======================================================================
+// #region Convar Creation
+
 //just to give me a bit less of a headache,
 //all convar creation is called here
 CreateConvars()
@@ -2114,6 +2120,8 @@ public Convar_SurAll (Handle:convar, const String:oldValue[], const String:newVa
 
 
 
+// =======================================================================
+// #region Events
 
 //====================================================
 //====================================================
@@ -3392,6 +3400,12 @@ Bot_Sur3_PickRandom ()
 	else
 		return 0;
 }
+
+// #endregion
+// =======================================================================
+
+// =======================================================================
+// #region Ability Functions
 
 //=============================
 // Sur1: Stopping Power
@@ -5599,38 +5613,6 @@ public Action:HardToKill_Delayed (Handle:timer, any:iCid)
 	return Plugin_Stop;
 }
 
-
-
-//=============================
-// Sur3: Little Leaguer
-//=============================
-
-Event_Confirm_LittleLeaguer (iCid)
-{
-	if (iCid==0
-		|| GetClientTeam(iCid)!=2
-		|| IsPlayerAlive(iCid)==false
-		|| g_iConfirm[iCid]==0
-		|| g_iSur3[iCid]!=5)
-		return;
-
-	//check if perk is enabled
-	if (g_iSur3_enable==0
-		|| g_iChem_enable==0		&&	g_iL4D_GameMode==0
-		|| g_iChem_enable_sur==0	&&	g_iL4D_GameMode==1
-		|| g_iChem_enable_vs==0		&&	g_iL4D_GameMode==2)
-		return;
-
-	new iflags=GetCommandFlags("give");
-	SetCommandFlags("give", iflags & ~FCVAR_CHEAT);
-	FakeClientCommand(iCid,"give katana");
-	SetCommandFlags("give", iflags);
-
-	return;
-}
-
-
-
 //=============================
 // Sur3: Extreme Conditioning
 //=============================
@@ -5672,6 +5654,39 @@ Extreme_Rebuild ()
 	}
 }
 
+//=============================
+// Sur3: Little Leaguer
+//=============================
+
+Event_Confirm_LittleLeaguer (iCid)
+{
+	if (iCid==0
+		|| GetClientTeam(iCid)!=2
+		|| IsPlayerAlive(iCid)==false
+		|| g_iConfirm[iCid]==0
+		|| g_iSur3[iCid]!=5)
+		return;
+
+	//check if perk is enabled
+	if (g_iSur3_enable==0
+		|| g_iChem_enable==0		&&	g_iL4D_GameMode==0
+		|| g_iChem_enable_sur==0	&&	g_iL4D_GameMode==1
+		|| g_iChem_enable_vs==0		&&	g_iL4D_GameMode==2)
+		return;
+
+	new iflags=GetCommandFlags("give");
+	SetCommandFlags("give", iflags & ~FCVAR_CHEAT);
+	FakeClientCommand(iCid,"give katana");
+	SetCommandFlags("give", iflags);
+
+	return;
+}
+
+// #endregion
+// =======================================================================
+
+// =======================================================================
+// #region Menu
 
 //====================================================
 //====================================================
@@ -6570,6 +6585,11 @@ public Menu_ChooseSur3Perk (Handle:menu, MenuAction:action, param1, param2)
 }
 
 
+// #endregion
+// =======================================================================
+
+// =======================================================================
+// #region Debug
 
 //=============================
 //	DEBUG
@@ -6755,6 +6775,9 @@ public Action:Debug_StaminaTimer (Handle:timer, any:iCid)
 	PrintToChat(iCid,"\x03 m_flStamina \x01%i",iStaminaO);
 	PrintToChat(iCid,"\x03 - value \x01%f", GetEntDataFloat(iCid,iStaminaO));
 }*/
+
+// #endregion
+// =======================================================================
 
 // =======================================================================
 // #region Native
