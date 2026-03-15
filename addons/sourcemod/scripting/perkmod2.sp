@@ -754,7 +754,6 @@ public OnPluginStart()
 	HookEvent("revive_success", Event_ReviveSuccess);
 	HookEvent("ammo_pickup", Event_AmmoPickup);
 	HookEvent("player_incapacitated", Event_Incap);
-	HookEvent("ability_use", Event_AbilityUsePre, EventHookMode_Pre);
 	HookEvent("tongue_grab", Event_TongueGrabPre, EventHookMode_Pre);
 	HookEvent("tongue_release", Event_TongueRelease);
 	HookEvent("choke_end", Event_TongueRelease);
@@ -762,7 +761,6 @@ public OnPluginStart()
 	HookEvent("choke_stopped", Event_TongueRelease_newsmokerid);
 	HookEvent("tongue_pull_stopped", Event_TongueRelease_newsmokerid);
 	HookEvent("player_spawn", Event_PlayerSpawn);
-	HookEvent("ability_use", Event_AbilityUse);
 	HookEvent("player_first_spawn", Event_PlayerFirstSpawn);
 	HookEvent("player_transitioned", Event_PlayerTransitioned);
 	HookEvent("player_connect_full", Event_PConnect);
@@ -2294,32 +2292,6 @@ public Event_LedgeGrab (Handle:event, const String:name[], bool:dontBroadcast)
 
 	g_iPIncap[iCid]=1;
 	g_iMyDisabler[iCid] = 0;
-}
-
-public Action:Event_AbilityUsePre (Handle:event, const String:name[], bool:dontBroadcast)
-{
-	new iCid=GetClientOfUserId(GetEventInt(event,"userid"));
-	if (iCid==0 || g_iConfirm[iCid]==0) return Plugin_Continue;
-	decl String:stAb[24];
-	GetEventString(event,"ability",stAb,24);
-
-	//----DEBUG----
-	//PrintToChatAll("\x03ability used: \x01%s", st_ab);
-
-	return Plugin_Continue;
-}
-
-public Event_AbilityUse (Handle:event, const String:name[], bool:dontBroadcast)
-{
-	new iCid=GetClientOfUserId(GetEventInt(event,"userid"));
-	if (iCid==0)
-		return;
-
-	decl String:stAb[24];
-	GetEventString(event,"ability",stAb,24);
-
-	//----DEBUG----
-	//PrintToChatAll("\x03ability used: \x01%s", stAb);
 }
 
 public Action:Event_TongueGrabPre (Handle:event, const String:name[], bool:dontBroadcast)
