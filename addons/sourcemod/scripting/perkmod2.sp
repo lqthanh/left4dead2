@@ -786,19 +786,23 @@ public OnPluginStart()
 	// Hard To Kill
 	HookEvent("player_incapacitated", Event_Incap);
 
-	RegConsoleCmd("sm_perks", MenuOpen_OnSay);
-	RegConsoleCmd("sm_setperks", SS_SetPerks);
-	HookConVarChange(FindConVar("mp_gamemode"),Convar_GameMode);
-
 	//l4d2 only hooks
 	if (g_iL4D_12 == 2)
 	{
+		// Sur2
+		// Spirit
 		HookEvent("jockey_ride", Event_JockeyRide);
 		HookEvent("jockey_ride_end", Event_JockeyRideEnd);
 		HookEvent("charger_pummel_start", Event_ChargerPummelStart);
 		HookEvent("charger_pummel_end", Event_ChargerPummelEnd);
+		// Sur3
+		// Chem Reliant
 		HookEvent("adrenaline_used", Event_PillsUsed, EventHookMode_Pre);
 	}
+
+	RegConsoleCmd("sm_perks", MenuOpen_OnSay);
+	RegConsoleCmd("sm_setperks", SS_SetPerks);
+	HookConVarChange(FindConVar("mp_gamemode"),Convar_GameMode);
 
 	//debug
 	//RegConsoleCmd("say", Debug_OnSay);
@@ -2150,318 +2154,6 @@ public Convar_SurAll (Handle:convar, const String:oldValue[], const String:newVa
 // Events Directly related to perks
 //=============================
 
-//this trigger only runs on players, not common infected
-public Action:Event_PlayerHurtPre (Handle:event, const String:name[], bool:dontBroadcast)
-{
-	new iAtt=GetClientOfUserId(GetEventInt(event,"attacker"));
-	new iVic=GetClientOfUserId(GetEventInt(event,"userid"));
-
-	if (iVic==0) return Plugin_Continue;
-
-	new iDmgOrig=GetEventInt(event,"dmg_health");
-
-	//----DEBUG----
-	//new String:sWeapon[128];
-	//GetEventString(event,"weapon",sWeapon,128);
-	//PrintToChatAll("\x03attacker:\x01%i\x03 weapon:\x01%s\x03 type:\x01%i\x03 amount: \x01%i",iAtt,sWeapon,iType,iDmgOrig);
-
-
-	if (iAtt==0) return Plugin_Continue;
-
-	new iTA=GetClientTeam(iAtt);
-	decl String:stWpn[16];
-	GetEventString(event,"weapon",stWpn,16);
-
-	//----DEBUG----
-	//if (iTA==2) PrintToChatAll("\x03weapon:\x01%s\x03 type:\x01%i",stWpn,iType);
-
-	//if damage is from survivors to a non-survivor,
-	//check for damage add (stopping power)
-	if (Stopping_DamageAdd(iAtt,iVic,iTA,iDmgOrig,stWpn)==1)
-		return Plugin_Continue;
-
-	return Plugin_Continue;
-}
-
-public Event_Incap (Handle:event, const String:name[], bool:dontBroadcast)
-{
-	new iCid=GetClientOfUserId(GetEventInt(event,"userid"));
-
-	if (iCid==0) return;
-
-	if (GetClientTeam(iCid) == 2
-		&& GetEntData(iCid,g_iIncapO) != 0 )
-		g_iPIncap[iCid]=1;
-
-	HardToKill_OnIncap(iCid);
-}
-
-//called when player is healed
-public Event_PlayerHealed (Handle:event, const String:name[], bool:dontBroadcast)
-{
-	new iCid=GetClientOfUserId(GetEventInt(event,"subject"));
-	if (iCid==0 || g_iConfirm[iCid]==0) return;
-
-	Unbreakable_OnHeal(iCid);
-}
-
-//called when survivor spawns from closet
-public Event_PlayerRescued (Handle:event, const String:name[], bool:dontBroadcast)
-{
-	new iCid=GetClientOfUserId(GetEventInt(event,"victim"));
-	if (iCid==0 || g_iConfirm[iCid]==0)
-		return;
-
-	//reset vars related to spirit perk
-	g_iMyDisabler[iCid] = -1;
-	g_iPIncap[iCid]=0;
-	g_iSpiritCooldown[iCid]=0;
-	//rebuilds pyrotechnician registry
-	CreateTimer(0.3,Delayed_Rebuild,0);
-
-	//checks for unbreakable health bonus
-	Unbreakable_OnRescue(iCid);
-	//check for pyrotechnician bonus grenade
-	Event_Confirm_Grenadier (iCid);
-	//check for chem reliant bonus pills
-	Event_Confirm_ChemReliant(iCid);
-}
-
-//on game frame
-public OnGameFrame()
-{
-	//if frames aren't being processed,
-	//don't bother - otherwise we get LAG
-	//or even disconnects on map changes, etc...
-	
-	if (IsServerProcessing()==false
-		|| g_bIsLoading == true
-		|| g_bIsRoundStart == true)
-		return;
-
-	MA_OnGameFrame();
-}
-
-//on reload
-public Event_Reload (Handle:event, const String:name[], bool:dontBroadcast)
-{
-	new iCid=GetClientOfUserId(GetEventInt(event,"userid"));
-	if (iCid==0)
-		return;
-
-	SoH_OnReload(iCid);
-}
-
-//on weapon fire
-public Event_WeaponFire (Handle:event, const String:name[], bool:dontBroadcast)
-{
-	new iCid=GetClientOfUserId(GetEventInt(event,"userid"));
-	if (iCid==0)
-		return;
-
-	decl String:stWpn[24];
-	GetEventString(event,"weapon",stWpn,24);
-
-	Pyro_OnWeaponFire(iCid,stWpn);
-}
-//on drug use
-public Action:Event_PillsUsed (Handle:event, const String:name[], bool:dontBroadcast)
-{
-	new iCid=GetClientOfUserId(GetEventInt(event,"subject"));
-	if (iCid==0) return Plugin_Continue;
-
-	Chem_OnDrugUsed(iCid);
-
-	return Plugin_Continue;
-}
-
-//on revive begin
-public Action:Event_ReviveBeginPre (Handle:event, const String:name[], bool:dontBroadcast)
-{
-	new iCid=GetClientOfUserId(GetEventInt(event,"userid"));
-
-	if (iCid==0) return Plugin_Continue;
-
-	HelpHand_OnReviveBegin (iCid);
-
-	return Plugin_Continue;
-}
-
-//on revive end
-public Event_ReviveSuccess (Handle:event, const String:name[], bool:dontBroadcast)
-{
-	new iCid=GetClientOfUserId(GetEventInt(event,"userid"));
-	new iSub=GetClientOfUserId(GetEventInt(event,"subject"));
-
-	if (iCid==0 || iSub==0) return;
-
-	new iLedge=GetEventInt(event,"ledge_hang");
-	//player is labelled as no longer incapped
-	g_iPIncap[iSub]=0;
-
-	Unbreakable_OnRevive(iSub, iLedge);
-	HelpHand_OnReviveSuccess(iCid,iSub,iLedge);
-}
-
-//detects when a person is hanging from a ledge
-public Event_LedgeGrab (Handle:event, const String:name[], bool:dontBroadcast)
-{
-	new iCid=GetClientOfUserId(GetEventInt(event,"userid"));
-
-	if (iCid==0) return;
-
-	//----DEBUG----
-	//PrintToChatAll("\x03spirit ledge grab detected, client: \x01%i",iCid);
-
-	g_iPIncap[iCid]=1;
-	g_iMyDisabler[iCid] = 0;
-}
-
-public Action:Event_TongueGrabPre (Handle:event, const String:name[], bool:dontBroadcast)
-{
-	new iCid=GetClientOfUserId(GetEventInt(event,"userid"));
-	new iVic = GetClientOfUserId(GetEventInt(event,"victim"));
-	if (iCid==0) return Plugin_Continue;
-
-	//spirit perk, tell plugin player is disabled by smoker
-	g_iMyDisabler[iVic] = iCid;
-	//+Inf, tell plugin attacker is disabling
-	g_iMyDisableTarget[iCid] = iVic;
-
-	return Plugin_Continue;
-}
-
-public Event_TongueRelease (Handle:event, const String:name[], bool:dontBroadcast)
-{
-	//+Inf, tell plugin attacker is no longer disabling
-	new iCid=GetClientOfUserId(GetEventInt(event,"userid"));
-	if (iCid!=0) g_iMyDisableTarget[iCid] = -1;
-	//tell plugin player is free
-	new iVic=GetClientOfUserId(GetEventInt(event,"victim"));
-	if (iVic!=0) g_iMyDisabler[iVic] = -1;
-}
-
-public Event_TongueRelease_novictimid (Handle:event, const String:name[], bool:dontBroadcast)
-{
-	//+Inf, tell plugin attacker is no longer disabling
-	new iCid=GetClientOfUserId(GetEventInt(event,"userid"));
-	if (iCid!=0) g_iMyDisableTarget[iCid] = -1;
-	//tell plugin player is free
-	//new iVic=GetClientOfUserId(GetEventInt(event,"victim"));
-	//if (iVic!=0) g_iMyDisabler[iVic] = -1;
-}
-
-public Event_TongueRelease_newsmokerid (Handle:event, const String:name[], bool:dontBroadcast)
-{
-	//+Inf, tell plugin attacker is no longer disabling
-	new iCid=GetClientOfUserId(GetEventInt(event,"smoker"));
-	if (iCid!=0) g_iMyDisableTarget[iCid] = -1;
-	//tell plugin player is free
-	new iVic=GetClientOfUserId(GetEventInt(event,"victim"));
-	if (iVic!=0) g_iMyDisabler[iVic] = -1;
-}
-
-public Event_PounceLanded (Handle:event, const String:name[], bool:dontBroadcast)
-{
-	new iAtt=GetClientOfUserId(GetEventInt(event,"userid"));
-	new iVic=GetClientOfUserId(GetEventInt(event,"victim"));
-
-	if (iVic==0 || iAtt==0) return;
-
-	//----DEBUG----
-	//PrintToChatAll("\x03pounce land detected, client: \x01%i\x03, victim: \x01%i",iAtt,iVic);
-
-	//spirit victim state is disabled by hunter
-	g_iMyDisabler[iVic] = iAtt;
-	//+Inf, attacker is disabling someone
-	g_iMyDisableTarget[iAtt] = iVic;
-}
-
-public Event_PounceStop (Handle:event, const String:name[], bool:dontBroadcast)
-{
-	new iAtt=GetClientOfUserId(GetEventInt(event,"userid"));
-	new iVic=GetClientOfUserId(GetEventInt(event,"victim"));
-
-	if (iVic==0 || iAtt==0) return;
-
-	//----DEBUG----
-	//PrintToChatAll("\x03pounce stop detected, attacker: \x01%i\x03, victim: \x01%i",iAtt,iVic);
-
-	//victim is no longer disabled
-	g_iMyDisabler[iVic] = -1;
-	//+Inf, attacker no longer disabling
-	g_iMyDisableTarget[iAtt] = -1;
-}
-
-public Event_JockeyRide (Handle:event, const String:name[], bool:dontBroadcast)
-{
-	new iAtt=GetClientOfUserId(GetEventInt(event,"userid"));
-	new iVic=GetClientOfUserId(GetEventInt(event,"victim"));
-
-	if (iVic==0 || iAtt==0) return;
-
-	//----DEBUG----
-	//PrintToChatAll("\x03ride start detected, client: \x01%i\x03, victim: \x01%i",iAtt,iVic);
-
-	//spirit victim state is disabled
-	g_iMyDisabler[iVic] = iAtt;
-	//+Inf, attacker is disabling someone
-	g_iMyDisableTarget[iAtt] = iVic;
-}
-
-public Event_JockeyRideEnd (Handle:event, const String:name[], bool:dontBroadcast)
-{
-	new iAtt=GetClientOfUserId(GetEventInt(event,"userid"));
-	new iVic=GetClientOfUserId(GetEventInt(event,"victim"));
-
-	if (iVic==0 || iAtt==0) return;
-
-	//----DEBUG----
-	//PrintToChatAll("\x03ride end detected, attacker: \x01%i\x03, victim: \x01%i",iAtt,iVic);
-
-	//victim is no longer disabled
-	g_iMyDisabler[iVic] = -1;
-	//+Inf, attacker no longer disabling
-	g_iMyDisableTarget[iAtt] = -1;
-
-	//since ride like the wind changes the survivor's speeds,
-	//reapply extreme conditioning if necessary
-	CreateTimer(0.3,Delayed_Rebuild,0);
-}
-
-public Event_ChargerPummelStart (Handle:event, const String:name[], bool:dontBroadcast)
-{
-	new iAtt=GetClientOfUserId(GetEventInt(event,"userid"));
-	new iVic=GetClientOfUserId(GetEventInt(event,"victim"));
-
-	if (iVic==0 || iAtt==0) return;
-
-	//----DEBUG----
-	//PrintToChatAll("\x03ride start detected, client: \x01%i\x03, victim: \x01%i",iAtt,iVic);
-
-	//spirit victim state is disabled
-	g_iMyDisabler[iVic] = iAtt;
-	//+Inf, attacker is disabling someone
-	g_iMyDisableTarget[iAtt] = iVic;
-}
-
-public Event_ChargerPummelEnd (Handle:event, const String:name[], bool:dontBroadcast)
-{
-	new iAtt=GetClientOfUserId(GetEventInt(event,"userid"));
-	new iVic=GetClientOfUserId(GetEventInt(event,"victim"));
-
-	if (iVic==0 || iAtt==0) return;
-
-	//----DEBUG----
-	//PrintToChatAll("\x03ride end detected, attacker: \x01%i\x03, victim: \x01%i",iAtt,iVic);
-
-	//victim is no longer disabled
-	g_iMyDisabler[iVic] = -1;
-	//+Inf, attacker no longer disabling
-	g_iMyDisableTarget[iAtt] = -1;
-}
-
-
 //** a very important event! =P
 public Event_PlayerSpawn (Handle:event, const String:name[], bool:dontBroadcast)
 {
@@ -2554,22 +2246,40 @@ public Event_PlayerSpawn (Handle:event, const String:name[], bool:dontBroadcast)
 	}
 }
 
-//if item that was picked up is a grenade type, set carried amount in var
-public Event_ItemPickup (Handle:event, const String:name[], bool:dontBroadcast)
+//call menu on first spawn, otherwise set default values for bots
+public Event_PlayerFirstSpawn (Handle:event, const String:name[], bool:dontBroadcast)
+{
+	if (g_bIsLoading == true
+		|| g_bIsRoundStart == true)
+		return;
+
+	new iCid=GetClientOfUserId(GetEventInt(event,"userid"));
+	if (iCid==0) return;
+	if (g_iConfirm[iCid]==0
+		&& IsFakeClient(iCid)==false)
+	{
+		CreateTimer(3.0,Timer_ShowTopMenu,iCid);
+		PrintHintText(iCid,"%t", "WelcomeMessageHint");
+		PrintToChat(iCid,"\x03[SM] %t", "WelcomeMessageChat");
+	}
+}
+
+//sets confirm to 0 and redisplays perks menu
+public Event_PlayerTransitioned (Handle:event, const String:name[], bool:dontBroadcast)
 {
 	new iCid=GetClientOfUserId(GetEventInt(event,"userid"));
 	if (iCid==0) return;
-	if (g_iConfirm[iCid]==0)
-		return;
-
-	new String:stWpn[24];
-	GetEventString(event,"item",stWpn,24);
-
-	//check for grenadier perk
-	Pyro_Pickup(iCid,stWpn);
-
-	//check for pack rat perk
-	PR_Pickup(iCid, stWpn);
+	//reset their confirm perks var
+	//and show the menu
+	g_iConfirm[iCid]=0;
+	/*CreateTimer(1.0,Timer_ShowTopMenu,iCid);
+	//since we just changed maps
+	//reset everything for the spirit cooldown timer
+	if (g_iSpiritTimer[iCid]!=INVALID_HANDLE)
+	{
+		KillTimer(g_iSpiritTimer[iCid]);
+		g_iSpiritTimer[iCid]=INVALID_HANDLE;
+	}*/
 }
 
 //set default perks for connecting players
@@ -2634,8 +2344,8 @@ public Event_PDisconnect(Handle:event, const String:name[], bool:dontBroadcast)
 	RebuildAll();
 }
 
-//call menu on first spawn, otherwise set default values for bots
-public Event_PlayerFirstSpawn (Handle:event, const String:name[], bool:dontBroadcast)
+//resets some temp vars related to perks
+public Event_PlayerDeath (Handle:event, const String:name[], bool:dontBroadcast)
 {
 	if (g_bIsLoading == true
 		|| g_bIsRoundStart == true)
@@ -2643,13 +2353,39 @@ public Event_PlayerFirstSpawn (Handle:event, const String:name[], bool:dontBroad
 
 	new iCid=GetClientOfUserId(GetEventInt(event,"userid"));
 	if (iCid==0) return;
-	if (g_iConfirm[iCid]==0
+	//reset vars related to spirit perk
+	g_iMyDisabler[iCid] = -1;
+	g_iMyDisableTarget[iCid] = -1;
+	g_iPIncap[iCid]=0;
+	g_iSpiritCooldown[iCid]=0;
+	//and also close the spirit cooldown timer
+	//and nullify the var pointing to it
+	if (g_iSpiritTimer[iCid]!=INVALID_HANDLE)
+	{
+		KillTimer(g_iSpiritTimer[iCid]);
+		g_iSpiritTimer[iCid]=INVALID_HANDLE;
+	}
+
+	if (IsClientInGame(iCid)==true
 		&& IsFakeClient(iCid)==false)
 	{
-		CreateTimer(3.0,Timer_ShowTopMenu,iCid);
-		PrintHintText(iCid,"%t", "WelcomeMessageHint");
-		PrintToChat(iCid,"\x03[SM] %t", "WelcomeMessageChat");
+		//reset var related to blind luck perk
+		//SendConVarValue(iCid,FindConVar("sv_cheats"),"0");
+		SetEntProp(iCid, Prop_Send, "m_iHideHUD", 0);
 	}
+
+	//rebuild registries for martial artist
+	RebuildAll();
+
+	//and while we're at it, the player just died so reset pyro's tick count
+	g_iPyroTicks[iCid] = 0;
+
+	//reset movement rate from martial artist
+	SetEntDataFloat(iCid,g_iLaggedMovementO, 1.0 ,true);
+
+
+	//----DEBUG----
+	//PrintToChatAll("\x03end death routine for \x01%i",iCid);
 }
 
 //checks to show perks menu on roundstart
@@ -2786,69 +2522,6 @@ public Event_RoundStart (Handle:event, const String:name[], bool:dontBroadcast)
 	//PrintToChatAll("\x03-end round start routine");
 }
 
-//resets some temp vars related to perks
-public Event_PlayerDeath (Handle:event, const String:name[], bool:dontBroadcast)
-{
-	if (g_bIsLoading == true
-		|| g_bIsRoundStart == true)
-		return;
-
-	new iCid=GetClientOfUserId(GetEventInt(event,"userid"));
-	if (iCid==0) return;
-	//reset vars related to spirit perk
-	g_iMyDisabler[iCid] = -1;
-	g_iMyDisableTarget[iCid] = -1;
-	g_iPIncap[iCid]=0;
-	g_iSpiritCooldown[iCid]=0;
-	//and also close the spirit cooldown timer
-	//and nullify the var pointing to it
-	if (g_iSpiritTimer[iCid]!=INVALID_HANDLE)
-	{
-		KillTimer(g_iSpiritTimer[iCid]);
-		g_iSpiritTimer[iCid]=INVALID_HANDLE;
-	}
-
-	if (IsClientInGame(iCid)==true
-		&& IsFakeClient(iCid)==false)
-	{
-		//reset var related to blind luck perk
-		//SendConVarValue(iCid,FindConVar("sv_cheats"),"0");
-		SetEntProp(iCid, Prop_Send, "m_iHideHUD", 0);
-	}
-
-	//rebuild registries for martial artist
-	RebuildAll();
-
-	//and while we're at it, the player just died so reset pyro's tick count
-	g_iPyroTicks[iCid] = 0;
-
-	//reset movement rate from martial artist
-	SetEntDataFloat(iCid,g_iLaggedMovementO, 1.0 ,true);
-
-
-	//----DEBUG----
-	//PrintToChatAll("\x03end death routine for \x01%i",iCid);
-}
-
-
-//sets confirm to 0 and redisplays perks menu
-public Event_PlayerTransitioned (Handle:event, const String:name[], bool:dontBroadcast)
-{
-	new iCid=GetClientOfUserId(GetEventInt(event,"userid"));
-	if (iCid==0) return;
-	//reset their confirm perks var
-	//and show the menu
-	g_iConfirm[iCid]=0;
-	/*CreateTimer(1.0,Timer_ShowTopMenu,iCid);
-	//since we just changed maps
-	//reset everything for the spirit cooldown timer
-	if (g_iSpiritTimer[iCid]!=INVALID_HANDLE)
-	{
-		KillTimer(g_iSpiritTimer[iCid]);
-		g_iSpiritTimer[iCid]=INVALID_HANDLE;
-	}*/
-}
-
 //resets everyone's confirm values on round end, mainly for survival and campaign
 public Event_RoundEnd (Handle:event, const String:name[], bool:dontBroadcast)
 {
@@ -2872,47 +2545,124 @@ public Event_RoundEnd (Handle:event, const String:name[], bool:dontBroadcast)
 	g_bIsLoading = true;
 }
 
-//as round end function above
-public OnMapEnd()
+//this trigger only runs on players, not common infected
+public Action:Event_PlayerHurtPre (Handle:event, const String:name[], bool:dontBroadcast)
 {
+	new iAtt=GetClientOfUserId(GetEventInt(event,"attacker"));
+	new iVic=GetClientOfUserId(GetEventInt(event,"userid"));
+
+	if (iVic==0) return Plugin_Continue;
+
+	new iDmgOrig=GetEventInt(event,"dmg_health");
+
 	//----DEBUG----
-	//PrintToChatAll("map end detected");
+	//new String:sWeapon[128];
+	//GetEventString(event,"weapon",sWeapon,128);
+	//PrintToChatAll("\x03attacker:\x01%i\x03 weapon:\x01%s\x03 type:\x01%i\x03 amount: \x01%i",iAtt,sWeapon,iType,iDmgOrig);
 
-	ClearAll();
 
-	for (new iI=1 ; iI<=MaxClients ; iI++)
-	{
-		g_iConfirm[iI]=0;
-	}
+	if (iAtt==0) return Plugin_Continue;
 
-	if (g_hTimerPerks != INVALID_HANDLE)
-	{
-		KillTimer(g_hTimerPerks);
-		g_hTimerPerks = INVALID_HANDLE;
-	}
+	new iTA=GetClientTeam(iAtt);
+	decl String:stWpn[16];
+	GetEventString(event,"weapon",stWpn,16);
 
-	//tells plugin we're about to start loading
-	g_bIsLoading = true;
-}
+	//----DEBUG----
+	//if (iTA==2) PrintToChatAll("\x03weapon:\x01%s\x03 type:\x01%i",stWpn,iType);
 
-//Anything that uses a global timer for periodic
-//checks is also called here; current functions called here:
-//Sur2: Spirit
-//Sur1: Pyrotechnician
-//NOTE: called every 2 seconds
-public Action:TimerPerks (Handle:timer, any:data)
-{
-	//if (IsServerProcessing()==false)
-	//{
-		//KillTimer(timer);
-		//g_hTimerPerks = INVALID_HANDLE;
-		//return Plugin_Stop;
-	//}
-
-	Spirit_Timer();
-	Pyro_Timer();
+	//if damage is from survivors to a non-survivor,
+	//check for damage add (stopping power)
+	if (Stopping_DamageAdd(iAtt,iVic,iTA,iDmgOrig,stWpn)==1)
+		return Plugin_Continue;
 
 	return Plugin_Continue;
+}
+
+//against common infected
+public Event_InfectedHurtPre (Handle:event, const String:name[], bool:dontBroadcast)
+{
+	new iCid=GetClientOfUserId(GetEventInt(event,"attacker"));
+
+	if (iCid==0 || g_iConfirm[iCid]==0)
+		return;
+
+	//check if perk is disabled
+	if (g_iStopping_meta_enable==0)
+		return;
+
+	//----DEBUG----
+	//PrintToChatAll("\x03infected hurt, iAtt: %i, iEntid: %i, i_odmg: %i, iHP: %i",iAtt,iEntid,i_odmg,GetEntProp(iEntid,Prop_Data,"m_iHealth"));
+
+	if (g_iSur1[iCid]==1
+		&& GetClientTeam(iCid)==2)
+	{
+		new iEntid=GetEventInt(event,"entityid");
+		new i_odmg=GetEventInt(event,"amount");
+		new i_dmga=RoundToNearest(i_odmg * g_flStopping_dmgmult);
+
+		//----DEBUG----
+		//PrintToChatAll("\x03Pre-mod damage: \x01%i, \x03pre-mod health: \x01%i", GetEventInt(event,"amount"),GetEntProp(iEntid,Prop_Data,"m_iHealth"));
+
+		SetEntProp(iEntid,Prop_Data,"m_iHealth", GetEntProp(iEntid,Prop_Data,"m_iHealth")-i_dmga );
+		//******SetEventInt(event,"dmg_health", i_odmg+i_dmga );
+
+		//----DEBUG----
+		//PrintToChatAll("\x03Post-mod damage: \x01%i, \x03post-mod health: \x01%i",GetEventInt(event,"amount"),GetEntProp(iEntid,Prop_Data,"m_iHealth"));
+	}
+}
+
+//on reload
+public Event_Reload (Handle:event, const String:name[], bool:dontBroadcast)
+{
+	new iCid=GetClientOfUserId(GetEventInt(event,"userid"));
+	if (iCid==0)
+		return;
+
+	SoH_OnReload(iCid);
+}
+
+//on weapon fire
+public Event_WeaponFire (Handle:event, const String:name[], bool:dontBroadcast)
+{
+	new iCid=GetClientOfUserId(GetEventInt(event,"userid"));
+	if (iCid==0)
+		return;
+
+	decl String:stWpn[24];
+	GetEventString(event,"weapon",stWpn,24);
+
+	Pyro_OnWeaponFire(iCid,stWpn);
+}
+
+//called when player is healed
+public Event_PlayerHealed (Handle:event, const String:name[], bool:dontBroadcast)
+{
+	new iCid=GetClientOfUserId(GetEventInt(event,"subject"));
+	if (iCid==0 || g_iConfirm[iCid]==0) return;
+
+	Unbreakable_OnHeal(iCid);
+}
+
+//called when survivor spawns from closet
+public Event_PlayerRescued (Handle:event, const String:name[], bool:dontBroadcast)
+{
+	new iCid=GetClientOfUserId(GetEventInt(event,"victim"));
+	if (iCid==0 || g_iConfirm[iCid]==0)
+		return;
+
+	//reset vars related to spirit perk
+	g_iMyDisabler[iCid] = -1;
+	g_iPIncap[iCid]=0;
+	g_iSpiritCooldown[iCid]=0;
+	//rebuilds pyrotechnician registry
+	CreateTimer(0.3,Delayed_Rebuild,0);
+
+	//checks for unbreakable health bonus
+	Unbreakable_OnRescue(iCid);
+	//check for pyrotechnician bonus grenade
+	Event_Confirm_Grenadier (iCid);
+	//check for chem reliant bonus pills
+	Event_Confirm_ChemReliant(iCid);
 }
 
 //called on a player changing teams
@@ -2971,6 +2721,290 @@ public Event_PlayerTeam (Handle:event, const String:name[], bool:dontBroadcast)
 	//PrintToChatAll("\x03-end change team routine");
 }
 
+//detects when a person is hanging from a ledge
+public Event_LedgeGrab (Handle:event, const String:name[], bool:dontBroadcast)
+{
+	new iCid=GetClientOfUserId(GetEventInt(event,"userid"));
+
+	if (iCid==0) return;
+
+	//----DEBUG----
+	//PrintToChatAll("\x03spirit ledge grab detected, client: \x01%i",iCid);
+
+	g_iPIncap[iCid]=1;
+	g_iMyDisabler[iCid] = 0;
+}
+
+public Event_PounceLanded (Handle:event, const String:name[], bool:dontBroadcast)
+{
+	new iAtt=GetClientOfUserId(GetEventInt(event,"userid"));
+	new iVic=GetClientOfUserId(GetEventInt(event,"victim"));
+
+	if (iVic==0 || iAtt==0) return;
+
+	//----DEBUG----
+	//PrintToChatAll("\x03pounce land detected, client: \x01%i\x03, victim: \x01%i",iAtt,iVic);
+
+	//spirit victim state is disabled by hunter
+	g_iMyDisabler[iVic] = iAtt;
+	//+Inf, attacker is disabling someone
+	g_iMyDisableTarget[iAtt] = iVic;
+}
+
+public Event_PounceStop (Handle:event, const String:name[], bool:dontBroadcast)
+{
+	new iAtt=GetClientOfUserId(GetEventInt(event,"userid"));
+	new iVic=GetClientOfUserId(GetEventInt(event,"victim"));
+
+	if (iVic==0 || iAtt==0) return;
+
+	//----DEBUG----
+	//PrintToChatAll("\x03pounce stop detected, attacker: \x01%i\x03, victim: \x01%i",iAtt,iVic);
+
+	//victim is no longer disabled
+	g_iMyDisabler[iVic] = -1;
+	//+Inf, attacker no longer disabling
+	g_iMyDisableTarget[iAtt] = -1;
+}
+
+public Action:Event_TongueGrabPre (Handle:event, const String:name[], bool:dontBroadcast)
+{
+	new iCid=GetClientOfUserId(GetEventInt(event,"userid"));
+	new iVic = GetClientOfUserId(GetEventInt(event,"victim"));
+	if (iCid==0) return Plugin_Continue;
+
+	//spirit perk, tell plugin player is disabled by smoker
+	g_iMyDisabler[iVic] = iCid;
+	//+Inf, tell plugin attacker is disabling
+	g_iMyDisableTarget[iCid] = iVic;
+
+	return Plugin_Continue;
+}
+
+public Event_TongueRelease (Handle:event, const String:name[], bool:dontBroadcast)
+{
+	//+Inf, tell plugin attacker is no longer disabling
+	new iCid=GetClientOfUserId(GetEventInt(event,"userid"));
+	if (iCid!=0) g_iMyDisableTarget[iCid] = -1;
+	//tell plugin player is free
+	new iVic=GetClientOfUserId(GetEventInt(event,"victim"));
+	if (iVic!=0) g_iMyDisabler[iVic] = -1;
+}
+
+public Event_TongueRelease_novictimid (Handle:event, const String:name[], bool:dontBroadcast)
+{
+	//+Inf, tell plugin attacker is no longer disabling
+	new iCid=GetClientOfUserId(GetEventInt(event,"userid"));
+	if (iCid!=0) g_iMyDisableTarget[iCid] = -1;
+	//tell plugin player is free
+	//new iVic=GetClientOfUserId(GetEventInt(event,"victim"));
+	//if (iVic!=0) g_iMyDisabler[iVic] = -1;
+}
+
+public Event_TongueRelease_newsmokerid (Handle:event, const String:name[], bool:dontBroadcast)
+{
+	//+Inf, tell plugin attacker is no longer disabling
+	new iCid=GetClientOfUserId(GetEventInt(event,"smoker"));
+	if (iCid!=0) g_iMyDisableTarget[iCid] = -1;
+	//tell plugin player is free
+	new iVic=GetClientOfUserId(GetEventInt(event,"victim"));
+	if (iVic!=0) g_iMyDisabler[iVic] = -1;
+}
+
+public Event_JockeyRide (Handle:event, const String:name[], bool:dontBroadcast)
+{
+	new iAtt=GetClientOfUserId(GetEventInt(event,"userid"));
+	new iVic=GetClientOfUserId(GetEventInt(event,"victim"));
+
+	if (iVic==0 || iAtt==0) return;
+
+	//----DEBUG----
+	//PrintToChatAll("\x03ride start detected, client: \x01%i\x03, victim: \x01%i",iAtt,iVic);
+
+	//spirit victim state is disabled
+	g_iMyDisabler[iVic] = iAtt;
+	//+Inf, attacker is disabling someone
+	g_iMyDisableTarget[iAtt] = iVic;
+}
+
+public Event_JockeyRideEnd (Handle:event, const String:name[], bool:dontBroadcast)
+{
+	new iAtt=GetClientOfUserId(GetEventInt(event,"userid"));
+	new iVic=GetClientOfUserId(GetEventInt(event,"victim"));
+
+	if (iVic==0 || iAtt==0) return;
+
+	//----DEBUG----
+	//PrintToChatAll("\x03ride end detected, attacker: \x01%i\x03, victim: \x01%i",iAtt,iVic);
+
+	//victim is no longer disabled
+	g_iMyDisabler[iVic] = -1;
+	//+Inf, attacker no longer disabling
+	g_iMyDisableTarget[iAtt] = -1;
+
+	//since ride like the wind changes the survivor's speeds,
+	//reapply extreme conditioning if necessary
+	CreateTimer(0.3,Delayed_Rebuild,0);
+}
+
+public Event_ChargerPummelStart (Handle:event, const String:name[], bool:dontBroadcast)
+{
+	new iAtt=GetClientOfUserId(GetEventInt(event,"userid"));
+	new iVic=GetClientOfUserId(GetEventInt(event,"victim"));
+
+	if (iVic==0 || iAtt==0) return;
+
+	//----DEBUG----
+	//PrintToChatAll("\x03ride start detected, client: \x01%i\x03, victim: \x01%i",iAtt,iVic);
+
+	//spirit victim state is disabled
+	g_iMyDisabler[iVic] = iAtt;
+	//+Inf, attacker is disabling someone
+	g_iMyDisableTarget[iAtt] = iVic;
+}
+
+public Event_ChargerPummelEnd (Handle:event, const String:name[], bool:dontBroadcast)
+{
+	new iAtt=GetClientOfUserId(GetEventInt(event,"userid"));
+	new iVic=GetClientOfUserId(GetEventInt(event,"victim"));
+
+	if (iVic==0 || iAtt==0) return;
+
+	//----DEBUG----
+	//PrintToChatAll("\x03ride end detected, attacker: \x01%i\x03, victim: \x01%i",iAtt,iVic);
+
+	//victim is no longer disabled
+	g_iMyDisabler[iVic] = -1;
+	//+Inf, attacker no longer disabling
+	g_iMyDisableTarget[iAtt] = -1;
+}
+
+//on revive begin
+public Action:Event_ReviveBeginPre (Handle:event, const String:name[], bool:dontBroadcast)
+{
+	new iCid=GetClientOfUserId(GetEventInt(event,"userid"));
+
+	if (iCid==0) return Plugin_Continue;
+
+	HelpHand_OnReviveBegin (iCid);
+
+	return Plugin_Continue;
+}
+
+//on revive end
+public Event_ReviveSuccess (Handle:event, const String:name[], bool:dontBroadcast)
+{
+	new iCid=GetClientOfUserId(GetEventInt(event,"userid"));
+	new iSub=GetClientOfUserId(GetEventInt(event,"subject"));
+
+	if (iCid==0 || iSub==0) return;
+
+	new iLedge=GetEventInt(event,"ledge_hang");
+	//player is labelled as no longer incapped
+	g_iPIncap[iSub]=0;
+
+	Unbreakable_OnRevive(iSub, iLedge);
+	HelpHand_OnReviveSuccess(iCid,iSub,iLedge);
+}
+
+//if item that was picked up is a grenade type, set carried amount in var
+public Event_ItemPickup (Handle:event, const String:name[], bool:dontBroadcast)
+{
+	new iCid=GetClientOfUserId(GetEventInt(event,"userid"));
+	if (iCid==0) return;
+	if (g_iConfirm[iCid]==0)
+		return;
+
+	new String:stWpn[24];
+	GetEventString(event,"item",stWpn,24);
+
+	//check for grenadier perk
+	Pyro_Pickup(iCid,stWpn);
+
+	//check for pack rat perk
+	PR_Pickup(iCid, stWpn);
+}
+
+//on ammo pickup, check if pack rat is in effect
+public Event_AmmoPickup (Handle:event, const String:name[], bool:dontBroadcast)
+{
+	new iCid=GetClientOfUserId(GetEventInt(event,"userid"));
+	if (iCid==0)
+		return;
+
+	if (g_iSur3[iCid]==1
+		&& g_iConfirm[iCid]==1
+		&& g_iSur3_enable==1
+		&& (g_iPack_enable==1			&&	g_iL4D_GameMode==0
+			|| g_iPack_enable_sur==1	&&	g_iL4D_GameMode==1
+			|| g_iPack_enable_vs==1		&&	g_iL4D_GameMode==2))
+	{
+		PR_GiveFullAmmo(iCid);
+	}
+}
+
+//on drug use
+public Action:Event_PillsUsed (Handle:event, const String:name[], bool:dontBroadcast)
+{
+	new iCid=GetClientOfUserId(GetEventInt(event,"subject"));
+	if (iCid==0) return Plugin_Continue;
+
+	Chem_OnDrugUsed(iCid);
+
+	return Plugin_Continue;
+}
+
+public Event_Incap (Handle:event, const String:name[], bool:dontBroadcast)
+{
+	new iCid=GetClientOfUserId(GetEventInt(event,"userid"));
+
+	if (iCid==0) return;
+
+	if (GetClientTeam(iCid) == 2
+		&& GetEntData(iCid,g_iIncapO) != 0 )
+		g_iPIncap[iCid]=1;
+
+	HardToKill_OnIncap(iCid);
+}
+
+//on game frame
+public OnGameFrame()
+{
+	//if frames aren't being processed,
+	//don't bother - otherwise we get LAG
+	//or even disconnects on map changes, etc...
+	
+	if (IsServerProcessing()==false
+		|| g_bIsLoading == true
+		|| g_bIsRoundStart == true)
+		return;
+
+	MA_OnGameFrame();
+}
+
+//as round end function above
+public OnMapEnd()
+{
+	//----DEBUG----
+	//PrintToChatAll("map end detected");
+
+	ClearAll();
+
+	for (new iI=1 ; iI<=MaxClients ; iI++)
+	{
+		g_iConfirm[iI]=0;
+	}
+
+	if (g_hTimerPerks != INVALID_HANDLE)
+	{
+		KillTimer(g_hTimerPerks);
+		g_hTimerPerks = INVALID_HANDLE;
+	}
+
+	//tells plugin we're about to start loading
+	g_bIsLoading = true;
+}
+
 //called when plugin is unloaded
 //reset all the convars that had permission to run
 public OnPluginEnd()
@@ -3022,6 +3056,25 @@ public OnPluginEnd()
 	//PrintToChatAll("\x03-end pluginend routine");
 }
 
+//Anything that uses a global timer for periodic
+//checks is also called here; current functions called here:
+//Sur2: Spirit
+//Sur1: Pyrotechnician
+//NOTE: called every 2 seconds
+public Action:TimerPerks (Handle:timer, any:data)
+{
+	//if (IsServerProcessing()==false)
+	//{
+		//KillTimer(timer);
+		//g_hTimerPerks = INVALID_HANDLE;
+		//return Plugin_Stop;
+	//}
+
+	Spirit_Timer();
+	Pyro_Timer();
+
+	return Plugin_Continue;
+}
 
 
 
@@ -3489,40 +3542,6 @@ Stopping_DamageAdd (iAtt, iVic, iTA, iDmgOrig, String:stWpn[])
 
 	return 0;
 }
-
-//against common infected
-public Event_InfectedHurtPre (Handle:event, const String:name[], bool:dontBroadcast)
-{
-	new iCid=GetClientOfUserId(GetEventInt(event,"attacker"));
-
-	if (iCid==0 || g_iConfirm[iCid]==0)
-		return;
-
-	//check if perk is disabled
-	if (g_iStopping_meta_enable==0)
-		return;
-
-	//----DEBUG----
-	//PrintToChatAll("\x03infected hurt, iAtt: %i, iEntid: %i, i_odmg: %i, iHP: %i",iAtt,iEntid,i_odmg,GetEntProp(iEntid,Prop_Data,"m_iHealth"));
-
-	if (g_iSur1[iCid]==1
-		&& GetClientTeam(iCid)==2)
-	{
-		new iEntid=GetEventInt(event,"entityid");
-		new i_odmg=GetEventInt(event,"amount");
-		new i_dmga=RoundToNearest(i_odmg * g_flStopping_dmgmult);
-
-		//----DEBUG----
-		//PrintToChatAll("\x03Pre-mod damage: \x01%i, \x03pre-mod health: \x01%i", GetEventInt(event,"amount"),GetEntProp(iEntid,Prop_Data,"m_iHealth"));
-
-		SetEntProp(iEntid,Prop_Data,"m_iHealth", GetEntProp(iEntid,Prop_Data,"m_iHealth")-i_dmga );
-		//******SetEventInt(event,"dmg_health", i_odmg+i_dmga );
-
-		//----DEBUG----
-		//PrintToChatAll("\x03Post-mod damage: \x01%i, \x03post-mod health: \x01%i",GetEventInt(event,"amount"),GetEntProp(iEntid,Prop_Data,"m_iHealth"));
-	}
-}
-
 
 //==================================
 // Sur1: Sleight of Hand
@@ -5320,24 +5339,6 @@ PR_Pickup(iCid, String:stWpn[])
 		{
 			PR_GiveFullAmmo(iCid);
 		}
-	}
-}
-
-//on ammo pickup, check if pack rat is in effect
-public Event_AmmoPickup (Handle:event, const String:name[], bool:dontBroadcast)
-{
-	new iCid=GetClientOfUserId(GetEventInt(event,"userid"));
-	if (iCid==0)
-		return;
-
-	if (g_iSur3[iCid]==1
-		&& g_iConfirm[iCid]==1
-		&& g_iSur3_enable==1
-		&& (g_iPack_enable==1			&&	g_iL4D_GameMode==0
-			|| g_iPack_enable_sur==1	&&	g_iL4D_GameMode==1
-			|| g_iPack_enable_vs==1		&&	g_iL4D_GameMode==2))
-	{
-		PR_GiveFullAmmo(iCid);
 	}
 }
 
