@@ -5327,7 +5327,7 @@ public Action:HelpHand_Delayed (Handle:timer, any:iCid)
 PR_Pickup(iCid, String:stWpn[])
 {
 	if (g_iSur3[iCid]==1
-		&& g_iSur2_enable==1
+		&& g_iSur3_enable==1
 		&& (g_iPack_enable==1		&&	g_iL4D_GameMode==0
 		|| g_iPack_enable_sur==1	&&	g_iL4D_GameMode==1
 		|| g_iPack_enable_vs==1		&&	g_iL4D_GameMode==2))
@@ -6177,7 +6177,7 @@ public Handle:Menu_ShowChoices (iCid)
 	else
 		Format(st_perk,128,"%t", "NotSet");
 
-	if (g_iSur2_enable==1)
+	if (g_iSur3_enable==1)
 	{
 		DrawPanelItem(menu,"Survivor, tertiary:");
 		DrawPanelText(menu,st_perk);
