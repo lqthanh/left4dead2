@@ -420,29 +420,6 @@ new g_iIncapO			= -1;
 //during roundstart by comparing an offset
 //to known offset numbers
 
-// netprop: m_nextActivationTimer
-//new g_iNextActO = 1084;
-new g_iNextActO;
-// netprop: m_attackTimer??
-//new g_iAttackTimerO = 5452;
-new g_iAttackTimerO;
-//new g_iNextActO = 1068;
-//new g_iAttackTimerO = 5436;
-
-//these are for L4D2, Linux
-//new g_iNextActO_linux = 1088;
-//new g_iAttackTimerO_linux = 5444;
-
-
-
-//=============================
-// Declare Variables that track
-// base L4D ConVars
-//=============================
-
-//tracks if the game is L4D 1 or 2
-new g_iL4D_12 = 0;
-
 //prevents certain functions from spamming too often
 new bool:g_bIsRoundStart	 = false;
 new bool:g_bIsLoading		 = false;
@@ -643,9 +620,16 @@ new Handle:g_hMenuAutoShow_enable;
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
+	EngineVersion engine = GetEngineVersion();
+	if( engine != Engine_Left4Dead2 )
+	{
+		strcopy(error, err_max, "Plugin only supports Left 4 Dead 2.");
+		return APLRes_SilentFailure;
+	}
+
 	RegPluginLibrary("perkmod2");
-	
 	CreateNative("perkmod2_Pyro_OnWeaponFire", Native_Pyro_OnWeaponFire);
+
 	return APLRes_Success;
 }
 
@@ -653,21 +637,6 @@ public OnPluginStart()
 {
 	//Plugin version for online tracking
 	CreateConVar("l4d_perkmod_version", PLUGIN_VERSION, "Version of Perkmod2 for L4D2", FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY);
-
-	decl String:stGame[32];
-	GetGameFolderName(stGame, 32);
-	if (StrEqual(stGame, "left4dead2", false)==true)
-	{
-		g_iL4D_12 = 2;
-		LogMessage("L4D 2 detected.");
-	}
-	else if (StrEqual(stGame, "left4dead", false)==true)
-	{
-		g_iL4D_12 = 1;
-		LogMessage("L4D 1 detected.");
-	}
-	else
-		SetFailState("Perkmod only supports L4D 1 or 2.");
 	
 	//PERK FUNCTIONS
 	//anything here that pertains to the actual
@@ -709,6 +678,10 @@ public OnPluginStart()
 	HookEvent("tongue_pull_stopped", Event_TongueRelease_newsmokerid);
 	HookEvent("choke_end", Event_TongueRelease);
 	HookEvent("choke_stopped", Event_TongueRelease_newsmokerid);
+	HookEvent("jockey_ride", Event_JockeyRide);
+	HookEvent("jockey_ride_end", Event_JockeyRideEnd);
+	HookEvent("charger_pummel_start", Event_ChargerPummelStart);
+	HookEvent("charger_pummel_end", Event_ChargerPummelEnd);
 	// Helping Hand
 	HookEvent("revive_begin", Event_ReviveBeginPre, EventHookMode_Pre);
 	HookEvent("revive_success", Event_ReviveSuccess);
@@ -721,22 +694,9 @@ public OnPluginStart()
 	HookEvent("receive_upgrade", Event_ReceiveUpgrade);
 	// Chem Reliant
 	HookEvent("pills_used", Event_PillsUsed, EventHookMode_Pre);
+	HookEvent("adrenaline_used", Event_PillsUsed, EventHookMode_Pre);
 	// Hard To Kill
 	HookEvent("player_incapacitated", Event_Incap);
-
-	//l4d2 only hooks
-	if (g_iL4D_12 == 2)
-	{
-		// Sur2
-		// Spirit
-		HookEvent("jockey_ride", Event_JockeyRide);
-		HookEvent("jockey_ride_end", Event_JockeyRideEnd);
-		HookEvent("charger_pummel_start", Event_ChargerPummelStart);
-		HookEvent("charger_pummel_end", Event_ChargerPummelEnd);
-		// Sur3
-		// Chem Reliant
-		HookEvent("adrenaline_used", Event_PillsUsed, EventHookMode_Pre);
-	}
 
 	RegConsoleCmd("sm_perks", MenuOpen_OnSay);
 	RegConsoleCmd("sm_setperks", SS_SetPerks);
@@ -768,11 +728,6 @@ public OnPluginStart()
 	g_iViewModelO		=	FindSendPropInfo("CTerrorPlayer","m_hViewModel");
 	g_iIncapO			=	FindSendPropInfo("CTerrorPlayer","m_isIncapacitated");
 	//g_iClipO			=	FindSendPropInfo("CTerrorGun","m_iClip1");
-	
-	g_iNextActO			=	FindSendPropInfo("CBaseAbility","m_nextActivationTimer");
-	LogMessage("Retrieved g_iNextActO = %i", g_iNextActO);
-	g_iAttackTimerO		=	FindSendPropInfo("CClaw","m_attackTimer");
-	LogMessage("Retrieved g_iAttackTimerO = %i", g_iAttackTimerO);
 
 	//CREATE AND INITIALIZE CONVARS
 	//everything related to the convars that adjust
@@ -1822,41 +1777,6 @@ public Event_RoundStart (Handle:event, const String:name[], bool:dontBroadcast)
 		return;
 	else
 		g_bIsRoundStart = true;
-
-	//----DEBUG----
-	//PrintToChatAll("\x03round start detected");
-
-	//for l4d1, need to change some offsets
-	/*if (g_iL4D_12 == 1)
-	{
-		//L4D1, Windows
-		g_iNextActO = 888;
-		g_iAttackTimerO = 1488;
-	}
-	else if (g_iL4D_12 == 2)
-	{
-		//check for Linux or Windows by checking
-		//a base offset, NextPrimaryAttack for weapons
-		//--------------------------------------------
-		//numbers have changed since last valve update
-		//usually +4 - next activation timer changed for
-		//both windows and linux, attack timer changed
-		//only for linux, next primary attack changed
-		//for both windows and linux
-
-		if (g_iNextPAttO == 5088)
-		{
-			//L4D2, Windows
-			g_iNextActO = 1068;
-			g_iAttackTimerO = 5436;
-		}
-		else if (g_iNextPAttO == 5104)
-		{
-			//L4D2, Linux
-			g_iNextActO = 1092;
-			g_iAttackTimerO = 5448;
-		}
-	}*/
 
 	//AutoExecConfig(false , "perkmod");
 
@@ -3119,15 +3039,7 @@ public Action:SoH_AutoshotgunStart (Handle:timer, Handle:hPack)
 	//but first check the reload state; if it's 2, then it
 	//needs a pump/cock before it can shoot again, and thus
 	//needs more time
-	if (g_iL4D_12 == 2)
 		CreateTimer(0.3,SoH_ShotgunEnd,hPack,TIMER_REPEAT);
-	else if (g_iL4D_12 == 1)
-	{
-		if (GetEntData(iEntid,g_iShotRelStateO)==2)
-			CreateTimer(0.3,SoH_ShotgunEndCock,hPack,TIMER_REPEAT);
-		else
-			CreateTimer(0.3,SoH_ShotgunEnd,hPack,TIMER_REPEAT);
-	}
 
 	//----DEBUG----
 	/*PrintToChatAll("\x03- after mod, start \x01%f\x03, insert \x01%f\x03, end \x01%f",
@@ -3247,15 +3159,7 @@ public Action:SoH_PumpshotgunStart (Handle:timer, Handle:hPack)
 
 	//and then call a timer to periodically check whether the
 	//gun is still reloading or not to reset the animation
-	if (g_iL4D_12 == 2)
 		CreateTimer(0.3,SoH_ShotgunEnd,hPack,TIMER_REPEAT);
-	else if (g_iL4D_12 == 1)
-	{
-		if (GetEntData(iEntid,g_iShotRelStateO)==2)
-			CreateTimer(0.3,SoH_ShotgunEndCock,hPack,TIMER_REPEAT);
-		else
-			CreateTimer(0.3,SoH_ShotgunEnd,hPack,TIMER_REPEAT);
-	}
 
 	//----DEBUG----
 	/*PrintToChatAll("\x03- after mod, start \x01%f\x03, insert \x01%f\x03, end \x01%f",
@@ -3424,7 +3328,7 @@ Pyro_Pickup(iCid, String:stWpn[])
 				decl String:stWpn2[24];
 				if (stWpn[0]=='p')
 					stWpn2="pipe bomb";
-				else if (stWpn[0]=='v' && g_iL4D_12 == 2)
+				else if (stWpn[0]=='v')
 					stWpn2="vomit jar";
 				else
 					stWpn2="molotov";
@@ -3551,13 +3455,8 @@ Event_Confirm_Grenadier (iCid)
 	new iflags=GetCommandFlags("give");
 	new String:st_give[24];
 
-	decl iMax;
-	if (g_iL4D_12 == 2)
-		iMax = 2;
-	else if (g_iL4D_12 == 1)
-		iMax = 1;
 
-	new iI=GetRandomInt(0,iMax);
+	new iI=GetRandomInt(0,2);
 	if (iI==0)
 		st_give="give pipe_bomb";
 	else if (iI==1)
@@ -3618,14 +3517,8 @@ Pyro_Timer()
 			new iflags=GetCommandFlags("give");
 			SetCommandFlags("give", iflags & ~FCVAR_CHEAT);
 
-			decl iMax;
-			if (g_iL4D_12 == 2)
-				iMax = 2;
-			else if (g_iL4D_12 == 1)
-				iMax = 1;
-
 			// give random grenade type
-			new iRandomGrenType=GetRandomInt(0,iMax);
+			new iRandomGrenType=GetRandomInt(0,2);
 			if (iRandomGrenType==0)
 				FakeClientCommand(iCid, "give pipe_bomb");
 			else if (iRandomGrenType==1)
@@ -4739,8 +4632,7 @@ Event_Confirm_ChemReliant (iCid)
 
 	new iflags=GetCommandFlags("give");
 	SetCommandFlags("give", iflags & ~FCVAR_CHEAT);
-	if (g_iL4D_12 == 1
-		|| GetRandomInt(0,1)==1)
+	if (GetRandomInt(0,1)==1)
 		FakeClientCommand(iCid,"give pain_pills");
 	else
 		FakeClientCommand(iCid,"give adrenaline");
@@ -5027,7 +4919,7 @@ public Handle:Menu_Top (iCid)
 		st_perk="Sleight of Hand";
 	else if (g_iSur1[iCid]==3 && g_iPyro_enable==1)
 		st_perk="Pyrotechnician";
-	else if (g_iSur1[iCid]==4 && g_iMA_enable==1 && g_iL4D_12 == 2)
+	else if (g_iSur1[iCid]==4 && g_iMA_enable==1)
 		st_perk="Martial Artist";
 	else
 		st_perk="Not set";
@@ -5344,7 +5236,7 @@ public Handle:Menu_Sur1Perk (client)
 	}
 
 	//set name for perk 4
-	if (g_iMA_enable==0 || g_iL4D_12 != 2)
+	if (g_iMA_enable==0)
 	{
 		DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
 	}
@@ -5601,7 +5493,7 @@ public Handle:Menu_Sur3Perk (client)
 	}
 
 	//set name for perk 5
-	if (g_iLittle_enable==0 || g_iL4D_12 != 2)
+	if (g_iLittle_enable==0)
 	{
 		DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
 	}
@@ -5804,14 +5696,6 @@ public Action:Debug_OnSay(iCid, args)
 	if (StrEqual(st_chat,"debug fatigue",false)==true)
 	{
 		PrintToChat(iCid,"\x03[SM] [DEBUG] shove penalty \x01%i\x03",GetEntData(iCid,g_iMeleeFatigueO));
-
-		return Plugin_Continue;
-	}
-	
-	if (StrEqual(st_chat,"debug nextact",false)==true)
-	{
-		g_iNextActO			=	FindSendPropInfo("CBaseAbility","m_nextActivationTimer");
-		PrintToChat(iCid,"\x03[SM] [DEBUG] g_iNextActO = \x01%i\x03", g_iNextActO);
 
 		return Plugin_Continue;
 	}
