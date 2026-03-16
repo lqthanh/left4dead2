@@ -307,11 +307,6 @@
 		"en"	"revive others faster, give bonus health buffer"
 	}
 
-	"LittleLeaguerDescriptionPanel"
-	{
-		"en"	"spawn with a katana"
-	}
-
 
 	"MartialArtistDescriptionPanel_noreduc"
 	{

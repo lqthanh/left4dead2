@@ -264,6 +264,7 @@
 		Remove GameMode Tracking.
 		Remove SI perks.
 		Remove Survivor Primary Double Tap.
+		Remove Survivor Tertiary Little Leaguer.
 		QOL:
 			Fix, Update Menu.
 			Added Native Function.
@@ -534,11 +535,6 @@ new Handle:g_hExtreme_rate;
 //associated var
 new g_iExtreme_enable;
 new Float:g_flExtreme_rate;
-
-//little leaguer
-new Handle:g_hLittle_enable;
-//associated var
-new g_iLittle_enable;
 
 
 //BOT CONTROLLER VARS
@@ -972,15 +968,6 @@ CreateConvars()
 	HookConVarChange(g_hExtreme_enable, Convar_Extreme_en);
 	g_iExtreme_enable = 1;
 
-	//little leaguer
-	g_hLittle_enable = CreateConVar(
-		"l4d_perkmod_littleleaguer_enable" ,
-		"1" ,
-		"Little Leaguer perk: Allows the perk to be chosen by players in campaign, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hLittle_enable, Convar_Little_en);
-	g_iLittle_enable = 1;
-
 	//MISC
 	//bot preferences for perks
 	g_hBot_Sur1 = CreateConVar(
@@ -1381,17 +1368,6 @@ public Convar_Extreme_en (Handle:convar, const String:oldValue[], const String:n
 	else
 		iI=1;
 	g_iExtreme_enable = iI;
-}
-
-//little leaguer
-public Convar_Little_en (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iLittle_enable = iI;
 }
 
 //default perks
@@ -2406,11 +2382,6 @@ public Action:TimerPerks (Handle:timer, any:data)
 
 	return Plugin_Continue;
 }
-
-
-
-
-
 
 //on drying from slime, remove hud changes
 RunChecksAll ()
@@ -3604,10 +3575,6 @@ Pyro_Clear (bool:bRoundStart)
 	}
 }
 
-
-
-
-
 //=============================
 // Sur1: Martial Artist
 //=============================
@@ -3748,10 +3715,6 @@ MA_OnGameFrame()
 		{
 			SetEntData(iCid, g_iMeleeFatigueO, g_iMA_maxpenalty);
 		}
-
-
-
-
 
 		//CHECK 1: IS PLAYER USING A KNOWN NON-MELEE WEAPON?
 		//--------------------------------------------------
@@ -3928,10 +3891,6 @@ MA_OnGameFrame()
 
 	return 0;
 }
-
-
-
-
 
 //=============================
 // Sur2: Unbreakable
@@ -4528,8 +4487,6 @@ public Action:HelpHand_Delayed (Handle:timer, any:iCid)
 	return Plugin_Stop;
 }
 
-
-
 //=============================
 // Sur3: Pack Rat
 //=============================
@@ -4731,31 +4688,6 @@ Extreme_Rebuild ()
 	}
 }
 
-//=============================
-// Sur3: Little Leaguer
-//=============================
-
-Event_Confirm_LittleLeaguer (iCid)
-{
-	if (iCid==0
-		|| GetClientTeam(iCid)!=2
-		|| IsPlayerAlive(iCid)==false
-		|| g_iConfirm[iCid]==0
-		|| g_iSur3[iCid]!=5)
-		return;
-
-	//check if perk is enabled
-	if (g_iSur3_enable==0 || g_iChem_enable==0)
-		return;
-
-	new iflags=GetCommandFlags("give");
-	SetCommandFlags("give", iflags & ~FCVAR_CHEAT);
-	FakeClientCommand(iCid,"give katana");
-	SetCommandFlags("give", iflags);
-
-	return;
-}
-
 // #endregion
 // =======================================================================
 
@@ -4767,8 +4699,6 @@ Event_Confirm_LittleLeaguer (iCid)
 //					M	E	N	U
 //====================================================
 //====================================================
-
-
 
 //======================================
 //	CHAT CHECK, TOP MENU, SELECT SUBMENU
@@ -4885,7 +4815,6 @@ public Menu_ChooseInit (Handle:topmenu, MenuAction:action, param1, param2)
 					Event_Confirm_Grenadier(param1);
 					Event_Confirm_ChemReliant(param1);
 					Event_Confirm_MA(param1);
-					Event_Confirm_LittleLeaguer(param1);
 					Extreme_Rebuild();
 					PrintHintText(param1,"Perkmod: %t", "ThanksForChoosingMessage");
 				}
@@ -4956,8 +4885,6 @@ public Handle:Menu_Top (iCid)
 		st_perk="Hard to Kill";
 	else if (g_iSur3[iCid]==4 && g_iExtreme_enable==1)
 		st_perk="Extreme Conditioning";
-	else if (g_iSur3[iCid]==5 && g_iLittle_enable==1)
-		st_perk="Little Leaguer";
 	else
 		st_perk="Not set";
 
@@ -5056,7 +4983,6 @@ public Menu_ChooseConfirm (Handle:topmenu, MenuAction:action, param1, param2)
 				Event_Confirm_ChemReliant(param1);
 				Event_Confirm_MA(param1);
 				Extreme_Rebuild();
-				Event_Confirm_LittleLeaguer(param1);
 			}
 			case 2:
 				SendPanelToClient(Menu_Top(param1),param1,Menu_ChooseSubMenu,MENU_TIME_FOREVER);
@@ -5149,8 +5075,6 @@ public Handle:Menu_ShowChoices (iCid)
 		Format(st_perk,128,"Hard to Kill (+%i%% %t)", RoundToNearest(g_flHard_hpmult*100), "HardToKillDescriptionPanel" );
 	else if (iPerk == 4 && g_iExtreme_enable==1)
 		Format(st_perk,128,"Extreme Conditioning (+%i%% %t)", RoundToNearest(g_flExtreme_rate*100-100), "MartialArtistDescriptionPanelCoop" );
-	else if (iPerk == 5 && g_iLittle_enable==1)
-		Format(st_perk,128,"Little Leaguer (%t)", "LittleLeaguerDescriptionPanel" );
 	else
 		Format(st_perk,128,"%t", "NotSet");
 
@@ -5162,10 +5086,6 @@ public Handle:Menu_ShowChoices (iCid)
 
 	return menu;
 }
-
-
-
-
 
 //=============================
 //	SUR1 PERK CHOICE
@@ -5492,24 +5412,6 @@ public Handle:Menu_Sur3Perk (client)
 		DrawPanelText(menu,st_display);
 	}
 
-	//set name for perk 5
-	if (g_iLittle_enable==0)
-	{
-		DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
-	}
-	else
-	{
-		switch (g_iSur3[client])
-		{
-			case 5: st_current="(CURRENT)";
-			default: st_current="";
-		}
-		Format(st_display,64,"Little Leaguer %s",st_current);
-		DrawPanelItem(menu,st_display);
-		Format(st_display,64,"%t", "LittleLeaguerDescriptionPanel" );
-		DrawPanelText(menu,st_display);
-	}
-
 	return menu;
 }
 
@@ -5533,9 +5435,6 @@ public Menu_ChooseSur3Perk (Handle:menu, MenuAction:action, param1, param2)
 			//extreme cond
 			case 4:
 				g_iSur3[param1]=4;
-			//little leaguer
-			case 5:
-				g_iSur3[param1]=5;
 		}
 	}
 
@@ -5819,14 +5718,6 @@ bool IsEnable_Perk_ExtremeConditioning(int client)
 		&& g_iSur3[client]==4 
 		&& g_iSur3_enable==1 
 		&& g_iExtreme_enable==1;
-}
-
-bool IsEnable_Perk_LittleLeaguer(int client)
-{
-	return g_iConfirm[client]==1 
-		&& g_iSur3[client]==5 
-		&& g_iSur3_enable==1 
-		&& g_iLittle_enable==1;
 }
 
 bool IsPrimaryWeapon(char[] classname)

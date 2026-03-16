@@ -609,16 +609,6 @@
 		"de"	""
 		"da"	""
 	}
-
-	"LittleLeaguerDescriptionPanel"
-	{
-		"en"	"spawn with a katana"
-		"ru"	"Появись с катаной"
-		"de"	""
-		"da"	""
-		"fr"	""
-		"it"	"recois un batte de katana"
-	}
 	"MartialArtistDescriptionPanel_noreduc"
 	{
 		"en"	"triple swing"
