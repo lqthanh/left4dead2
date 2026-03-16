@@ -201,12 +201,12 @@
 
 	"PackRatDescriptionPanel"
 	{
-		"en"	"carry more ammo"
-		"de"	"trage mehr Munition"
-		"it"	"puoi portare piщ munizioni"
-		"da"	"bжr pе mere ammo"
-		"ru"	"Нести больше боезапаса"
-		"fr"	"porter plus de ammunition"
+		"en"	"refill when ammo upgraded, carry more ammo"
+		"de"	"nachfüllen wenn die munition aufgerüstet ist, trage mehr munition"
+		"it"	"ricaricare quando le munizioni vengono aggiornate, puoi portare piщ munizioni"
+		"da"	"genopfyld, når ammunition er opgraderet, medbring mere ammunition"
+		"ru"	"пополнение при обновлении боеприпасов, Нести больше боезапаса"
+		"fr"	"rechargez lorsque les munitions sont améliorées, porter plus de ammunition"
 	}
 
 	"MartialArtistDescriptionPanelCoop"

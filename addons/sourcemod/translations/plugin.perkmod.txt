@@ -102,7 +102,7 @@
 
 	"PackRatDescriptionPanel"
 	{
-		"en"	"carry more ammo"
+		"en"	"refill when pick ammo upgrade, carry more ammo"
 	}
 
 	"HardToKillDescriptionPanel"

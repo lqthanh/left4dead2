@@ -263,17 +263,13 @@
 - version 1.0.rw:
 		Remove GameMode Tracking.
 		Remove SI perks.
-		Remove Survivor Primary Double Tap perk.
+		Remove Survivor Primary Double Tap.
 		QOL:
 			Fix, Update Menu.
 			Added Native Function.
 
 - version 1.1.rw:
-		Perks:
-			Change Pyrotechnician: 
-				For a set amount of time, you will be given a ( pipe bomb -> random type )
-			Change Unbreakable: heal full HP
-			Change Little Leaguer: gives a ( baseball bat -> katana )
+		Rewrite Survivor Tertiary Pack Rat.
 
 ==========================================================================
 ========================================================================*/
@@ -722,6 +718,7 @@ public OnPluginStart()
 	HookEvent("item_pickup", Event_ItemPickup);
 	HookEvent("spawner_give_item", Event_ItemPickup);
 	HookEvent("ammo_pickup", Event_AmmoPickup);
+	HookEvent("receive_upgrade", Event_ReceiveUpgrade);
 	// Chem Reliant
 	HookEvent("pills_used", Event_PillsUsed, EventHookMode_Pre);
 	// Hard To Kill
@@ -2325,8 +2322,6 @@ public Event_ItemPickup (Handle:event, const String:name[], bool:dontBroadcast)
 {
 	new iCid=GetClientOfUserId(GetEventInt(event,"userid"));
 	if (iCid==0) return;
-	if (g_iConfirm[iCid]==0)
-		return;
 
 	new String:stWpn[24];
 	GetEventString(event,"item",stWpn,24);
@@ -2335,20 +2330,28 @@ public Event_ItemPickup (Handle:event, const String:name[], bool:dontBroadcast)
 	Pyro_Pickup(iCid,stWpn);
 
 	//check for pack rat perk
-	PR_Pickup(iCid, stWpn);
+	if (IsPrimaryWeapon(stWpn)) PR_GiveFullAmmo(iCid);
 }
 
 //on ammo pickup, check if pack rat is in effect
 public Event_AmmoPickup (Handle:event, const String:name[], bool:dontBroadcast)
 {
 	new iCid=GetClientOfUserId(GetEventInt(event,"userid"));
-	if (iCid==0)
-		return;
+	if (iCid==0) return;
 
-	if (g_iSur3[iCid]==1 && g_iConfirm[iCid]==1 && g_iSur3_enable==1 && g_iPack_enable==1)
-	{
-		PR_GiveFullAmmo(iCid);
-	}
+	PR_GiveFullAmmo(iCid);
+}
+
+public Event_ReceiveUpgrade (Handle:event, const String:name[], bool:dontBroadcast)
+{
+	new iCid=GetClientOfUserId(GetEventInt(event,"userid"));
+	if (iCid==0) return;
+
+	char upgrade[128];
+	GetEventString(event,"upgrade",upgrade,128);
+
+	// == (INCENDIARY_AMMO or EXPLOSIVE_AMMO)
+	if (!StrEqual(upgrade,"LASER_SIGHT",false)) PR_GiveFullAmmo(iCid, true);
 }
 
 //on drug use
@@ -3408,7 +3411,7 @@ public Action:SoH_ShotgunEndCock (Handle:timer, any:hPack)
 //on pickup
 Pyro_Pickup(iCid, String:stWpn[])
 {
-	if (g_iSur1[iCid]==3 && g_iSur1_enable==1 && g_iPyro_enable==1)
+	if (IsEnable_Perk_Pyrotechnician(iCid))
 	{
 		//only bother with checks if they aren't throwing
 		if (g_iGrenThrow[iCid]==0)
@@ -4638,154 +4641,25 @@ public Action:HelpHand_Delayed (Handle:timer, any:iCid)
 // Sur3: Pack Rat
 //=============================
 
-//on gun pickup
-PR_Pickup(iCid, String:stWpn[])
-{
-	if (g_iSur3[iCid]==1 && g_iSur3_enable==1 && g_iPack_enable==1)
-	{
-		if (StrContains(stWpn, "smg", false)!= -1
-			|| StrContains(stWpn, "rifle", false)!= -1
-			|| StrContains(stWpn, "shotgun", false)!= -1
-			|| StrContains(stWpn, "sniper", false)!= -1	)
-		{
-			PR_GiveFullAmmo(iCid);
-		}
-	}
-}
-
 //gives full ammo
-PR_GiveFullAmmo (iCid)
+PR_GiveFullAmmo(int client, bool extraClip = false)
 {
-	//formula: max + pack rat + max clip size - currently in clip
-	//new iAmmoO=FindDataMapInfo(iCid,"m_iAmmo");
-
-	if (g_iL4D_12 == 2)
+	if (IsEnable_Perk_PackRat(client))
 	{
-		if (g_bPRalreadyApplying[iCid] == false)
+		int weapon = GetPlayerWeaponSlot(client, L4D_WEAPON_SLOT_PRIMARY);
+		if( weapon != -1 )
 		{
-			g_bPRalreadyApplying[iCid] = true;
-			CreateTimer(0.1, PR_GiveFullAmmo_delayed, iCid);
+			int ammoType = GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType");
+			int maxAmmoCarry = AmmoDef.MaxCarry(ammoType);
+
+			if (maxAmmoCarry <= 0) return;
+
+			int refill = RoundToNearest(maxAmmoCarry * (1 + g_flPack_ammomult)) + (extraClip ? GetEntProp(weapon, Prop_Send, "m_iClip1") : 0);
+
+			L4D_SetReserveAmmo(client, weapon, refill);
 		}
-		else
-			return;
-	}
-	else if (g_iL4D_12 == 1)
-	{
-		new iAmmoO=FindDataMapInfo(iCid,"m_iAmmo");
-		decl iAmmoCount;
-
-		//huntingrifle offset +8
-		iAmmoCount = GetEntData(iCid, iAmmoO +8);
-		SetEntData(iCid, iAmmoO	+8, RoundToNearest(iAmmoCount * (1 + g_flPack_ammomult)) );
-		//rifle - offset +12
-		iAmmoCount = GetEntData(iCid, iAmmoO +12);
-		SetEntData(iCid, iAmmoO	+12, RoundToNearest(iAmmoCount * (1 + g_flPack_ammomult)) );
-		//smg - offset +20
-		iAmmoCount = GetEntData(iCid, iAmmoO +20);
-		SetEntData(iCid, iAmmoO	+20, RoundToNearest(iAmmoCount * (1 + g_flPack_ammomult)) );
-		//shotgun - offset +24
-		iAmmoCount = GetEntData(iCid, iAmmoO +24);
-		SetEntData(iCid, iAmmoO	+24, RoundToNearest(iAmmoCount * (1 + g_flPack_ammomult)) );
 	}
 }
-
-//new technique - instead of running off a convar, adjusts ammo
-//relative to what player already has in inventory after a delay
-public Action:PR_GiveFullAmmo_delayed (Handle:timer, any:iCid)
-{
-	KillTimer(timer);
-
-	if (g_bPRalreadyApplying[iCid] == true)
-		g_bPRalreadyApplying[iCid] = false;
-	else
-		return Plugin_Stop;
-	
-	if (IsServerProcessing()==false
-		|| IsValidEntity(iCid) == false
-		|| IsClientInGame(iCid) == false
-		|| IsPlayerAlive(iCid)==false
-		|| GetClientTeam(iCid)!=2)
-		return Plugin_Stop;
-
-	new iAmmoO=FindDataMapInfo(iCid,"m_iAmmo");
-	decl iAmmoO_offset;
-	decl iAmmoCount;
-
-	//checks each weapon type ammo in player's inventory
-	//if non-zero, then assume player has that weapon
-	//and adjust only that weapon's ammo
-
-	//----DEBUG----
-	//new iI = 0;
-	//PrintToChatAll("\x05PR\x03 being feedback loop");
-	//while (iI <= 64)
-	//{
-		//iAmmoCount = GetEntData(iCid, iAmmoO + iI);
-		//PrintToChatAll("\x05PR\x03 iI = \x01%i\x03, value = \x01%i",iI, iAmmoCount);
-		//iI++;
-	//}
-
-	//rifle - offset +12
-	iAmmoO_offset = 12;
-	iAmmoCount = GetEntData(iCid, iAmmoO + iAmmoO_offset);
-	if (iAmmoCount > 0)
-	{
-		SetEntData(iCid, iAmmoO	+ iAmmoO_offset, RoundToNearest(iAmmoCount * (1 + g_flPack_ammomult)) );
-		//return Plugin_Stop;
-	}
-	//smg - offset +20
-	iAmmoO_offset = 20;
-	iAmmoCount = GetEntData(iCid, iAmmoO + iAmmoO_offset);
-	if (iAmmoCount > 0)
-	{
-		SetEntData(iCid, iAmmoO	+ iAmmoO_offset, RoundToNearest(iAmmoCount * (1 + g_flPack_ammomult)) );
-		//return Plugin_Stop;
-	}
-	//auto-shotgun - now offset +32
-	iAmmoO_offset = 32;
-	iAmmoCount = GetEntData(iCid, iAmmoO + iAmmoO_offset);
-	if (iAmmoCount > 0)
-	{
-		SetEntData(iCid, iAmmoO	+ iAmmoO_offset, RoundToNearest(iAmmoCount * (1 + g_flPack_ammomult)) );
-		//return Plugin_Stop;
-	}
-	//pump shotgun - now offset +28
-	iAmmoO_offset = 28;
-	iAmmoCount = GetEntData(iCid, iAmmoO + iAmmoO_offset);
-	if (iAmmoCount > 0)
-	{
-		SetEntData(iCid, iAmmoO	+ iAmmoO_offset, RoundToNearest(iAmmoCount * (1 + g_flPack_ammomult)) );
-		//return Plugin_Stop;
-	}
-	//huntingrifle offset +32 - now +36
-	iAmmoO_offset = 36;
-	iAmmoCount = GetEntData(iCid, iAmmoO + iAmmoO_offset);
-	if (iAmmoCount > 0)
-	{
-		SetEntData(iCid, iAmmoO	+ iAmmoO_offset, RoundToNearest(iAmmoCount * (1 + g_flPack_ammomult)) );
-		//return Plugin_Stop;
-	}
-	//militarysniper offset +36 - now +40
-	iAmmoO_offset = 40;
-	iAmmoCount = GetEntData(iCid, iAmmoO + iAmmoO_offset);
-	if (iAmmoCount > 0)
-	{
-		SetEntData(iCid, iAmmoO	+ iAmmoO_offset, RoundToNearest(iAmmoCount * (1 + g_flPack_ammomult)) );
-		//return Plugin_Stop;
-	}
-	//grenade launcher offset +64
-	iAmmoO_offset = 64;
-	iAmmoCount = GetEntData(iCid, iAmmoO + iAmmoO_offset);
-	if (iAmmoCount > 0)
-	{
-		SetEntData(iCid, iAmmoO	+ iAmmoO_offset, RoundToNearest(iAmmoCount * (1 + g_flPack_ammomult)) );
-		//return Plugin_Stop;
-	}
-
-	return Plugin_Stop;
-}
-
-
 
 //=============================
 // Sur3: Chem Reliant
@@ -5968,6 +5842,118 @@ public Action:Debug_StaminaTimer (Handle:timer, any:iCid)
 	PrintToChat(iCid,"\x03 m_flStamina \x01%i",iStaminaO);
 	PrintToChat(iCid,"\x03 - value \x01%f", GetEntDataFloat(iCid,iStaminaO));
 }*/
+
+// #endregion
+// =======================================================================
+
+// =======================================================================
+// #region Helpers
+
+bool IsEnable_Perk_StoppingPower(int client)
+{
+	return g_iConfirm[client]==1 
+		&& g_iSur1[client]==1 
+		&& g_iSur1_enable==1 
+		&& g_iStopping_enable==1;
+}
+
+bool IsEnable_Perk_SleightOfHand(int client)
+{
+	return g_iConfirm[client]==1 
+		&& g_iSur1[client]==2 
+		&& g_iSur1_enable==1 
+		&& g_iSoH_enable==1;
+}
+
+bool IsEnable_Perk_Pyrotechnician(int client)
+{
+	return g_iConfirm[client]==1 
+		&& g_iSur1[client]==3 
+		&& g_iSur1_enable==1 
+		&& g_iPyro_enable==1;
+}
+
+bool IsEnable_Perk_MartialArtist(int client)
+{
+	return g_iConfirm[client]==1 
+		&& g_iSur1[client]==4 
+		&& g_iSur1_enable==1 
+		&& g_iMA_enable==1;
+}
+
+bool IsEnable_Perk_Unbreakable(int client)
+{
+	return g_iConfirm[client]==1 
+		&& g_iSur2[client]==1 
+		&& g_iSur2_enable==1 
+		&& g_iUnbreak_enable==1;
+}
+
+bool IsEnable_Perk_Spirit(int client)
+{
+	return g_iConfirm[client]==1 
+		&& g_iSur2[client]==2 
+		&& g_iSur2_enable==1 
+		&& g_iSpirit_enable==1;
+}
+
+bool IsEnable_Perk_HelpingHand(int client)
+{
+	return g_iConfirm[client]==1 
+		&& g_iSur2[client]==3 
+		&& g_iSur2_enable==1 
+		&& g_iHelpHand_enable==1;
+}
+
+bool IsEnable_Perk_PackRat(int client)
+{
+	return g_iConfirm[client]==1 
+		&& g_iSur3[client]==1 
+		&& g_iSur3_enable==1 
+		&& g_iPack_enable==1;
+}
+
+bool IsEnable_Perk_ChemReliant(int client)
+{
+	return g_iConfirm[client]==1 
+		&& g_iSur3[client]==2 
+		&& g_iSur3_enable==1 
+		&& g_iChem_enable==1;
+}
+
+bool IsEnable_Perk_HardToKill(int client)
+{
+	return g_iConfirm[client]==1 
+		&& g_iSur3[client]==3 
+		&& g_iSur3_enable==1 
+		&& g_iHard_enable==1;
+}
+
+bool IsEnable_Perk_ExtremeConditioning(int client)
+{
+	return g_iConfirm[client]==1 
+		&& g_iSur3[client]==4 
+		&& g_iSur3_enable==1 
+		&& g_iExtreme_enable==1;
+}
+
+bool IsEnable_Perk_LittleLeaguer(int client)
+{
+	return g_iConfirm[client]==1 
+		&& g_iSur3[client]==5 
+		&& g_iSur3_enable==1 
+		&& g_iLittle_enable==1;
+}
+
+bool IsPrimaryWeapon(char[] classname)
+{
+	return StrContains(classname, "spawn") == -1
+		&& (StrContains(classname, "shotgun") != -1
+			|| StrContains(classname, "smg") != -1
+			|| StrContains(classname, "sniper") != -1
+			|| StrContains(classname, "rifle") != -1
+			|| StrContains(classname, "grenade_launcher") != -1);
+}
 
 // #endregion
 // =======================================================================
