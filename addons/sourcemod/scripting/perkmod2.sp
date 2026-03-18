@@ -403,7 +403,6 @@ new g_iShotRelStateO	= -1;
 new g_iNextAttO			= -1;
 new g_iTimeIdleO		= -1;
 new g_iLaggedMovementO	= -1;
-new g_iClassO			= -1;
 new g_iVMStartTimeO		= -1;
 new g_iViewModelO		= -1;
 new g_iIncapO			= -1;
@@ -717,7 +716,6 @@ public OnPluginStart()
 	g_iNextAttO			=	FindSendPropInfo("CTerrorPlayer","m_flNextAttack");
 	g_iTimeIdleO		=	FindSendPropInfo("CTerrorGun","m_flTimeWeaponIdle");
 	g_iLaggedMovementO	=	FindSendPropInfo("CTerrorPlayer","m_flLaggedMovementValue");
-	g_iClassO			=	FindSendPropInfo("CTerrorPlayer","m_zombieClass");
 	g_iVMStartTimeO		=	FindSendPropInfo("CTerrorViewModel","m_flLayerStartTime");
 	g_iViewModelO		=	FindSendPropInfo("CTerrorPlayer","m_hViewModel");
 	g_iIncapO			=	FindSendPropInfo("CTerrorPlayer","m_isIncapacitated");
@@ -1544,38 +1542,6 @@ public Event_PlayerSpawn (Handle:event, const String:name[], bool:dontBroadcast)
 		&& g_iInfAll_enable == 0)
 	{
 		g_iConfirm[iCid] = 0;
-		return;
-	}
-
-	new iClass = GetEntData(iCid, g_iClassO);
-
-	//check for smoker first
-	if (iClass == 1)
-	{
-		//----DEBUG----
-		//PrintToChatAll("\x03smoker model detected");
-
-		//run a max health check before
-		//doing anything else
-		new iMaxHP = GetConVarInt(FindConVar("z_gas_health"));
-		if ( GetEntProp(iCid,Prop_Data,"m_iHealth") > iMaxHP)
-			SetEntProp(iCid,Prop_Data,"m_iHealth", iMaxHP );
-
-		//----DEBUG----
-		//PrintToChatAll("\x03spawned smoker \x01%i\x03 health \x01%i\x03, maxhp \x01%i", iCid, GetEntProp(iCid,Prop_Data,"m_iHealth"), iMaxHP );
-
-		return;
-	}
-
-	//lastly, check for boomer
-	else if (iClass == 2)
-	{
-		//run a max health check before
-		//doing anything else
-		new iMaxHP = GetConVarInt(FindConVar("z_exploding_health"));
-		if ( GetEntProp(iCid,Prop_Data,"m_iHealth") > iMaxHP)
-			SetEntProp(iCid,Prop_Data,"m_iHealth", iMaxHP );
-
 		return;
 	}
 }
