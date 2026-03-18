@@ -732,7 +732,7 @@ public OnPluginStart()
 
 	//finally, run a command to exec the .cfg file
 	//to load the server's preferences for these cvars
-	AutoExecConfig(true , "perkmod2_rw");
+	AutoExecConfig(true , "perkmod2");
 
 	//and load translations
 	LoadTranslations("plugin.perkmod");
