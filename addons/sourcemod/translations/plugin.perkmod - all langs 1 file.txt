@@ -4,7 +4,7 @@
 	{
 		"en"	"Welcome to Perkmod!"
 		"de"	"Willkommen bei Perkmod:"
-       		"it"	"Benvenuto in Perkmod:"
+       	"it"	"Benvenuto in Perkmod:"
 		"da"	"Velkommen til Perkmod"
 		"ru"	"Добро пожаловать в Перк-Мод: "
 		"fr"	"Bienvenue a Perkmod!"
