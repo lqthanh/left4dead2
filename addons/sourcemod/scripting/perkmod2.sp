@@ -589,9 +589,7 @@ new g_iSur3_enable;
 //option for servers to completely
 //disable perks for infected or survivors
 new Handle:g_hSurAll_enable;
-new Handle:g_hInfAll_enable;
 new g_iSurAll_enable;
-new g_iInfAll_enable;
 
 //this var keeps track of whether
 //to enable Stopping or not, so we don't
@@ -1041,14 +1039,6 @@ CreateConvars()
 
 	//perk hierarchy
 	//--------------
-	g_hInfAll_enable = CreateConVar(
-		"l4d_perkmod_perktree_infected_enable" ,
-		"1" ,
-		"If set to 1, players will be allowed to select perks as Special Infected (affects ALL perks for SI)." ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hInfAll_enable, Convar_InfAll);
-	g_iInfAll_enable = 1;
-
 	g_hSurAll_enable = CreateConVar(
 		"l4d_perkmod_perktree_survivor_enable" ,
 		"1" ,
@@ -1463,18 +1453,6 @@ public Convar_Sur3_en (Handle:convar, const String:oldValue[], const String:newV
 		iI=1;
 
 	g_iSur3_enable=iI;
-	RunChecksAll();
-}
-
-public Convar_InfAll (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-
-	g_iInfAll_enable=iI;
 	RunChecksAll();
 }
 
