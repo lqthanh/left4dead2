@@ -1538,8 +1538,7 @@ public Event_PlayerSpawn (Handle:event, const String:name[], bool:dontBroadcast)
 		return;
 	}
 
-	if (iTeam == 3
-		&& g_iInfAll_enable == 0)
+	if (iTeam == 3)
 	{
 		g_iConfirm[iCid] = 0;
 		return;
@@ -1549,14 +1548,14 @@ public Event_PlayerSpawn (Handle:event, const String:name[], bool:dontBroadcast)
 //call menu on first spawn, otherwise set default values for bots
 public Event_PlayerFirstSpawn (Handle:event, const String:name[], bool:dontBroadcast)
 {
-	if (g_bIsLoading == true
-		|| g_bIsRoundStart == true)
-		return;
+	if (g_bIsLoading == true || g_bIsRoundStart == true) return;
 
 	new iCid=GetClientOfUserId(GetEventInt(event,"userid"));
 	if (iCid==0) return;
-	if (g_iConfirm[iCid]==0
-		&& IsFakeClient(iCid)==false)
+
+	if (GetClientTeam(iCid) == 3) return;
+
+	if (g_iConfirm[iCid]==0 && IsFakeClient(iCid)==false)
 	{
 		CreateTimer(3.0,Timer_ShowTopMenu,iCid);
 		PrintHintText(iCid,"%t", "WelcomeMessageHint");
@@ -2406,11 +2405,7 @@ public Action:Timer_ShowTopMenu (Handle:timer, any:iCid)
 	new iT = GetClientTeam(iCid);
 
 	//don't show menu if perks are disabled
-	if ((g_iSurAll_enable == 0
-		&& iT == 2)
-		||
-		(g_iInfAll_enable == 0
-		&& iT == 3))
+	if ((g_iSurAll_enable == 0 && iT == 2) || (iT == 3))
 	{
 		g_iConfirm[iCid] = 0;
 		return Plugin_Stop;
@@ -4654,13 +4649,7 @@ public Action:MenuOpen_OnSay(iCid, args)
 	new iT = GetClientTeam(iCid);
 
 	//don't show the menu if all perks are disabled
-	if (
-		(g_iSurAll_enable == 0
-		&& iT == 2)
-		||
-		(g_iInfAll_enable == 0
-		&& iT == 3)
-		)
+	if ((g_iSurAll_enable == 0 && iT == 2) || (iT == 3))
 	{
 		g_iConfirm[iCid] = 0;
 		return Plugin_Continue;
@@ -5402,13 +5391,7 @@ public Action:SS_SetPerks(iCid, args)
 	new iT = GetClientTeam(iCid);
 
 	//don't show the menu if all perks are disabled
-	if (
-		(g_iSurAll_enable == 0
-		&& iT == 2)
-		||
-		(g_iInfAll_enable == 0
-		&& iT == 3)
-		)
+	if ((g_iSurAll_enable == 0 && iT == 2) || (iT == 3))
 	{
 		g_iConfirm[iCid] = 0;
 		return Plugin_Continue;
@@ -5683,8 +5666,7 @@ bool IsPrimaryWeapon(char[] classname)
 any Native_Pyro_OnWeaponFire(Handle plugin, int numParams)
 {
 	int client = GetNativeCell(1);
-	char weapon[24];
-	GetNativeString(2, weapon, sizeof(weapon));
+	char weapon[24]; GetNativeString(2, weapon, sizeof(weapon));
 
 	Pyro_OnWeaponFire(client, weapon);
 
