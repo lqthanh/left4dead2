@@ -75,6 +75,11 @@
 		"en"	"carry 2 grenades instead of 1"
 	}
 
+	"ChristmasGiftDescriptionPanel"
+	{
+		"en"	"Special Infected drop gifts when killed."
+	}
+
 	"SpiritDescriptionPanel"
 	{
 		"en"	"self-revive on teammate incap, cooldown"

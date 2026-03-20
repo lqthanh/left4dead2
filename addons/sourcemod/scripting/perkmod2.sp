@@ -270,6 +270,7 @@
 			Added Native Function.
 
 - version 1.1.rw:
+		Add Survivor Primary Christmas Gift.
 		Rewrite Survivor Tertiary Pack Rat.
 
 ==========================================================================
@@ -469,6 +470,11 @@ new Handle:g_hMA_maxpenalty;
 new g_iMA_enable;
 new g_iMA_maxpenalty;
 
+//christmas gift
+new Handle:g_hChristmas_enable;
+//associated var
+new g_iChristmas_enable;
+
 //SUR2 PERKS
 //unbreakable, bonus hp
 //one-size-fits-all
@@ -621,6 +627,18 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	}
 
 	RegPluginLibrary("perkmod2");
+		CreateNative("perkmod2_IsEnable_Perk_StoppingPower", Native_IsEnable_Perk_StoppingPower);
+	CreateNative("perkmod2_IsEnable_Perk_SleightOfHand", Native_IsEnable_Perk_SleightOfHand);
+	CreateNative("perkmod2_IsEnable_Perk_Pyrotechnician", Native_IsEnable_Perk_Pyrotechnician);
+	CreateNative("perkmod2_IsEnable_Perk_MartialArtist", Native_IsEnable_Perk_MartialArtist);
+	CreateNative("perkmod2_IsEnable_Perk_ChristmasGift", Native_IsEnable_Perk_ChristmasGift);
+	CreateNative("perkmod2_IsEnable_Perk_Unbreakable", Native_IsEnable_Perk_Unbreakable);
+	CreateNative("perkmod2_IsEnable_Perk_Spirit", Native_IsEnable_Perk_Spirit);
+	CreateNative("perkmod2_IsEnable_Perk_HelpingHand", Native_IsEnable_Perk_HelpingHand);
+	CreateNative("perkmod2_IsEnable_Perk_PackRat", Native_IsEnable_Perk_PackRat);
+	CreateNative("perkmod2_IsEnable_Perk_ChemReliant", Native_IsEnable_Perk_ChemReliant);
+	CreateNative("perkmod2_IsEnable_Perk_HardToKill", Native_IsEnable_Perk_HardToKill);
+	CreateNative("perkmod2_IsEnable_Perk_ExtremeConditioning", Native_IsEnable_Perk_ExtremeConditioning);
 	CreateNative("perkmod2_Pyro_OnWeaponFire", Native_Pyro_OnWeaponFire);
 
 	return APLRes_Success;
@@ -813,6 +831,15 @@ CreateConvars()
 	HookConVarChange(g_hMA_enable, Convar_MA_en);
 	g_iMA_enable = 1;
 
+	//christmas gift
+	g_hChristmas_enable = CreateConVar(
+		"l4d_perkmod_christmasgift_enable" ,
+		"1" ,
+		"Christmas Gift perk: Allows the perk to be chosen by players in campaign, 0=disabled, 1=enabled" ,
+		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
+	HookConVarChange(g_hChristmas_enable, Convar_Christmas_en);
+	g_iChristmas_enable = 1;
+
 	//unbreakable
 	g_hUnbreak_hp = CreateConVar(
 		"l4d_perkmod_unbreakable_bonushealth" ,
@@ -988,7 +1015,7 @@ CreateConvars()
 	g_hSur1_default = CreateConVar(
 		"l4d_perkmod_default_survivor1" ,
 		"1" ,
-		"Default selected perk for Survivor, Primary: 1 = stopping power, 2 = sleight of hand, 3 = pyrotechnician, 4 = martial artist" ,
+		"Default selected perk for Survivor, Primary: 1 = stopping power, 2 = sleight of hand, 3 = pyrotechnician, 4 = martial artist, 5 = christmas gift" ,
 		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
 	HookConVarChange(g_hSur1_default, Convar_Def_Sur1);
 	g_iSur1_default = 1;
@@ -1168,6 +1195,16 @@ public Convar_MA_en (Handle:convar, const String:oldValue[], const String:newVal
 	else
 		iI=1;
 	g_iMA_enable = iI;
+}
+
+public Convar_Christmas_en (Handle:convar, const String:oldValue[], const String:newValue[])
+{
+	new iI=StringToInt(newValue);
+	if (iI==0)
+		iI=0;
+	else
+		iI=1;
+	g_iChristmas_enable = iI;
 }
 
 //unbreakable
@@ -2473,6 +2510,13 @@ AssignRandomPerks (iCid)
 	{
 		iPerkCount++;
 		iPerkType[iPerkCount]=4;
+	}
+
+	//5 christmas gift
+	if (g_iChristmas_enable==1)
+	{
+		iPerkCount++;
+		iPerkType[iPerkCount]=5;
 	}
 
 	//randomize a perk
@@ -4783,6 +4827,8 @@ public Handle:Menu_Top (iCid)
 		st_perk="Pyrotechnician";
 	else if (g_iSur1[iCid]==4 && g_iMA_enable==1)
 		st_perk="Martial Artist";
+	else if (g_iSur1[iCid]==5 && g_iChristmas_enable==1)
+		st_perk="Christmas Gift";
 	else
 		st_perk="Not set";
 
@@ -4961,6 +5007,8 @@ public Handle:Menu_ShowChoices (iCid)
 		else
 			Format(st_perk,128,"Martial Artist (%t)", "MartialArtistDescriptionPanel_noreduc");
 	}
+	else if (iPerk == 5 && g_iChristmas_enable==1)
+		Format(st_perk,128,"Christmas Gift (%t)", "ChristmasGiftDescriptionPanel");
 	else
 		Format(st_perk,128,"%t", "NotSet");
 
@@ -5111,6 +5159,24 @@ public Handle:Menu_Sur1Perk (client)
 		}
 	}
 
+	//set name for perk 5
+	if (g_iChristmas_enable==0)
+	{
+		DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
+	}
+	else
+	{
+		switch (g_iSur1[client])
+		{
+			case 5: st_current="(CURRENT)";
+			default: st_current="";
+		}
+		Format(st_display,64,"Christmas Gift %s",st_current);
+		DrawPanelItem(menu,st_display);
+		Format(st_display,64,"%t", "ChristmasGiftDescriptionPanel");
+		DrawPanelText(menu, st_display);
+	}
+
 	return menu;
 }
 
@@ -5134,6 +5200,9 @@ public Menu_ChooseSur1Perk (Handle:menu, MenuAction:action, param1, param2)
 			//martial artist
 			case 4:
 				g_iSur1[param1]=4;
+				//christmas gift
+				case 5:
+					g_iSur1[param1]=5;
 		}
 	}
 
@@ -5591,6 +5660,14 @@ bool IsEnable_Perk_MartialArtist(int client)
 		&& g_iMA_enable==1;
 }
 
+bool IsEnable_Perk_ChristmasGift(int client)
+{
+	return g_iConfirm[client]==1 
+		&& g_iSur1[client]==5 
+		&& g_iSur1_enable==1 
+		&& g_iChristmas_enable==1;
+}
+
 bool IsEnable_Perk_Unbreakable(int client)
 {
 	return g_iConfirm[client]==1 
@@ -5662,6 +5739,83 @@ bool IsPrimaryWeapon(char[] classname)
 
 // =======================================================================
 // #region Native
+
+bool Native_IsValidClientIndex(int client)
+{
+	return client > 0 && client <= MaxClients;
+}
+
+any Native_IsEnable_Perk_StoppingPower(Handle plugin, int numParams)
+{
+	int client = GetNativeCell(1);
+	return Native_IsValidClientIndex(client) && IsEnable_Perk_StoppingPower(client);
+}
+
+any Native_IsEnable_Perk_SleightOfHand(Handle plugin, int numParams)
+{
+	int client = GetNativeCell(1);
+	return Native_IsValidClientIndex(client) && IsEnable_Perk_SleightOfHand(client);
+}
+
+any Native_IsEnable_Perk_Pyrotechnician(Handle plugin, int numParams)
+{
+	int client = GetNativeCell(1);
+	return Native_IsValidClientIndex(client) && IsEnable_Perk_Pyrotechnician(client);
+}
+
+any Native_IsEnable_Perk_MartialArtist(Handle plugin, int numParams)
+{
+	int client = GetNativeCell(1);
+	return Native_IsValidClientIndex(client) && IsEnable_Perk_MartialArtist(client);
+}
+
+any Native_IsEnable_Perk_ChristmasGift(Handle plugin, int numParams)
+{
+	int client = GetNativeCell(1);
+	return Native_IsValidClientIndex(client) && IsEnable_Perk_ChristmasGift(client);
+}
+
+any Native_IsEnable_Perk_Unbreakable(Handle plugin, int numParams)
+{
+	int client = GetNativeCell(1);
+	return Native_IsValidClientIndex(client) && IsEnable_Perk_Unbreakable(client);
+}
+
+any Native_IsEnable_Perk_Spirit(Handle plugin, int numParams)
+{
+	int client = GetNativeCell(1);
+	return Native_IsValidClientIndex(client) && IsEnable_Perk_Spirit(client);
+}
+
+any Native_IsEnable_Perk_HelpingHand(Handle plugin, int numParams)
+{
+	int client = GetNativeCell(1);
+	return Native_IsValidClientIndex(client) && IsEnable_Perk_HelpingHand(client);
+}
+
+any Native_IsEnable_Perk_PackRat(Handle plugin, int numParams)
+{
+	int client = GetNativeCell(1);
+	return Native_IsValidClientIndex(client) && IsEnable_Perk_PackRat(client);
+}
+
+any Native_IsEnable_Perk_ChemReliant(Handle plugin, int numParams)
+{
+	int client = GetNativeCell(1);
+	return Native_IsValidClientIndex(client) && IsEnable_Perk_ChemReliant(client);
+}
+
+any Native_IsEnable_Perk_HardToKill(Handle plugin, int numParams)
+{
+	int client = GetNativeCell(1);
+	return Native_IsValidClientIndex(client) && IsEnable_Perk_HardToKill(client);
+}
+
+any Native_IsEnable_Perk_ExtremeConditioning(Handle plugin, int numParams)
+{
+	int client = GetNativeCell(1);
+	return Native_IsValidClientIndex(client) && IsEnable_Perk_ExtremeConditioning(client);
+}
 
 any Native_Pyro_OnWeaponFire(Handle plugin, int numParams)
 {
