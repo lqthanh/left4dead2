@@ -11,6 +11,7 @@ native bool perkmod2_IsEnable_Perk_ChristmasGift(int client);
 native bool perkmod2_IsEnable_Perk_Unbreakable(int client);
 native bool perkmod2_IsEnable_Perk_Spirit(int client);
 native bool perkmod2_IsEnable_Perk_HelpingHand(int client);
+native bool perkmod2_IsEnable_Perk_PackCat(int client);
 native bool perkmod2_IsEnable_Perk_PackRat(int client);
 native bool perkmod2_IsEnable_Perk_ChemReliant(int client);
 native bool perkmod2_IsEnable_Perk_HardToKill(int client);

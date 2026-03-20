@@ -271,6 +271,7 @@
 
 - version 1.1.rw:
 		Add Survivor Primary Christmas Gift.
+		Add Survivor Secondary Pack Cat.
 		Rewrite Survivor Tertiary Pack Rat.
 
 ==========================================================================
@@ -508,6 +509,13 @@ new g_iHelpHand_convar;
 new Float:g_flHelpHand_timemult;
 new g_iHelpHand_buff;
 
+//pack cat, ammo refill
+new Handle:g_hPackCat_enable;
+new Handle:g_hPackCat_ammorefill;
+//associated vars
+new g_iPackCat_enable;
+new Float:g_flPackCat_ammorefill;
+
 //SUR3 PERKS
 //pack rat, bonus ammo multiplier
 //one-size-fits-all
@@ -635,6 +643,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	CreateNative("perkmod2_IsEnable_Perk_Unbreakable", Native_IsEnable_Perk_Unbreakable);
 	CreateNative("perkmod2_IsEnable_Perk_Spirit", Native_IsEnable_Perk_Spirit);
 	CreateNative("perkmod2_IsEnable_Perk_HelpingHand", Native_IsEnable_Perk_HelpingHand);
+	CreateNative("perkmod2_IsEnable_Perk_PackCat", Native_IsEnable_Perk_PackCat);
 	CreateNative("perkmod2_IsEnable_Perk_PackRat", Native_IsEnable_Perk_PackRat);
 	CreateNative("perkmod2_IsEnable_Perk_ChemReliant", Native_IsEnable_Perk_ChemReliant);
 	CreateNative("perkmod2_IsEnable_Perk_HardToKill", Native_IsEnable_Perk_HardToKill);
@@ -923,6 +932,23 @@ CreateConvars()
 	HookConVarChange(g_hHelpHand_convar, Convar_Help_convar);
 	g_iHelpHand_convar = 1;
 
+	//pack cat
+	g_hPackCat_ammorefill = CreateConVar(
+		"l4d_perkmod_packcat_ammorefill" ,
+		"0.04" ,
+		"Pack Cat perk: Special Infected refill this amount of ammo (clamped between 0.01 < 0.25)" ,
+		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
+	HookConVarChange(g_hPackCat_ammorefill, Convar_PackCat_ammorefill);
+	g_flPackCat_ammorefill = 0.04;
+
+	g_hPackCat_enable = CreateConVar(
+		"l4d_perkmod_packcat_enable" ,
+		"1" ,
+		"Pack Cat perk: Allows the perk to be chosen by players in campaign, 0=disabled, 1=enabled" ,
+		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
+	HookConVarChange(g_hPackCat_enable, Convar_PackCat_en);
+	g_iPackCat_enable = 1;
+
 	//pack rat
 	g_hPack_ammomult = CreateConVar(
 		"l4d_perkmod_packrat_ammomultiplier" ,
@@ -1023,7 +1049,7 @@ CreateConvars()
 	g_hSur2_default = CreateConVar(
 		"l4d_perkmod_default_survivor2" ,
 		"1" ,
-		"Default selected perk for Survivor, Secondary: 1 = unbreakable, 2 = spirit, 3 = helping hand" ,
+		"Default selected perk for Survivor, Secondary: 1 = unbreakable, 2 = spirit, 3 = helping hand, 4 = pack cat" ,
 		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
 	HookConVarChange(g_hSur2_default, Convar_Def_Sur2);
 	g_iSur2_default = 1;
@@ -1310,6 +1336,26 @@ public Convar_Help_convar (Handle:convar, const String:oldValue[], const String:
 	g_iHelpHand_convar = iI;
 }
 
+public Convar_PackCat_ammorefill (Handle:convar, const String:oldValue[], const String:newValue[])
+{
+	new Float:flF=StringToFloat(newValue);
+	if (flF<0.01)
+		flF=0.01;
+	else if (flF>0.25)
+		flF=0.25;
+	g_flPackCat_ammorefill = flF;
+}
+
+public Convar_PackCat_en (Handle:convar, const String:oldValue[], const String:newValue[])
+{
+	new iI=StringToInt(newValue);
+	if (iI==0)
+		iI=0;
+	else
+		iI=1;
+	g_iPackCat_enable = iI;
+}
+
 //pack rat
 public Convar_Pack (Handle:convar, const String:oldValue[], const String:newValue[])
 {
@@ -1412,8 +1458,8 @@ public Convar_Def_Sur2 (Handle:convar, const String:oldValue[], const String:new
 	new iI=StringToInt(newValue);
 	if (iI<=0)
 		iI=1;
-	else if (iI>3)
-		iI=3;
+	else if (iI>4)
+		iI=4;
 
 	g_iSur2_default=iI;
 }
@@ -2547,6 +2593,13 @@ AssignRandomPerks (iCid)
 	{
 		iPerkCount++;
 		iPerkType[iPerkCount]=3;
+	}
+
+	//4 pack cat
+	if (g_iPackCat_enable==1)
+	{
+		iPerkCount++;
+		iPerkType[iPerkCount]=4;
 	}
 
 	//randomize a perk
@@ -4846,6 +4899,8 @@ public Handle:Menu_Top (iCid)
 		st_perk="Spirit";
 	else if (g_iSur2[iCid]==3 && g_iHelpHand_enable==1)
 		st_perk="Helping Hand";
+	else if (g_iSur2[iCid]==4 && g_iPackCat_enable==1)
+		st_perk="Pack Cat";
 	else
 		st_perk="Not set";
 
@@ -5037,6 +5092,8 @@ public Handle:Menu_ShowChoices (iCid)
 		else
 			Format(st_perk,128,"Helping Hand (%t +%i)", "HelpingHandDescriptionPanel", iBuff);
 	}
+	else if (iPerk == 4 && g_iPackCat_enable==1)
+		Format(st_perk,128,"Pack Cat (%t)", "PackCatDescriptionPanel", RoundToNearest(g_flPackCat_ammorefill*100));
 	else
 		Format(st_perk,128,"%t", "NotSet");
 
@@ -5294,6 +5351,24 @@ public Handle:Menu_Sur2Perk (client)
 		}
 	}
 
+	//set name for perk 4
+	if (g_iPackCat_enable==0)
+	{
+		DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
+	}
+	else
+	{
+		switch (g_iSur2[client])
+		{
+			case 4: st_current="(CURRENT)";
+			default: st_current="";
+		}
+		Format(st_display,64,"Pack Cat %s",st_current);
+		DrawPanelItem(menu,st_display);
+		Format(st_display,64,"%t", "PackCatDescriptionPanel", RoundToNearest(g_flPackCat_ammorefill*100));
+		DrawPanelText(menu,st_display);
+	}
+
 	return menu;
 }
 
@@ -5314,6 +5389,9 @@ public Menu_ChooseSur2Perk (Handle:menu, MenuAction:action, param1, param2)
 			//helping hand
 			case 3:
 				g_iSur2[param1]=3;
+				//pack cat
+				case 4:
+					g_iSur2[param1]=4;
 		}
 	}
 
@@ -5692,6 +5770,14 @@ bool IsEnable_Perk_HelpingHand(int client)
 		&& g_iHelpHand_enable==1;
 }
 
+bool IsEnable_Perk_PackCat(int client)
+{
+	return g_iConfirm[client]==1 
+		&& g_iSur2[client]==4 
+		&& g_iSur2_enable==1 
+		&& g_iPackCat_enable==1;
+}
+
 bool IsEnable_Perk_PackRat(int client)
 {
 	return g_iConfirm[client]==1 
@@ -5791,6 +5877,12 @@ any Native_IsEnable_Perk_HelpingHand(Handle plugin, int numParams)
 {
 	int client = GetNativeCell(1);
 	return Native_IsValidClientIndex(client) && IsEnable_Perk_HelpingHand(client);
+}
+
+any Native_IsEnable_Perk_PackCat(Handle plugin, int numParams)
+{
+	int client = GetNativeCell(1);
+	return Native_IsValidClientIndex(client) && IsEnable_Perk_PackCat(client);
 }
 
 any Native_IsEnable_Perk_PackRat(Handle plugin, int numParams)

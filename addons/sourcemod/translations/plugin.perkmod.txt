@@ -105,6 +105,11 @@
 		"en"	"give bonus health buffer"
 	}
 
+	"PackCatDescriptionPanel"
+	{
+		"en"	"Special Infected refill %i%% ammo."
+	}
+
 	"PackRatDescriptionPanel"
 	{
 		"en"	"refill when pick ammo upgrade, carry more ammo"

@@ -209,6 +209,16 @@
 		"fr"	"donner plus sante temporaire"
 	}
 
+	"PackCatDescriptionPanel"
+	{
+		"en"	"Special Infected refill %i%% ammo."
+		"de"	"Spezialinfizierte füllen %i%% Munition nach."
+		"it"	"Ricarica speciale per infetti da %i%% munizioni."
+		"da"	"Speciel inficeret refill %i%% ammunition."
+		"ru"	"Специальный заражённый пополняет %i%% патронов."
+		"fr"	"Recharge spéciale Infectés %i%% munitions."
+	}
+
 	"PackRatDescriptionPanel"
 	{
 		"en"	"refill when ammo upgraded, carry more ammo"
