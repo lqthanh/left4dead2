@@ -3344,7 +3344,7 @@ Pyro_Pickup(iCid, String:stWpn[])
 					|| g_iGren[iCid]==2)
 				{
 					g_iGren[iCid]=2;
-					PrintHintText(iCid,"Pyrotechnician: %t %i %s(s)", "GrenadierCarryHint", g_iGren[iCid], stWpn2);
+					PrintHintText(iCid,"Pyrotechnician: %t", "PyroMessageHintGrenadierCarry", g_iGren[iCid], stWpn2);
 				}
 				//otherwise, only give them one and tell them to
 				//throw the grenade before picking up another one;
@@ -3352,7 +3352,7 @@ Pyro_Pickup(iCid, String:stWpn[])
 				else
 				{
 					g_iGren[iCid]=1;
-					PrintHintText(iCid,"%t %s! %t", "GrenadierCantTake2Grenades_A", stWpn2, "GrenadierCantTake2Grenades_B");
+					PrintHintText(iCid,"%t", "PyroMessageHintGrenadierCantTake2Grenades", stWpn2);
 				}
 			}
 		}
@@ -3401,7 +3401,7 @@ Pyro_OnWeaponFire(iCid, String:stWpn[])
 				stWpn2="vomit jar";
 			}
 
-			PrintHintText(iCid,"Pyrotechnician: %t %i %s(s) %t", "GrenadierCounter_A", g_iGren[iCid], stWpn2, "GrenadierCounter_B");
+			PrintHintText(iCid,"Pyrotechnician: %t", "PyroMessageHintGrenadierCounter", g_iGren[iCid], stWpn2);
 			CreateTimer(2.0,Grenadier_DelayedGive,iCid);
 		}
 	}
@@ -5015,7 +5015,7 @@ public Handle:Menu_ShowChoices (iCid)
 	else if (iPerk == 2 && g_iSoH_enable==1)
 		Format(st_perk,128,"Sleight of Hand (%t)", "SleighOfHandDescriptionPanel", RoundToNearest(100 * ((1/g_flSoH_rate)-1) ) ) ;
 	else if (iPerk == 3 && g_iPyro_enable==1)
-		Format(st_perk,128,"Pyrotechnician (%t)", "PyroDescriptionPanel");
+		Format(st_perk,128,"Pyrotechnician (%t)", "PyroDescriptionPanel", g_iPyro_maxticks*2 );
 	else if (iPerk == 4 && g_iMA_enable==1)
 	{
 		if (g_iMA_maxpenalty < 6)
@@ -5042,7 +5042,7 @@ public Handle:Menu_ShowChoices (iCid)
 	{
 		decl iTime;
 			iTime=g_iSpirit_cd;
-		Format(st_perk,128,"Spirit (%t)", "SpiritDescriptionPanel2", g_iSpirit_buff, iTime );
+		Format(st_perk,128,"Spirit (%t)", "SpiritDescriptionPanel", g_iSpirit_buff, iTime );
 	}
 	else if (iPerk == 3 && g_iHelpHand_enable==1)
 	{
@@ -5148,9 +5148,9 @@ public Handle:Menu_Sur1Perk (client)
 		}
 		Format(st_display,64,"Pyrotechnician %s",st_current);
 		DrawPanelItem(menu,st_display);
-		Format(st_display,64,"%t", "PyroDescriptionText1");
+		Format(st_display,64,"%t", "PyroDescriptionPanel1");
 		DrawPanelText(menu, st_display);
-		Format(st_display,64,"%t", "PyroDescriptionText2");
+		Format(st_display,64,"%t", "PyroDescriptionPanel2", g_iPyro_maxticks*2 );
 		DrawPanelText(menu, st_display);
 	}
 
@@ -5274,9 +5274,9 @@ public Handle:Menu_Sur2Perk (client)
 		}
 		Format(st_display,64,"Spirit %s",st_current);
 		DrawPanelItem(menu,st_display);
-		Format(st_display,64,"%t", "SpiritDescriptionPanel");
+		Format(st_display,64,"%t", "SpiritDescriptionPanel1");
 		DrawPanelText(menu,st_display);
-		Format(st_display,64,"%t", "SpiritDescriptionPanel1", g_iSpirit_buff, g_iSpirit_cd );
+		Format(st_display,64,"%t", "SpiritDescriptionPanel2", g_iSpirit_buff, g_iSpirit_cd );
 		DrawPanelText(menu,st_display);
 	}
 

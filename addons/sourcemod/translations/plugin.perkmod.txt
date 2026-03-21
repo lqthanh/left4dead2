@@ -90,6 +90,36 @@
 		"en"	"Reload faster %i%%"
 	}
 
+	"PyroDescriptionPanel"
+	{
+		"en"	"Carry 2 grenades, gain random type after %i (sec) not carry any"
+	}
+
+	"PyroDescriptionPanel1"
+	{
+		"en"	"Picking up a grenade gives you two, start the round with 2 grenades"
+	}
+
+	"PyroDescriptionPanel2"
+	{
+		"en"	"Gain random type after %i (sec) not carry any"
+	}
+
+	"PyroMessageHintGrenadierCarry"
+	{
+		"en"	"You are carrying %i %s(s)"
+	}
+
+	"PyroMessageHintGrenadierCantTake2Grenades"
+	{
+		"en"	"You only picked up one %s. Throw your second grenade before picking up another."
+	}
+
+	"PyroMessageHintGrenadierCounter"
+	{
+		"en"	"You have %i %s(s) left."
+	}
+
 	"ChristmasGiftDescriptionPanel"
 	{
 		"en"	"Special Infected drop gifts when killed."
@@ -102,17 +132,17 @@
 
 	"SpiritDescriptionPanel"
 	{
-		"en"	"Self-revive on teammate incap"
+		"en"	"Self-revive, gain %i temp health, cooldown %i (sec)"
 	}
 
 	"SpiritDescriptionPanel1"
 	{
-		"en"	"Gain bonus %i temp health, cooldown %i (sec)"
+		"en"	"Self-revive on teammate incap"
 	}
 
 	"SpiritDescriptionPanel2"
 	{
-		"en"	"Self-revive, gain %i temp health, cooldown %i (sec)"
+		"en"	"Gain bonus %i temp health, cooldown %i (sec)"
 	}
 
 	"SpiritMessageHintSuccess"
@@ -175,49 +205,9 @@
 		"en"	"Speed Bonus %i%%"
 	}
 
-	"GrenadierCarryHint"
-	{
-		"en"	"You are carrying"
-	}
-
-	"GrenadierCantTake2Grenades_A"
-	{
-		"en"	"You only picked up one"
-	}
-
-	"GrenadierCantTake2Grenades_B"
-	{
-		"en"	"Throw your second grenade before picking up another."
-	}
-
-	"GrenadierCounter_A"
-	{
-		"en"	"You have"
-	}
-
-	"GrenadierCounter_B"
-	{
-		"en"	"left"
-	}
-
-	"PyroDescriptionPanel"
-	{
-		"en"	"carry 2 grenades instead of 1"
-	}
-
 	"NotSet"
 	{
 		"en"	"Not set"
-	}
-
-	"PyroDescriptionText1"
-	{
-		"en"	"Picking up a grenade gives you two"
-	}
-
-	"PyroDescriptionText2"
-	{
-		"en"	"and you start the round with 2 grenades"
 	}
 
 	"MartialArtistDescriptionPanel"

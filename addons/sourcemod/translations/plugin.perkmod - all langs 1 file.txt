@@ -180,6 +180,66 @@
 		"fr"	"Recharger plus vite %i%%"
 	}
 
+	"PyroDescriptionPanel"
+	{
+		"en"	"carry 2 grenades instead of 1"
+		"de"	"trage zwei Granaten statt einer"
+		"it"	"puoi portare 2 granate invece di una"
+		"da"	"bжrer to granater i stedet for йn"
+		"ru"	"Две гранаты вместо одной"
+		"fr"	"porter 2 grenades au lieu d'un"
+	}
+
+	"PyroDescriptionPanel1"
+	{
+		"en"	"Picking up a grenade gives you two"
+		"de"	"Nimm nicht eine sondern 2 Granaten"
+		"it"	"Raccogliere una granata te ne dа 2"
+		"da"	"At samle en granat op vil give dig to"
+		"ru"	"Подбирание гранаты дает вам сразу две"
+		"fr"	"Prenant une grenade vous donne deux"
+	}
+
+	"PyroDescriptionPanel2"
+	{
+		"en"	"and you start the round with 2 grenades"
+		"de"	"und beginne die Runde mit zwei Granaten"
+		"it"	"e cominci il round con 2 granate"
+		"da"	"og du starter runden med to granater"
+		"ru"	"и вы начинаете раунд с двумя гранатами."
+		"fr"	"et vous commencez la ronde avec deux grenades"
+	}
+
+	"PyroMessageHintGrenadierCarry"
+	{
+		"en"	"You are carrying %i %s(s)"
+		"de"	"Du traegst jetzt %i %s(s)"
+		"it"	"Hai %i %s(s)"
+		"da"	"Du bжrer %i %s(s)"
+		"ru"	"Вы несете %i %s(s)"
+		"fr"	"Vous avez %i %s(s)"
+	}
+
+	"PyroMessageHintGrenadierCantTake2Grenades"
+	{
+		"en"	"You only picked up one %s. Throw your second grenade before picking up another."
+		"de"	"Du hast nur eine %s aufgehoben. Wirf die zweite Granate, bevor du eine weitere aufnimmst."
+		"it"	"Hai preso solo una %s. Lancia la tua seconda granata prima di prenderne un'altra."
+		"da"	"Du samlede kun en %s. Kast din anden granat, fшr du samler en anden op."
+		"ru"	"Вы подобрали только одну %s. Бросьте вторую гранату, прежде чем поднять другую."
+		"fr"	"Vous avez seulement un %s. Jetez votre deuxiиme grenade avant d'en ramasser une autre."
+	}
+
+	"PyroMessageHintGrenadierCounter"
+	{
+		"en"	"You have %i %s(s) left."
+		"de"	"Du hast noch %i %s(s)."
+		"it"	"Ti rimangono %i %s(s)."
+		"da"	"Du har %i %s(s) tilbage."
+		"ru"	"У вас осталось %i %s(s)."
+		"fr"	"Il vous reste %i %s(s)."
+	}
+
 	"ChristmasGiftDescriptionPanel"
 	{
 		"en"	"Special Infected drop gifts when killed."
@@ -202,6 +262,16 @@
 
 	"SpiritDescriptionPanel"
 	{
+		"en"	"Self-revive, gain %i temp health, cooldown %i (sec)"
+		"de"	"Selbstwiederbelebung, gewinne %i temporдres Leben, Abklingzeit %i (sec)"
+		"it"	"Autoriabilitazione, ottieni %i salute temporanea, cooldown %i (sec)"
+		"da"	"Selv-genoplivning, fе %i midlertidigt helbred, cooldown %i (sec)"
+		"ru"	"Самовосстановление, получите %i бонусного временного хп, перезарядка %i (sec)"
+		"fr"	"Auto-rйanimation, reзois %i vie temporaire, cooldown %i (sec)"
+	}
+
+	"SpiritDescriptionPanel1"
+	{
 		"en"	"Self-revive on teammate incap"
 		"de"	"Selbstwiederbelebung bei Teammitglied-Incap"
 		"it"	"Autoriabilitazione quando un compagno viene incapacita"
@@ -210,7 +280,7 @@
 		"fr"	"Auto-rйanimation quand un coйquipier est mis KO"
 	}
 
-	"SpiritDescriptionPanel1"
+	"SpiritDescriptionPanel2"
 	{
 		"en"	"Gain bonus %i temp health, cooldown %i (sec)"
 		"de"	"Gewinne %i temporдres Leben, Abklingzeit %i (sec)"
@@ -218,16 +288,6 @@
 		"da"	"Fе %i midlertidigt helbred bonus, cooldown %i (sec)"
 		"ru"	"Получите %i бонусного временного хп, перезарядка %i (sec)"
 		"fr"	"Reзois %i vie temporaire bonus, cooldown %i (sec)"
-	}
-
-	"SpiritDescriptionPanel2"
-	{
-		"en"	"Self-revive, gain %i temp health, cooldown %i (sec)"
-		"de"	"Selbstwiederbelebung, gewinne %i temporдres Leben, Abklingzeit %i (sec)"
-		"it"	"Autoriabilitazione, ottieni %i salute temporanea, cooldown %i (sec)"
-		"da"	"Selv-genoplivning, fе %i midlertidigt helbred, cooldown %i (sec)"
-		"ru"	"Самовосстановление, получите %i бонусного временного хп, перезарядка %i (sec)"
-		"fr"	"Auto-rйanimation, reзois %i vie temporaire, cooldown %i (sec)"
 	}
 
 	"SpiritMessageHintSuccess"
@@ -350,66 +410,6 @@
 		"fr"	"Bonus de vitesse %i%%"
 	}
 
-	"GrenadierCarryHint"
-	{
-		"en"	"You are carrying"
-		"de"	"Du traegst jetzt"
-		"it"	"Hai"
-		"da"	"Du bжrer pе"
-		"ru"	"Вы несете"
-		"fr"	"Vous avez"
-	}
-
-	"GrenadierCantTake2Grenades_A"
-	{
-		"en"	"You only picked up one"
-		"de"	"Du hast nur eine"
-		"it"	"Hai preso solo una"
-		"da"	"Du samlede kun йn op"
-		"ru"	"Вы подобрали только одну"
-		"fr"	"Vous avez seulement un"
-	}
-
-	"GrenadierCantTake2Grenades_B"
-	{
-		"en"	"Throw your second grenade before picking up another."
-		"de"	"aufgehoben! Wirf die zweite Granate, bevor du Neue aufhebst."
-	 	"it"	"Lancia la tua seconda granata prima di prenderne un'altra."
-		"da"	"Kast din anden granat fшr du samler en anden op."
-		"ru"	"Киньте свою вторую гранату перед тем как поднять следующую."
-		"fr"	"Lancez votre grenade seconde avant de prenez d'autre."
-	}
-
-	"GrenadierCounter_A"
-	{
-		"en"	"You have"
-		"de"	"Du hast noch"
-		"it"	"Hai"
-		"da"	"Du har"
-		"ru"	"У вас"
-		"fr"	"Vous avez"
-	}
-
-	"GrenadierCounter_B"
-	{
-		"en"	"left"
-		"de"	"uebrig"
-		"it"	"rimaste"
-		"da"	"tilbage"
-		"ru"	"осталось"
-		"fr"	"restant"
-	}
-
-	"PyroDescriptionPanel"
-	{
-		"en"	"carry 2 grenades instead of 1"
-		"de"	"trage zwei Granaten statt einer"
-		"it"	"puoi portare 2 granate invece di una"
-		"da"	"bжrer to granater i stedet for йn"
-		"ru"	"Две гранаты вместо одной"
-		"fr"	"porter 2 grenades au lieu d'un"
-	}
-
 	"NotSet"
 	{
 		"en"	"Not set"
@@ -418,26 +418,6 @@
 		"da"	"Ikke sat"
 		"ru"	"Не установлен"
 		"fr"	"Pas fixe"
-	}
-
-	"PyroDescriptionText1"
-	{
-		"en"	"Picking up a grenade gives you two"
-		"de"	"Nimm nicht eine sondern 2 Granaten"
-		"it"	"Raccogliere una granata te ne dа 2"
-		"da"	"At samle en granat op vil give dig to"
-		"ru"	"Подбирание гранаты дает вам сразу две"
-		"fr"	"Prenant une grenade vous donne deux"
-	}
-
-	"PyroDescriptionText2"
-	{
-		"en"	"and you start the round with 2 grenades"
-		"de"	"und beginne die Runde mit zwei Granaten"
-		"it"	"e cominci il round con 2 granate"
-		"da"	"og du starter runden med to granater"
-		"ru"	"и вы начинаете раунд с двумя гранатами."
-		"fr"	"et vous commencez la ronde avec deux grenades"
 	}
 
 	"MartialArtistDescriptionPanel"
