@@ -120,6 +120,11 @@
 		"en"	"Special Infected refill %i%% ammo."
 	}
 
+	"ChemReliantDescriptionPanel"
+	{
+		"en"	"Start the round with pills, %i bonus temp health using pills"
+	}
+
 	"PackRatDescriptionPanel"
 	{
 		"en"	"Refill when pick ammo upgrade, carry more %i%% ammo"
@@ -185,11 +190,6 @@
 		"en"	"Not set"
 	}
 
-	"ChemReliantDescriptionPanel"
-	{
-		"en"	"bonus temp health using pills"
-	}
-
 	"HelpingHandDescriptionPanel"
 	{
 		"en"	"give bonus health buffer"
@@ -223,16 +223,6 @@
 	"SpritDescriptionText2"
 	{
 		"en"	"bonus health buffer, cooldown"
-	}
-
-	"ChemReliantDescriptionText"
-	{
-		"en"	"You gain bonus health buffer when taking pills"
-	}
-
-	"ChemReliantDescriptionText2"
-	{
-		"en"	"and you start the round with extra pills"
 	}
 
 	"MartialArtistDescriptionPanel"

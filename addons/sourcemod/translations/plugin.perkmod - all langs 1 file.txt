@@ -250,6 +250,16 @@
 		"fr"	"Rechargez lorsque les munitions sont améliorées, porter plus de %i%% ammunition"
 	}
 
+	"ChemReliantDescriptionPanel"
+	{
+		"en"	"Start the round with pills, %i bonus temp health when using pills"
+		"de"	"Starte die Runde mit Pillen, %i Bonus-Temp-Leben bei Pilleneinnahme"
+		"it"	"Inizia il round con pillole, %i salute temporanea bonus usando le pillole"
+		"da"	"Start runden med piller, %i bonus midlertidigt helbred ved brug af piller"
+		"ru"	"Начните раунд с таблетками, %i бонусного временного здоровья при использовании таблеток"
+		"fr"	"Commencez le round avec des pilules, %i de vie temporaire bonus avec les pilules"
+	}
+
 	"HardToKillDescriptionPanel"
 	{
 		"en"	"More health when incapped"
@@ -369,15 +379,6 @@
 		"ru"	"Не установлен"
 		"fr"	"Pas fixe"
 	}
-	"ChemReliantDescriptionPanel"
-	{
-		"en"	"bonus temp health using pills"
-		"de"	"extra Leben von Pillen"
-		"it"	"salute extra usando le pillole"
-		"da"	"ekstra midlertidigt helbred ved brug af piller"
-		"ru"	"Бонусное хп от использования таблеток"
-		"fr"	"plus de sante temporaire avec des pilules"
-	}
 
 	"HelpingHandDescriptionPanel"
 	{
@@ -447,26 +448,6 @@
 		"da"	"ekstra helbred, cooldown"
 		"ru"	"бонусное временное хп, кулдаун."
 		"fr"	"plus de sante temporaire, temps de recharge"
-	}
-
-	"ChemReliantDescriptionText"
-	{
-		"en"	"You gain bonus health buffer when taking pills"
-		"de"	"Du erhaelst mehr Leben wenn du Pillen schluckst"
-		"it"	"Ottieni piщ salute temporanea usando le pillole"
-		"da" 	"Du opnеr ekstra helbred ved at tage piller"
-		"ru"	"Вы получаете бонусное хп, используя таблетки,"
-		"fr"	"Vous recevez plus sante temporaire avec des pilules"
-	}
-
-	"ChemReliantDescriptionText2"
-	{
-		"en"	"and you start the round with extra pills"
-		"de"	"und beginnst die Runde mit Pillen"
-		"it"	"e cominci il round con le pillole"
-		"da"	"og du starter runden med ekstra piller"
-		"ru"	"и вы начинаете раунд с таблетками."
-		"fr"	"et vous commencez la ronde avec des pilules"
 	}
 
 	"MartialArtistDescriptionPanel"

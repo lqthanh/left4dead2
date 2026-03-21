@@ -5069,7 +5069,7 @@ public Handle:Menu_ShowChoices (iCid)
 	if (iPerk == 1 && g_iPack_enable==1)
 		Format(st_perk,128,"Pack Rat (%t)", "PackRatDescriptionPanel", RoundToNearest(g_flPack_ammomult*100) );
 	else if (iPerk == 2 && g_iChem_enable==1)
-		Format(st_perk,128,"Chem Reliant (%t +%i)", "ChemReliantDescriptionPanel", g_iChem_buff);
+		Format(st_perk,128,"Chem Reliant (%t)", "ChemReliantDescriptionPanel", g_iChem_buff);
 	else if (iPerk == 3 && g_iHard_enable==1)
 		Format(st_perk,128,"Hard to Kill (%t)", "HardToKillDescriptionPanel");
 	else if (iPerk == 4 && g_iExtreme_enable==1)
@@ -5406,12 +5406,7 @@ public Handle:Menu_Sur3Perk (client)
 		}
 		Format(st_display,64,"Chem Reliant %s",st_current);
 		DrawPanelItem(menu,st_display);
-		if (g_iChem_buff > 0)
-		{
-			Format(st_display,64,"%t (+%i)", "ChemReliantDescriptionText", g_iChem_buff);
-			DrawPanelText(menu,st_display);
-		}
-		Format(st_display,64,"%t", "ChemReliantDescriptionText2");
+		Format(st_display,64,"%t", "ChemReliantDescriptionPanel", g_iChem_buff);
 		DrawPanelText(menu,st_display);
 	}
 
