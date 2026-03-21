@@ -5019,9 +5019,9 @@ public Handle:Menu_ShowChoices (iCid)
 	else if (iPerk == 4 && g_iMA_enable==1)
 	{
 		if (g_iMA_maxpenalty < 6)
-			Format(st_perk,128,"Martial Artist (%t)", "MartialArtistDescriptionPanel");
+			Format(st_perk,128,"Martial Artist (%t)", "MartialArtistDescriptionPanel1");
 		else
-			Format(st_perk,128,"Martial Artist (%t)", "MartialArtistDescriptionPanel_noreduc");
+			Format(st_perk,128,"Martial Artist (%t)", "MartialArtistDescriptionPanel");
 	}
 	else if (iPerk == 5 && g_iChristmas_enable==1)
 		Format(st_perk,128,"Christmas Gift (%t)", "ChristmasGiftDescriptionPanel");
@@ -5167,12 +5167,15 @@ public Handle:Menu_Sur1Perk (client)
 			default: st_current="";
 		}
 		Format(st_display,64,"Martial Artist %s",st_current);
-		DrawPanelItem(menu,st_display);
-		Format(st_display,64,"%t", "MartialArtistDescriptionPanel1");
 		DrawPanelText(menu, st_display);
 		if (g_iMA_maxpenalty <6)
 		{
-			Format(st_display,64,"%t", "MartialArtistDescriptionPanel2");
+			Format(st_display,64,"%t", "MartialArtistDescriptionPanel1");
+			DrawPanelText(menu, st_display);
+		}
+		else
+		{
+			Format(st_display,64,"%t", "MartialArtistDescriptionPanel");
 			DrawPanelText(menu, st_display);
 		}
 	}

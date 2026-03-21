@@ -120,6 +120,16 @@
 		"en"	"You have %i %s(s) left."
 	}
 
+	"MartialArtistDescriptionPanel"
+	{
+		"en"	"Strike more swing with melee"
+	}
+
+	"MartialArtistDescriptionPanel1"
+	{
+		"en"	"Strike more swing with melee, reduced shove fatigue"
+	}
+
 	"ChristmasGiftDescriptionPanel"
 	{
 		"en"	"Special Infected drop gifts when killed."
@@ -208,25 +218,5 @@
 	"NotSet"
 	{
 		"en"	"Not set"
-	}
-
-	"MartialArtistDescriptionPanel"
-	{
-		"en"	"double swing, half the shove fatigue"
-	}
-
-	"MartialArtistDescriptionPanel1"
-	{
-		"en"	"You can strike twice in rapid succession with a melee weapon"
-	}
-
-	"MartialArtistDescriptionPanel2"
-	{
-		"en"	"and you have a reduced maximum shove penalty"
-	}
-
-	"MartialArtistDescriptionPanel_noreduc"
-	{
-		"en"	"triple swing"
 	}
 }

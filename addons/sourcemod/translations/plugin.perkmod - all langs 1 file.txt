@@ -240,6 +240,26 @@
 		"fr"	"Il vous reste %i %s(s)."
 	}
 
+	"MartialArtistDescriptionPanel"
+	{
+		"en"	"Strike more swing with melee"
+		"de"	"Treffe mehrmals hintereinander mit Nahkampf"
+		"it"	"Colpisci piщ colpi con il corpo a corpo"
+		"da"	"Slг flere sving med nжrkamp"
+		"ru"	"Наносите больше ударов ближнего боя"
+		"fr"	"Frappez plus de coups au corps а corps"
+	}
+
+	"MartialArtistDescriptionPanel1"
+	{
+		"en"	"Strike more swing with melee, reduced shove fatigue"
+		"de"	"Treffe mehrmals mit Nahkampf, reduzierte Schubmьdigkeit"
+		"it"	"Colpisci piщ colpi con il corpo a corpo, fatica di spinta ridotta"
+		"da"	"Slг flere sving med nжrkamp, reduceret skubtrжthed"
+		"ru"	"Наносите больше ударов ближнего боя, уменьшенная усталость от толчков"
+		"fr"	"Frappez plus de coups au corps а corps, fatigue de poussйe rйduite"
+	}
+
 	"ChristmasGiftDescriptionPanel"
 	{
 		"en"	"Special Infected drop gifts when killed."
@@ -418,45 +438,5 @@
 		"da"	"Ikke sat"
 		"ru"	"Не установлен"
 		"fr"	"Pas fixe"
-	}
-
-	"MartialArtistDescriptionPanel"
-	{
-		"en"	"triple swing, half the melee fatigue"
-		"de"	"triple swing, halbierte Nahkampfermuedung"
-		"it"	"Doppio swing, metа dell'affaticamento da mischia."
-		"da"	"triple swing, halveret melee trжthed"
-		"ru"	"Быстрые рукопашные удары, меньше усталость в ближнем бою"
-		"fr"	"triple swing, demi de melee fatigue"
-	}
-
-	"MartialArtistDescriptionPanel1"
-	{
-		"en"	"You can strike three times in rapid succession with a melee weapon"
-		"it"	"Puoi colpire due volte in rapida successione con un'arma da corpo a corpo"
-		"fr"	"Vous pouvez balancer trois temps tres vites avec un arme de melee"
-		"ru"	"Быстрые рукопашных атаки"
-		"de"	""
-		"da"	""
-	}
-
-	"MartialArtistDescriptionPanel2"
-	{
-		"en"	"and you have a reduced maximum shove penalty"
-		"it"	"ed hai una penalità ridotta di affaticamento."
-		"fr"	"et vous avez moins de peine de pousser"
-		"ru"	"и меньшая усталость от них"
-		"de"	""
-		"da"	""
-	}
-
-	"MartialArtistDescriptionPanel_noreduc"
-	{
-		"en"	"triple swing"
-		"it"	"triple swing"
-		"ru"	"triple swing"
-		"de"	"triple swing"
-		"da"	"triple swing"
-		"fr"	"triple swing"
 	}
 }
