@@ -110,14 +110,14 @@
 		"en"	"Special Infected drop gifts when killed."
 	}
 
+	"UnbreakableDescriptionPanel"
+	{
+		"en"	"Bonus health %i"
+	}
+
 	"ExtremeConditioningDescriptionPanel"
 	{
 		"en"	"Speed Bonus %i%%"
-	}
-
-	"UnbreakableHint"
-	{
-		"en"	"bonus health"
 	}
 
 	"GrenadierCarryHint"

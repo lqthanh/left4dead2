@@ -220,6 +220,16 @@
 		"fr"	"Les infectés spéciaux lâchent des cadeaux une fois tués."
 	}
 
+	"UnbreakableDescriptionPanel"
+	{
+		"en"	"Bonus health %i"
+		"de"	"Zusaetzliches Leben %i"
+		"it"	"Salute extra %i"
+		"da"	"Ekstra helbred %i"
+		"ru"	"Бонусное здоровье %i"
+		"fr"	"Plus sante %i"
+	}
+
 	"ExtremeConditioningDescriptionPanel"
 	{
 		"en"	"Speed Bonus %i%%"
@@ -228,16 +238,6 @@
 		"da"	"Hastighedsbonus %i%%"
 		"ru"	"Бонус скорости %i%%"
 		"fr"	"Bonus de vitesse %i%%"
-	}
-
-	"UnbreakableHint"
-	{
-		"en"	"bonus health"
-		"de"	"Zusaetzliches Leben"
-		"it"	"Salute extra"
-		"da"	"Ekstra helbred"
-		"ru"	"Бонусное здоровье"
-		"fr"	"plus sante"
 	}
 
 	"GrenadierCarryHint"

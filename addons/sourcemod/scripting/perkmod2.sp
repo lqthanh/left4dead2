@@ -3931,7 +3931,7 @@ MA_OnGameFrame()
 // Sur2: Unbreakable
 //=============================
 
-//on heal; gives 100% of bonus hp
+//on heal;
 Unbreakable_OnHeal (iCid)
 {
 	//check if perk is enabled
@@ -3941,7 +3941,6 @@ Unbreakable_OnHeal (iCid)
 	if (g_iSur2[iCid]==1)
 	{
 		CreateTimer(0.5,Unbreakable_Delayed_Heal,iCid);
-		//SetEntProp(iCid,Prop_Data,"m_iHealth", GetEntProp(iCid,Prop_Data,"m_iHealth")+(g_iUnbreak_hp) );
 
 		//run a check to see if for whatever reason
 		//the player's health is above 200
@@ -3949,8 +3948,6 @@ Unbreakable_OnHeal (iCid)
 		//in which case we set their health to 200
 		if (GetEntProp(iCid,Prop_Data,"m_iHealth") > 200)
 			CreateTimer(0.5,Unbreakable_Delayed_SetHigh,iCid);
-
-		PrintHintText(iCid,"Unbreakable: %t!", "UnbreakableHint");
 	}
 }
 
@@ -3988,7 +3985,6 @@ Event_Confirm_Unbreakable (iCid)
 			CreateTimer(0.5,Unbreakable_Delayed_Max,iCid);
 		else if (iHP<=100)
 			CreateTimer(0.5,Unbreakable_Delayed_Normal,iCid);
-		PrintHintText(iCid,"Unbreakable: %t!", "UnbreakableHint");
 
 		//run a check to see if for whatever reason
 		//the player's health is above 200
@@ -4020,7 +4016,6 @@ Unbreakable_OnRescue (iCid)
 			return;
 
 		CreateTimer(0.5,Unbreakable_Delayed_Rescue,iCid);
-		PrintHintText(iCid,"Unbreakable: %t!", "UnbreakableHint");
 
 		//run a check to see if for whatever reason
 		//the player's health is above 200
@@ -4044,7 +4039,6 @@ Unbreakable_OnRevive (iSub, iLedge)
 		if (g_iSur1_enable==1 && g_iUnbreak_enable==1)
 		{
 			SetEntDataFloat(iSub,g_iHPBuffO, GetEntDataFloat(iSub,g_iHPBuffO)+(g_iUnbreak_hp/2) ,true);
-			PrintHintText(iSub,"Unbreakable: %t!", "UnbreakableHint");
 		}
 	}
 }
@@ -5043,7 +5037,7 @@ public Handle:Menu_ShowChoices (iCid)
 	//show sur2 perk
 	iPerk = g_iSur2[iCid];
 	if (iPerk == 1 && g_iUnbreak_enable==1)
-		Format(st_perk,128,"Unbreakable (+%i %t)", g_iUnbreak_hp, "UnbreakableHint");
+		Format(st_perk,128,"Unbreakable (%t)", "UnbreakableDescriptionPanel", g_iUnbreak_hp);
 	else if (iPerk == 2 && g_iSpirit_enable==1)
 	{
 		decl iTime;
@@ -5262,7 +5256,7 @@ public Handle:Menu_Sur2Perk (client)
 		}
 		Format(st_display,64,"Unbreakable %s",st_current);
 		DrawPanelItem(menu,st_display);
-		Format(st_display,64,"+%i %t", g_iUnbreak_hp, "UnbreakableHint" );
+		Format(st_display,64,"%t", "UnbreakableDescriptionPanel", g_iUnbreak_hp );
 		DrawPanelText(menu,st_display);
 	}
 
