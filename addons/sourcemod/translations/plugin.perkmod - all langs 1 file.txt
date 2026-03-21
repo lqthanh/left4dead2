@@ -1,16 +1,6 @@
 ﻿"Phrases"
 {
-	"WelcomeMessageHint"
-	{
-		"en"	"Welcome to Perkmod!"
-		"de"	"Willkommen bei Perkmod:"
-       	"it"	"Benvenuto in Perkmod:"
-		"da"	"Velkommen til Perkmod"
-		"ru"	"Добро пожаловать в Перк-Мод: "
-		"fr"	"Bienvenue a Perkmod!"
-	}
-
-	"WelcomeMessageChat"
+	"MessageChatWelcome"
 	{
 		"en"	"Welcome to Perkmod! If the menu doesn't come up, type !perks to display it."
 		"de"	"Willkommen bei Perkmod! Sollte das Menu nicht offen sein, bitte !perks eintippen."
@@ -18,6 +8,156 @@
 		"da" 	"Velkommen til Perkmod! Hvis menuen ikke kommer frem, skriv !perks for at vise den"
 		"ru"	"Добро пожаловать в Перк-Мод! Если меню не появилось, напишите в чате !perks."
 		"fr"	"Bienvenue a Perkmod! Si le menu n'apparaits pas, tapez !perks pour afficher le menu."
+	}
+
+	"MessageChatConfirmed"
+	{
+		"en"	"You've confirmed your Perk choices; they will now take effect. You may not change your Perks until the next round. \n\n To check your perks, type !perks"
+		"de"	"Du hast deine Staerken bestaetigt, sie treten nun in Effekt. Du kannst keine Дnderungen bis zur naechsten Runde vornehmen. \n\n Um deine Staerken zu sehen, tippe !perks"
+		"it"	"Hai confermato la scelta dei tuoi bonus; ora sono attivati. Non puoi cambiare i tuoi bonus fino al prossimo round. \n\n Per controllare i tuoi bonus, scrivi !perks"
+		"da"	"Du har bekrжftet dine Perk valg; de vil nu trжde i kraft. Du kan ikke жndre dine Perks fшr nжste runde. \n\n for at tjekke dine perk, skriv !perks"
+		"ru"	"Вы подтвердили свой выбор перков; теперь они вступят в силу. Вы не сможете их изменить до начала след. раунда. \n\n Проверить свои перки - !perks"
+		"fr"	"Vous avez confirme des Perks; des Perks fonctionnera maintenant. Vous ne pouvez pas changer des Perks avant de ronde prochaine. \n\n Pour voir des perks, tapez !perks"
+	}
+
+	"MessageHintThanksForChoosing"
+	{
+		"en"	"Thanks and have fun!"
+		"de"	"Danke und viel Spass!"
+		"it"	"Grazie e buon divertimento!"
+		"da"	"Tak og hav det sjovt!"
+		"ru"	"Спасибо и хорошей игры!"
+		"fr"	"Merci!"
+	}
+
+	"MenuInitialDescriptionCustom"
+	{
+		"en"	"Select first option to customize your perks"
+		"de"	"Waehle zuerst Option 1, um deine Staerken(Perks) anzupassen"
+		"it"	"Seleziona prima opzione per scegliere i bonus"
+		"da"	"Vжlg fшrste valg for at tilpasse dine perks"
+		"ru"	"Выберите первый пункт, чтобы настроить свои перки"
+		"fr"	"Choisissez la premiпre option pour personnaliser vos perks"
+	}
+
+	"MenuInitialPanelCustom"
+	{
+		"en"	"Customize Perks"
+		"de"	"Staerken(Perks) waehlen"
+		"it"	"Scegli i bonus"
+		"da"	"Tilpas Perks"
+		"ru"	"Настроить перки"
+		"fr"	"Personnaliser des Perks"
+	}
+
+	"MenuInitialDescriptionRandom"
+	{
+		"en"	"You can randomize your perks, but you can't change them until the round ends."
+		"de"	"Du kannst deine Staerken zufaellig waehlen, aber du kannst sie nicht aendern, bis die Runde endet."
+		"it"	"Puoi randomizzare i tuoi bonus, ma non puoi cambiarli fino alla fine del round."
+		"da"	"Du kan randomisere dine perks, men du kan ikke aendre dem fшr runden er slut."
+		"ru"	"Вы можете случайно выбрать перки, но не можете изменить их до конца раунда."
+		"fr"	"Vous pouvez randomiser vos perks, mais vous ne pouvez pas les changer avant la fin de la ronde."
+	}
+
+	"MenuInitialPanelRandom"
+	{
+		"en"	"Randomize Perks"
+		"de"	"Zufaellig waehlen"
+		"it"	"Assegna casualmente i bonus"
+		"da"	"Tilfжldiggшr Perks"
+		"ru"	"Случайно выбрать перки"
+		"fr"	"Randomiser des Perks"
+	}
+
+	"MenuInitialDescriptionAuto"
+	{
+		"en"	"Otherwise, you can use whatever perks you've selected already, or by default"
+		"de"	"Andernfalls kannst du die Perks verwenden, die du bereits ausgewaehlt hast, oder die Standardwerte."
+		"it"	"Altrimenti puoi usare i perk che hai gia' selezionato o quelli predefiniti."
+		"da"	"Ellers kan du bruge de perks, du allerede har valgt, eller standardindstillingerne."
+		"ru"	"В противном случае вы можете использовать перки, которые уже выбрали, или по умолчанию."
+		"fr"	"Sinon, vous pouvez utiliser les perks que vous avez deja selectionnes, ou les valeurs par defaut."
+	}
+
+	"MenuInitialPanelAuto"
+	{
+		"en"	"Auto choose default / previous perks"
+		"de"	"Automatisch Standard-/vorherige Staerken wählen"
+		"it"	"Scegli automaticamente i perk predefiniti/precedenti"
+		"da"	"Vælg automatisk standard/forrige perks"
+		"ru"	"Автоматический выбор стандартных/предыдущих перков"
+		"fr"	"Choisir automatiquement les perks par défaut/précédents"
+	}
+
+	"MenuTopDescription"
+	{
+		"en"	"Select a submenu to choose a perk"
+		"de"	"Waehle eine Klasse fuer moegliche Staerken"
+		"it"	"Seleziona un sottomenu per scegliere i bonus"
+		"da"	"Vжlg en undermenu for at vжlge en perk"
+		"ru"	"Выберите подменю чтобы выбрать перк"
+		"fr"	"Selectionnez un sous-menu pour choisir un perk"
+	}
+
+	"MenuTopDoneDescription"
+	{
+		"en"	"In order for your perks to work, you MUST hit 'DONE'"
+		"de"	"Damit die Staerken wirken, musst du 'FERTIG' druecken"
+		"it"	"Affinchи i tuoi bonus funzionino, DEVI selezionare 'FINE'"
+		"da"	"For at dine perks skal virke, SKAL du trykke 'FЖRDIG'"
+		"ru"	"Чтобы ваши перки работали, вы ДОЛЖНЫ нажать 'ГОТОВО'"
+		"fr"	"Pour utiliser des perks, on doit selectionner 'FINI'"
+	}
+
+	"MenuTopDonePanel"
+	{
+		"en"	"DONE"
+		"de"	"FERTIG"
+		"it"	"FINE"
+		"da"	"FЖRDIG"
+		"ru"	"ГОТОВО"
+		"fr"	"FINI"
+	}
+
+	"MenuConfirmConfirmDescription"
+	{
+		"en"	"Are you sure? Once confirmed you cannot change your perks until the next round!"
+		"de"	"Bist du sicher? Einmal bestaetigt kannst du bis Rundenende keine Дnderungen vornehmen!"
+		"it"	"Sei sicuro? Dopo che avrai confermato, non potrai cambiare i tuoi bonus fino al prossimo round"
+		"da"	"Er du sikker? Nеr det er valgt kan det ikke жndres dine perks intil nжste runde!"
+		"ru"	"Вы уверены? Подтвердив выбор, вы не сможете изменить свои перки до начала след. раунда!"
+		"fr"	"Etes-vous sur? Quand on confirme on ne pas change des perks avant de ronde prochaine!"
+	}
+
+	"MenuConfirmConfirmPanel"
+	{
+		"en"	"CONFIRM"
+		"de"	"BESTДTIGEN"
+		"it"	"CONFERMA"
+		"da"	"BEKRЖFT"
+		"ru"	"ПОДТВЕРДИТЬ"
+		"fr"	"CONFIRMER"
+	}
+
+	"MenuConfirmCancelDescription"
+	{
+		"en"	"If you cancel remember that your perks will not take effect until you hit confirm!"
+		"de"	"Wenn du abbrichst bedenke dass du keine Staerken erhaelst bis du bestaetigen gedrueckt hast!"
+		"it"	"Se esci adesso, ricorda che i tuoi bonus non saranno attivi finchи non avrai selezionato conferma!"
+		"da"	"Hvis du annulerer, husk at dine perks ikke vil tage effekt indtil du trykker bekrжft!"
+		"ru"	"Выбрав отмену, помните что ваши перки не активируются до тех пор, пока вы не нажмете 'ПОДТВЕРДИТЬ'!"
+		"fr"	"Si on annule on doit se revenir que on ne peut pas utiliser des perks avant de confirmer!"
+	}
+
+	"MenuConfirmCancelPanel"
+	{
+		"en"	"CANCEL"
+		"de"	"ABBRECHEN"
+		"it"	"CANCELLA"
+		"da"	"ANNULER"
+		"ru"	"ОТМЕНА"
+		"fr"	"ANNULER"
 	}
 
 	"BonusDamageText"
@@ -130,16 +270,6 @@
 		"fr"	"a vous donne plus de sante temporaire!"
 	}
 
-	"MapPerksPanel"
-	{
-		"en"	"Your perks for this round"
-		"de"	"Deine Staerken fuer diese Runde"
-		"it"	"I tuoi bonus per questo round"
-		"da"	"Dine perks for denne runde"
-		"ru"	"Ваши перки на этот раунд"
-		"fr"	"Votre perks pour cette ronde"
-	}
-
 	"PyroDescriptionPanel"
 	{
 		"en"	"carry 2 grenades instead of 1"
@@ -247,246 +377,6 @@
 		"da"	"mere helbred ved incap"
 		"ru"	"Больше хп когда вы лежите"
 		"fr"	"plus de sante quand on tombe"
-	}
-
-	"InitialMenuPanel1"
-	{
-		"en"	"This server is using Perkmod"
-		"de"	"Dieser Server nutzt Perkmod"
-		"it"	"Questo server usa Perkmod"
-		"da"	"Denne server bruger Perkmod"
-		"ru"	"Этот сервер использует Перк-Мод"
-		"fr"	"Ce serveur utilise Perkmod"
-	}
-
-	"InitialMenuPanel2"
-	{
-		"en"	"Select option 1 to customize your perks"
-		"de"	"Druecke 1, um deine Staerken(Perks) neu zu waehlen"
-		"it"	"Seleziona 1 per scegliere i bonus"
-		"da"	"Vжlg option 1 for at tilpasse dine perks"
-		"ru"	"Выбирите пункт 1, чтобы настроить свои перки"
-		"fr"	"Choisissez l'option 1 pour personnaliser des perks"
-	}
-
-	"InitialMenuPanel3"
-	{
-		"en"	"Customize Perks"
-		"de"	"Staerken(Perks) waehlen"
-		"it"	"Scegli i bonus"
-		"da"	"Tilpas Perks"
-		"ru"	"Настроить перки"
-		"fr"	"Personnaliser des Perks"
-	}
-
-	"InitialMenuPanel4"
-	{
-		"en"	"You can opt to randomize your perks"
-		"de"	"Du kannst auch den Zufall walten lassen"
-		"it"	"Puoi assegnare casualmente i bonus"
-		"da"	"Du kan vжlge at gшre Perks tilfжldige"
-		"ru"	"Вы можете выбрать случайную настройку перков"
-		"fr"	"Vous pouvez randomiser des perks"
-	}
-
-	"InitialMenuPanel5"
-	{
-		"en"	"but you can't change them afterwards"
-		"de"	"aber danach stehen sie fuer die Runde fest"
-		"it"	"ma non potrai cambiarli fino alla fine del round"
-		"da"	"men du kan ikke жndre dem bagefter"
-		"ru"	"но вы не сможете поменять их потом."
-		"fr"	"mais on ne peut pas changer pour la reste de la ronde"
-	}
-
-	"InitialMenuPanel6"
-	{
-		"en"	"Randomize Perks"
-		"de"	"Zufaellig waehlen"
-		"it"	"Assegna casualmente i bonus"
-		"da"	"Tilfжldiggшr Perks"
-		"ru"	"Случайно выбрать перки"
-		"fr"	"Randomiser des Perks"
-	}
-
-	"InitialMenuPanel7"
-	{
-		"en"	"Otherwise, you can use whatever"
-		"de"	"Ansonsten kannst du auch die Staerken"
-		"it"	"Oppure, puoi usare i bonus"
-		"da"	"Ellers kan du bruge hvad end"
-		"ru"	"Иначе, вы можете использовать любые"
-		"fr"	"Ou vous pouvez utiliser"
-	}
-
-	"InitialMenuPanel8"
-	{
-		"en"	"perks you've selected already"
-		"de"	"der letzten Runde uebernehmen"
-		"it"	"che hai gia selezionato l'ultimo round"
-		"da"	"Perks du allerede har valgt"
-		"ru"	"перки, которые вы уже выбрали,"
-		"fr"	"les perks qui vous avez choissise"
-	}
-
-	"InitialMenuPanel9"
-	{
-		"en"	"by using option 3"
-		"de"	"indem du 3 drueckst"
-		"it"	"premendo 3"
-		"da"	"ved at vжlge option 3"
-		"ru"	"используя пункт 3."
-		"fr"	"avec l'option 3"
-	}
-
-	"InitialMenuPanel10"
-	{
-		"en"	"PLAY NOW!"
-		"de"	"EINFACH LOS!"
-		"it"	"GIOCA ADESSO!"
-		"da"	"SPIL NU!"
-		"ru"	"ИГРАТЬ СЕЙЧАС!"
-		"fr"	"JOUER MAINTENANT!"
-	}
-
-	"ThanksForChoosingMessage"
-	{
-		"en"	"Thanks and have fun!"
-		"de"	"Danke und viel Spass!"
-		"it"	"Grazie e buon divertimento!"
-		"da"	"Tak og hav det sjovt!"
-		"ru"	"Спасибо и хорошей игры!"
-		"fr"	"Merci!"
-	}
-
-	"ChooseSubMenuPanel"
-	{
-		"en"	"Select a submenu to choose a perk"
-		"de"	"Waehle eine Klasse fuer moegliche Staerken"
-		"it"	"Seleziona un sottomenu per scegliere i bonus"
-		"da"	"Vжlg en undermenu for at vжlge en perk"
-		"ru"	"Выберите подменю чтобы выбрать перк"
-		"fr"	"Selectionnez un sous-menu pour choisir un perk"
-	}
-
-	"DoneNagPanel1"
-	{
-		"en"	"In order for your perks to work"
-		"de"	"Damit die Staerken wirken"
-		"it"	"Affinchи i tuoi bonus funzionino"
-		"da"	"For at dine perks skal virke"
-		"ru"	"Чтобы ваши перки работали,"
-		"fr"	"Pour utiliser des perks"
-	}
-
-	"DoneNagPanel2"
-	{
-		"en"	"you MUST hit 'done'"
-		"de"	"musst du 'FERTIG' druecken"
-		"it"	"DEVI selezionare fine"
-		"da"	"SKAL du trykke 'FЖRDIG'"
-		"ru"	"вы ДОЛЖНЫ нажать 'ГОТОВО'"
-		"fr"	"on doit selectionner 'FINI'"
-	}
-
-	"DoneNagPanel3"
-	{
-		"en"	"DONE"
-		"de"	"FERTIG"
-		"it"	"FINE"
-		"da"	"FЖRDIG"
-		"ru"	"ГОТОВО"
-		"fr"	"FINI"
-	}
-
-	"ConfirmNagPanel1"
-	{
-		"en"	"Are you sure?"
-		"de"	"Bist du sicher?"
-		"it"	"Sei sicuro?"
-		"da"	"Er du sikker?"
-		"ru"	"Вы уверены?"
-		"fr"	"Etes-vous sur?"
-	}
-
-	"ConfirmNagPanel2"
-	{
-		"en"	"Once confirmed you cannot change"
-		"de"	"Einmal bestaetigt kannst du bis"
-		"it"	"Dopo che avrai confermato, non potrai cambiare"
-		"da"	"Nеr det er valgt kan det ikke жndres"
-		"ru"	"Подтвердив выбор, вы не сможете изменить"
-		"fr"	"Quand on confirme on ne pas change"
-	}
-
-	"ConfirmNagPanel3"
-	{
-		"en"	"your perks until the next round!"
-		"de"	"Rundenende keine Дnderungen vornehmen!"
-		"it"	"i tuoi bonus fino al prossimo round"
-		"da"	"dine perks intil nжste runde!"
-		"ru"	"свои перки до начала след. раунда!"
-		"fr"	"des perks avant de ronde prochaine!"
-	}
-
-	"ConfirmNagPanel4"
-	{
-		"en"	"CONFIRM"
-		"de"	"BESTДTIGEN"
-		"it"	"CONFERMA"
-		"da"	"BEKRЖFT"
-		"ru"	"ПОДТВЕРДИТЬ"
-		"fr"	"CONFIRMER"
-	}
-
-	"ConfirmNagPanel5"
-	{
-		"en"	"If you cancel remember that your"
-		"de"	"Wenn du abbrichst bedenke dass du"
-		"it"	"Se esci adesso, ricorda che i tuoi"
-		"da"	"Hvis du annulerer, husk at dine"
-		"ru"	"Выбрав отмену, помните что ваши"
-		"fr"	"Si on annule on doit se revenir que"
-	}
-
-	"ConfirmNagPanel6"
-	{
-		"en"	"perks will not take effect until"
-		"de"	"keine Staerken erhaelst bis du"
-		"it"	"bonus non saranno attivi finchи"
-		"da"	"perks ikke vil tage effekt indtil"
-		"ru"	"перки не активируются до тех пор,"
-		"fr"	"on ne peut pas utiliser des perks avant"
-	}
-
-	"ConfirmNagPanel7"
-	{
-		"en"	"you hit confirm!"
-		"de"	"bestaetigen gedrueckt hast"
-		"it"	"non avrai selezionato conferma!"
-		"da"	"du trykker bekrжft"
-		"ru"	"пока вы не нажмете 'ПОДТВЕРДИТЬ'!"
-		"fr"	"de confirmer!"
-	}
-
-	"ConfirmNagPanel8"
-	{
-		"en"	"CANCEL"
-		"de"	"ABBRECHEN"
-		"it"	"CANCELLA"
-		"da"	"ANNULER"
-		"ru"	"ОТМЕНА"
-		"fr"	"ANNULER"
-	}
-
-	"ConfirmedMessage"
-	{
-		"en"	"You've confirmed your Perk choices; they will now take effect. You may not change your Perks until the next round. \n\n To check your perks, type !perks"
-		"de"	"Du hast deine Staerken bestaetigt, sie treten nun in Effekt. Du kannst keine Дnderungen bis zur naechsten Runde vornehmen. \n\n Um deine Staerken zu sehen, tippe !perks"
-		"it"	"Hai confermato la scelta dei tuoi bonus; ora sono attivati. Non puoi cambiare i tuoi bonus fino al prossimo round. \n\n Per controllare i tuoi bonus, scrivi !perks"
-		"da"	"Du har bekrжftet dine Perk valg; de vil nu trжde i kraft. Du kan ikke жndre dine Perks fшr nжste runde. \n\n for at tjekke dine perk, skriv !perks"
-		"ru"	"Вы подтвердили свой выбор перков; теперь они вступят в силу. Вы не сможете их изменить до начала след. раунда. \n\n Проверить свои перки - !perks"
-		"fr"	"Vous avez confirme des Perks; des Perks fonctionnera maintenant. Vous ne pouvez pas changer des Perks avant de ronde prochaine. \n\n Pour voir des perks, tapez !perks"
 	}
 
 	"YourPerksPanel"

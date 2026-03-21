@@ -1,13 +1,83 @@
 ﻿"Phrases"
 {
-	"WelcomeMessageHint"
-	{
-		"en"	"Welcome to Perkmod!"
-	}
-
-	"WelcomeMessageChat"
+	"MessageChatWelcome"
 	{
 		"en"	"Welcome to Perkmod! If the menu doesn't come up, type !perks to display it."
+	}
+
+	"MessageChatConfirmed"
+	{
+		"en"	"You've confirmed your Perk choices; they will now take effect. You may not change your Perks until the next round. \n\n To check your perks, type !perks"
+	}
+
+	"MessageHintThanksForChoosing"
+	{
+		"en"	"Thanks and have fun!"
+	}
+
+	"MenuInitialDescriptionCustom"
+	{
+		"en"	"Select first option to customize your perks"
+	}
+
+	"MenuInitialPanelCustom"
+	{
+		"en"	"Customize Perks"
+	}
+
+	"MenuInitialDescriptionRandom"
+	{
+		"en"	"You can randomize your perks, but you can't change them until the round ends."
+	}
+
+	"MenuInitialPanelRandom"
+	{
+		"en"	"Randomize Perks"
+	}
+
+	"MenuInitialDescriptionAuto"
+	{
+		"en"	"Otherwise, you can use whatever perks you've selected already, or by default"
+	}
+
+	"MenuInitialPanelAuto"
+	{
+		"en"	"Auto Chose default / previous Perks"
+	}
+
+	"MenuTopDescription"
+	{
+		"en"	"Select a submenu to choose a perk"
+	}
+
+	"MenuTopDoneDescription"
+	{
+		"en"	"In order for your perks to work, you MUST hit 'DONE'"
+	}
+
+	"MenuTopDonePanel"
+	{
+		"en"	"DONE"
+	}
+
+	"MenuConfirmConfirmDescription"
+	{
+		"en"	"Are you sure? Once confirmed you cannot change your perks until the next round!"
+	}
+
+	"MenuConfirmConfirmPanel"
+	{
+		"en"	"CONFIRM"
+	}
+
+	"MenuConfirmCancelDescription"
+	{
+		"en"	"If you cancel remember that your perks will not take effect until you hit confirm!"
+	}
+
+	"MenuConfirmCancelPanel"
+	{
+		"en"	"CANCEL"
 	}
 
 	"BonusDamageText"
@@ -65,11 +135,6 @@
 		"en"	"gave you bonus temporary health!"
 	}
 
-	"MapPerksPanel"
-	{
-		"en"	"Your perks for this round"
-	}
-
 	"PyroDescriptionPanel"
 	{
 		"en"	"carry 2 grenades instead of 1"
@@ -118,126 +183,6 @@
 	"HardToKillDescriptionPanel"
 	{
 		"en"	"more health when incapped"
-	}
-
-	"InitialMenuPanel1"
-	{
-		"en"	"This server is using Perkmod"
-	}
-
-	"InitialMenuPanel2"
-	{
-		"en"	"Select option 1 to customize your perks"
-	}
-
-	"InitialMenuPanel3"
-	{
-		"en"	"Customize Perks"
-	}
-
-	"InitialMenuPanel4"
-	{
-		"en"	"You can opt to randomize your perks"
-	}
-
-	"InitialMenuPanel5"
-	{
-		"en"	"but you can't change them afterwards"
-	}
-
-	"InitialMenuPanel6"
-	{
-		"en"	"Randomize Perks"
-	}
-
-	"InitialMenuPanel7"
-	{
-		"en"	"Otherwise, you can use whatever"
-	}
-
-	"InitialMenuPanel8"
-	{
-		"en"	"perks you've selected already"
-	}
-
-	"InitialMenuPanel9"
-	{
-		"en"	"by using option 3"
-	}
-
-	"InitialMenuPanel10"
-	{
-		"en"	"PLAY NOW!"
-	}
-
-	"ThanksForChoosingMessage"
-	{
-		"en"	"Thanks and have fun!"
-	}
-
-	"ChooseSubMenuPanel"
-	{
-		"en"	"Select a submenu to choose a perk"
-	}
-
-	"DoneNagPanel1"
-	{
-		"en"	"In order for your perks to work"
-	}
-
-	"DoneNagPanel2"
-	{
-		"en"	"you MUST hit 'done'"
-	}
-
-	"DoneNagPanel3"
-	{
-		"en"	"DONE"
-	}
-
-	"ConfirmNagPanel1"
-	{
-		"en"	"Are you sure?"
-	}
-
-	"ConfirmNagPanel2"
-	{
-		"en"	"Once confirmed you cannot change"
-	}
-
-	"ConfirmNagPanel3"
-	{
-		"en"	"your perks until the next round!"
-	}
-
-	"ConfirmNagPanel4"
-	{
-		"en"	"CONFIRM"
-	}
-
-	"ConfirmNagPanel5"
-	{
-		"en"	"If you cancel remember that your"
-	}
-
-	"ConfirmNagPanel6"
-	{
-		"en"	"perks will not take effect until"
-	}
-
-	"ConfirmNagPanel7"
-	{
-		"en"	"you hit confirm!"
-	}
-
-	"ConfirmNagPanel8"
-	{
-		"en"	"CANCEL"
-	}
-
-	"ConfirmedMessage"
-	{
-		"en"	"You've confirmed your Perk choices; they will now take effect. You may not change your Perks until the next round. \n\n To check your perks, type !perks"
 	}
 
 	"YourPerksPanel"

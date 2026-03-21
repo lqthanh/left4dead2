@@ -1641,8 +1641,7 @@ public Event_PlayerFirstSpawn (Handle:event, const String:name[], bool:dontBroad
 	if (g_iConfirm[iCid]==0 && IsFakeClient(iCid)==false)
 	{
 		CreateTimer(3.0,Timer_ShowTopMenu,iCid);
-		PrintHintText(iCid,"%t", "WelcomeMessageHint");
-		PrintToChat(iCid,"\x03[SM] %t", "WelcomeMessageChat");
+		PrintToChat(iCid,"\x03[SM] %t", "MessageChatWelcome");
 	}
 }
 
@@ -4780,14 +4779,9 @@ public Handle:Menu_Initial (iCid)
 	DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
 	DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
 
-	//"This server is using Perkmod"
-	Format(stPanel, 128, "%t", "InitialMenuPanel1");
+	Format(stPanel, 128, "%t", "MenuInitialDescriptionCustom");
 	DrawPanelText(menu, stPanel);
-	//"Select option 1 to customize your perks"
-	Format(stPanel, 128, "%t", "InitialMenuPanel2");
-	DrawPanelText(menu, stPanel);
-	//"Customize Perks"
-	Format(stPanel, 128, "%t", "InitialMenuPanel3");
+	Format(stPanel, 128, "%t", "MenuInitialPanelCustom");
 	DrawPanelItem(menu, stPanel);
 
 	//random perks, enable only if cvar is set
@@ -4797,28 +4791,15 @@ public Handle:Menu_Initial (iCid)
 	}
 	else
 	{
-		//"You can opt to randomize your perks"
-		Format(stPanel, 128, "%t", "InitialMenuPanel4");
+		Format(stPanel, 128, "%t", "MenuInitialDescriptionRandom");
 		DrawPanelText(menu, stPanel);
-		//"but you can't change them afterwards"
-		Format(stPanel, 128, "%t", "InitialMenuPanel5");
-		DrawPanelText(menu, stPanel);
-		//"Randomize Perks"
-		Format(stPanel, 128, "%t", "InitialMenuPanel6");
+		Format(stPanel, 128, "%t", "MenuInitialPanelRandom");
 		DrawPanelItem(menu, stPanel);
 	}
 
-	//"Otherwise, you can use whatever"
-	Format(stPanel, 128, "%t", "InitialMenuPanel7");
+	Format(stPanel, 128, "%t", "MenuInitialDescriptionAuto");
 	DrawPanelText(menu, stPanel);
-	//"perks you've selected already"
-	Format(stPanel, 128, "%t", "InitialMenuPanel8");
-	DrawPanelText(menu, stPanel);
-	//"by using option 3"
-	Format(stPanel, 128, "%t", "InitialMenuPanel9");
-	DrawPanelText(menu, stPanel);
-	//"PLAY NOW!"
-	Format(stPanel, 128, "%t", "InitialMenuPanel10");
+	Format(stPanel, 128, "%t", "MenuInitialPanelAuto");
 	DrawPanelItem(menu, stPanel);
 
 	return menu;
@@ -4836,7 +4817,7 @@ public Menu_ChooseInit (Handle:topmenu, MenuAction:action, param1, param2)
 			case 7:
 				{
 					AssignRandomPerks(param1);
-					PrintHintText(param1,"Perkmod: %t", "ThanksForChoosingMessage");
+					PrintHintText(param1,"Perkmod: %t", "MessageHintThanksForChoosing");
 				}
 			case 8:
 				{
@@ -4846,7 +4827,7 @@ public Menu_ChooseInit (Handle:topmenu, MenuAction:action, param1, param2)
 					Event_Confirm_ChemReliant(param1);
 					Event_Confirm_MA(param1);
 					Extreme_Rebuild();
-					PrintHintText(param1,"Perkmod: %t", "ThanksForChoosingMessage");
+					PrintHintText(param1,"Perkmod: %t", "MessageHintThanksForChoosing");
 				}
 			default:
 				{
@@ -4866,10 +4847,11 @@ public Menu_ChooseInit (Handle:topmenu, MenuAction:action, param1, param2)
 public Handle:Menu_Top (iCid)
 {
 	new Handle:menu = CreatePanel();
-	SetPanelTitle(menu, "tPoncho's Perkmod - Main Menu");
-	DrawPanelText(menu,"Select a submenu to choose a perk");
 	decl String:st_perk[32];
 	decl String:st_display[MAXPLAYERS+1];
+
+	Format(st_display, 64, "%t", "MenuTopDescription");	
+	DrawPanelText(menu, st_display);
 
 	//set name for sur1 perk
 	if (g_iSur1[iCid]==1 && g_iStopping_enable==1)
@@ -4932,11 +4914,9 @@ public Handle:Menu_Top (iCid)
 	DrawPanelItem(menu,st_display, ITEMDRAW_NOTEXT);
 	DrawPanelItem(menu,st_display, ITEMDRAW_NOTEXT);
 	DrawPanelItem(menu,st_display, ITEMDRAW_NOTEXT);
-	Format(st_display, 64, "%t", "DoneNagPanel1");	
+	Format(st_display, 64, "%t", "MenuTopDoneDescription");	
 	DrawPanelText(menu, st_display);
-	Format(st_display, 64, "%t", "DoneNagPanel2");	
-	DrawPanelText(menu, st_display);
-	Format(st_display, 64, "%t", "DoneNagPanel3");	
+	Format(st_display, 64, "%t", "MenuTopDonePanel");	
 	DrawPanelItem(menu, st_display);
 	return menu;
 }
@@ -4978,24 +4958,13 @@ public Handle:Menu_Confirm (iCid)
 {
 	new Handle:menu = CreatePanel();
 	decl String:panel[128];
-	Format(panel, 128, "%t", "ConfirmNagPanel1");	
-	SetPanelTitle(menu, panel);
-	
-	DrawPanelText(menu,"");
-	
-	Format(panel, 128, "%t", "ConfirmNagPanel2");
-	DrawPanelText(menu,panel);
-	Format(panel, 128, "%t", "ConfirmNagPanel3");
-	DrawPanelText(menu,panel);
-	Format(panel, 128, "%t", "ConfirmNagPanel4");
+	Format(panel, 128, "%t", "MenuConfirmConfirmDescription");	
+	DrawPanelText(menu, panel);
+	Format(panel, 128, "%t", "MenuConfirmConfirmPanel");
 	DrawPanelItem(menu,panel);
-	Format(panel, 128, "%t", "ConfirmNagPanel5");
+	Format(panel, 128, "%t", "MenuConfirmCancelDescription");
 	DrawPanelText(menu,panel);
-	Format(panel, 128, "%t", "ConfirmNagPanel6");
-	DrawPanelText(menu,panel);
-	Format(panel, 128, "%t", "ConfirmNagPanel7");
-	DrawPanelText(menu,panel);
-	Format(panel, 128, "%t", "ConfirmNagPanel8");
+	Format(panel, 128, "%t", "MenuConfirmCancelPanel");
 	DrawPanelItem(menu,panel);
 	return menu;
 }
@@ -5011,7 +4980,7 @@ public Menu_ChooseConfirm (Handle:topmenu, MenuAction:action, param1, param2)
 			case 1:
 			{
 				g_iConfirm[param1]=1;
-				PrintToChat(param1,"\x03[SM] %t", "ConfirmedMessage");
+				PrintToChat(param1,"\x03[SM] %t", "MessageChatConfirmed");
 				Event_Confirm_Unbreakable(param1);
 				Event_Confirm_Grenadier(param1);
 				Event_Confirm_ChemReliant(param1);
@@ -5044,8 +5013,6 @@ public Handle:Menu_ShowChoices (iCid)
 	SetPanelTitle(menu,"tPoncho's Perkmod");
 	decl String:st_perk[128];
 	decl iPerk;
-	//"Your perks for this round:"
-	Format(st_perk, 128, "%t:", "MapPerksPanel");
 
 	//show sur1 perk
 	iPerk = g_iSur1[iCid];
