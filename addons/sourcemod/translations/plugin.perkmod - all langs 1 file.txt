@@ -229,7 +229,47 @@
 		"ru"	"Бонусное здоровье %i"
 		"fr"	"Plus sante %i"
 	}
-	
+
+	"HelpingHandDescriptionPanel"
+	{
+		"en"	"Give bonus %i temp health"
+		"de"	"Gib %i temporдres Leben als Bonus"
+		"it"	"Dа un bonus di %i salute temporanea"
+		"da"	"Giv %i midlertidigt helbred som bonus"
+		"ru"	"Дать %i бонусного временного хп"
+		"fr"	"Donner %i santй temporaire bonus"
+	}
+
+	"HelpingHandDescriptionPanel2"
+	{
+		"en"	"Revive others faster, give bonus %i temp health"
+		"de"	"Andere schneller wiederbeleben, gebe %i temporдres Leben als Bonus"
+		"it"	"Revitalizzare gli altri piщ velocemente, da un bonus di %i salute temporanea"
+		"da"	"Genopliv andre hurtigere, giv %i midlertidigt helbred som bonus"
+		"ru"	"Вы поднимаете других быстрее, давайте %i бонусного временного хп"
+		"fr"	"Revivre les autres plus vite, donner %i de santй temporaire bonus"
+	}
+
+	"HelpingHandMessageHintDonor"
+	{
+		"en"	"Gave bonus temporary health to %s"
+		"de"	"Gab zusaetzliches Health beim Aufhelfen an %s"
+		"it"	"Ha dato salute extra temporanea a %s"
+		"da"	"Gav ekstra midlertidigt helbred til %s"
+		"ru"	"дал бонусное временное здоровье %s"
+		"fr"	"Bous avez donne plus de sante temporaire a %s"
+	}
+
+	"HelpingHandMessageHintReceiver"
+	{
+		"en"	"%s gave you bonus temporary health!"
+		"de"	"%s gab dir zusaetzliches Health beim Aufhelfen!"
+		"it"	"%s ti ha dato salute extra temporanea!"
+		"da"	"%s gav dig ekstra midlertidigt helbred!"
+		"ru"	"%s дал вам бонусное временное здоровье"
+		"fr"	"%s a vous donne plus de sante temporaire!"
+	}
+
 	"PackCatDescriptionPanel"
 	{
 		"en"	"Special Infected refill %i%% ammo."
@@ -330,26 +370,6 @@
 		"fr"	"restant"
 	}
 
-	"HelpingHandDonorHint"
-	{
-		"en"	"gave bonus temporary health to"
-		"de"	"gab zusaetzliches Health beim Aufhelfen an"
-		"it"	"ha dato salute extra temporanea a"
-		"da"	"gav ekstra midlertidigt helbred til"
-		"ru"	"дал бонусное временное здоровье"
-		"fr"	"vous avez donne plus de sante temporaire a"
-	}
-
-	"HelpingHandReceiverHint"
-	{
-		"en"	"gave you bonus temporary health!"
-		"de"	"gab dir zusaetzliches Health beim Aufhelfen!"
-		"it"	"ti ha dato salute extra temporanea!"
-		"da"	"gav dig ekstra midlertidigt helbred!"
-		"ru"	"дал вам бонусное временное здоровье"
-		"fr"	"a vous donne plus de sante temporaire!"
-	}
-
 	"PyroDescriptionPanel"
 	{
 		"en"	"carry 2 grenades instead of 1"
@@ -378,36 +398,6 @@
 		"da"	"Ikke sat"
 		"ru"	"Не установлен"
 		"fr"	"Pas fixe"
-	}
-
-	"HelpingHandDescriptionPanel"
-	{
-		"en"	"give bonus health buffer"
-		"de"	"gib beim Aufhelfen mehr Leben"
-		"it"	"dа piщ salute temporanea"
-		"da"	"giv ekstra helbred buffer"
-		"ru"	"дополнительный запас временного хп"
-		"fr"	"donner plus sante temporaire"
-	}
-
-	"YourPerksPanel"
-	{
-		"en"	"tPoncho's Perkmod: Your perks for this round"
-		"de"	"tPoncho's Perkmod: Deine Staerken diese Runde"
-		"it"	"tPoncho's Perkmod: I tuoi bonus per questo round"
-		"da"	"tPoncho's Perkmod: Dine perks for denne runde"
-		"ru"	"tPoncho's Perkmod: Ваши перки на этот раунд"
-		"fr"	"tPoncho's Perkmod: Votre perks pour cette ronde"
-	}
-
-	"DisplayDisabledText"
-	{
-		"en"	"disabled"
-		"de"	"inaktiv"
-		"it"	"disattivato"
-		"da"	"slеet fra"
-		"ru"	"отключено"
-		"fr"	"desactivee"
 	}
 
 	"PyroDescriptionText1"
@@ -480,15 +470,6 @@
 		"da"	""
 	}
 
-	"HelpingHandDescriptionPanel2"
-	{
-		"en"	"revive others faster, give bonus health buffer"
-		"it"	"Revitalizzare gli altri ti darà un bonus in salute."
-		"ru"	"Вы поднимаете других быстрее и даёте им бонусный буфер здоровья"
-		"fr"	"donner l'aide plus vite et plus de sante temporaire"
-		"de"	""
-		"da"	""
-	}
 	"MartialArtistDescriptionPanel_noreduc"
 	{
 		"en"	"triple swing"

@@ -4446,9 +4446,9 @@ HelpHand_OnReviveSuccess (iCid, iSub, iLedge)
 
 				new String:st_name[24];
 				GetClientName(iSub,st_name,24);
-				PrintHintText(iCid,"Helping Hand: %t %s!", "HelpingHandDonorHint", st_name);
+				PrintHintText(iCid,"Helping Hand: %t!", "HelpingHandMessageHintDonor", st_name);
 				GetClientName(iCid,st_name,24);
-				PrintHintText(iSub,"Helping Hand: %s %t",st_name, "HelpingHandReceiverHint");
+				PrintHintText(iSub,"Helping Hand: %t!", "HelpingHandMessageHintReceiver", st_name);
 			}
 		}
 	}
@@ -5049,9 +5049,9 @@ public Handle:Menu_ShowChoices (iCid)
 		decl iBuff;
 			iBuff=g_iHelpHand_buff;
 		if (g_iHelpHand_convar==1)
-			Format(st_perk,128,"Helping Hand (%t +%i)", "HelpingHandDescriptionPanel2", iBuff);
+			Format(st_perk,128,"Helping Hand (%t)", "HelpingHandDescriptionPanel2", iBuff);
 		else
-			Format(st_perk,128,"Helping Hand (%t +%i)", "HelpingHandDescriptionPanel", iBuff);
+			Format(st_perk,128,"Helping Hand (%t)", "HelpingHandDescriptionPanel", iBuff);
 	}
 	else if (iPerk == 4 && g_iPackCat_enable==1)
 		Format(st_perk,128,"Pack Cat (%t)", "PackCatDescriptionPanel", RoundToNearest(g_flPackCat_ammorefill*100));
@@ -5302,12 +5302,12 @@ public Handle:Menu_Sur2Perk (client)
 
 		if (g_iHelpHand_convar==1)
 		{
-			Format(st_display,64,"%t +%i", "HelpingHandDescriptionPanel2", iBuff);
+			Format(st_display,64,"%t", "HelpingHandDescriptionPanel2", iBuff);
 			DrawPanelText(menu,st_display);
 		}
 		else
 		{
-			Format(st_display,64,"%t +%i", "HelpingHandDescriptionPanel", iBuff);
+			Format(st_display,64,"%t", "HelpingHandDescriptionPanel", iBuff);
 			DrawPanelText(menu,st_display);
 		}
 	}

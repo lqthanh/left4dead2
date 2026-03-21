@@ -115,6 +115,26 @@
 		"en"	"Bonus health %i"
 	}
 
+	"HelpingHandDescriptionPanel"
+	{
+		"en"	"Give bonus %i temp health"
+	}
+
+	"HelpingHandDescriptionPanel2"
+	{
+		"en"	"Revive others faster, give bonus %i temp health"
+	}
+
+	"HelpingHandMessageHintDonor"
+	{
+		"en"	"Gave bonus temporary health to %s"
+	}
+
+	"HelpingHandMessageHintReceiver"
+	{
+		"en"	"%s gave you bonus temporary health!"
+	}
+
 	"PackCatDescriptionPanel"
 	{
 		"en"	"Special Infected refill %i%% ammo."
@@ -165,16 +185,6 @@
 		"en"	"left"
 	}
 
-	"HelpingHandDonorHint"
-	{
-		"en"	"gave bonus temporary health to"
-	}
-
-	"HelpingHandReceiverHint"
-	{
-		"en"	"gave you bonus temporary health!"
-	}
-
 	"PyroDescriptionPanel"
 	{
 		"en"	"carry 2 grenades instead of 1"
@@ -188,21 +198,6 @@
 	"NotSet"
 	{
 		"en"	"Not set"
-	}
-
-	"HelpingHandDescriptionPanel"
-	{
-		"en"	"give bonus health buffer"
-	}
-
-	"YourPerksPanel"
-	{
-		"en"	"tPoncho's Perkmod: Your perks for this round"
-	}
-
-	"DisplayDisabledText"
-	{
-		"en"	"disabled"
 	}
 
 	"PyroDescriptionText1"
@@ -239,12 +234,6 @@
 	{
 		"en"	"and you have a reduced maximum shove penalty"
 	}
-
-	"HelpingHandDescriptionPanel2"
-	{
-		"en"	"revive others faster, give bonus health buffer"
-	}
-
 
 	"MartialArtistDescriptionPanel_noreduc"
 	{
