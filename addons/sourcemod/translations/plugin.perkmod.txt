@@ -15,6 +15,21 @@
 		"en"	"Thanks and have fun!"
 	}
 
+	"MessageHintSpiritSuccess"
+	{
+		"en"	"You've self-revived!"
+	}
+
+	"MessageHintSpiritTimerFinished"
+	{
+		"en"	"You feel strong enough to self-revive again!"
+	}
+
+	"MessageHintSpiritBWWarning"
+	{
+		"en"	"Warning: You are now in BLACK AND WHITE health!!!"
+	}
+
 	"MenuInitialDescriptionCustom"
 	{
 		"en"	"Select first option to customize your perks"
@@ -80,19 +95,14 @@
 		"en"	"CANCEL"
 	}
 
-	"BonusDamageText"
+	"StoppingPowerDescriptionPanel"
 	{
-		"en"	"bonus damage"
+		"en"	"Bonus damage %i%%"
 	}
 
-	"SpritSuccessMessage"
+	"SleighOfHandDescriptionPanel"
 	{
-		"en"	"You've self-revived!"
-	}
-
-	"SpiritTimerFinishedMessage"
-	{
-		"en"	"You feel strong enough to self-revive again!"
+		"en"	"Reload faster %i%%"
 	}
 
 	"UnbreakableHint"
@@ -148,11 +158,6 @@
 	"SpiritDescriptionPanel"
 	{
 		"en"	"self-revive on teammate incap, cooldown"
-	}
-
-	"SleighOfHandDescriptionPanel"
-	{
-		"en"	"reload faster"
 	}
 
 	"NotSet"
@@ -266,9 +271,5 @@
 	"MartialArtistDescriptionPanel_noreduc"
 	{
 		"en"	"triple swing"
-	}
-	"SpiritBWWarning"
-	{
-		"en"	"Warning: You are now in BLACK AND WHITE health!!!"
 	}
 }

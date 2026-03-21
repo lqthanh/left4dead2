@@ -30,6 +30,36 @@
 		"fr"	"Merci!"
 	}
 
+	"MessageHintSpiritSuccess"
+	{
+		"en"	"You've self-revived!"
+		"de"	"Du hast dich wieder aufgerafft!"
+		"it"	"Ti sei rialzato da solo!"
+		"da"	"Du genoplivede dig selv!"
+		"ru"	"Вы успешно поднялись!"
+		"fr"	"Vous vous avez relance!"
+	}
+
+	"MessageHintSpiritTimerFinished"
+	{
+		"en"	"You feel strong enough to self-revive again!"
+		"de"	"Du fuehlst dich stark genug, um selbst wieder aufzustehen!"
+		"it"	"Ti senti abbastanza forte per rialzarti da solo di nuovo!"
+		"da"	"Du fшler dig stжrk nok igen til at genoplive dig selv!"
+		"ru"	"Вы чувствуете себя достаточно сильным чтобы встать!"
+		"fr"	"Vous pouvez vous relancer maintenant!"
+	}
+
+	"MessageHintSpiritBWWarning"
+	{
+		"en"	"Warning: You are now in BLACK AND WHITE health!!!"
+		"it"	"Warning: You are now in BLACK AND WHITE health!!!"
+		"ru"	"Warning: You are now in BLACK AND WHITE health!!!"
+		"de"	"Warning: You are now in BLACK AND WHITE health!!!"
+		"da"	"Warning: You are now in BLACK AND WHITE health!!!"
+		"fr"	"Warning: You are now in BLACK AND WHITE health!!!"
+	}
+
 	"MenuInitialDescriptionCustom"
 	{
 		"en"	"Select first option to customize your perks"
@@ -160,34 +190,24 @@
 		"fr"	"ANNULER"
 	}
 
-	"BonusDamageText"
+	"StoppingPowerDescriptionPanel"
 	{
-		"en"	"bonus damage"
-		"de"	"Extraschaden"
-		"it"	"Danno extra"
-		"da"	"Ekstra skade"
-		"ru"	"Бонусные повреждения"
-		"fr"	"plus degats"
+		"en"	"Bonus damage %i%%"
+		"de"	"Extraschaden %i%%"
+		"it"	"Danno extra %i%%"
+		"da"	"Ekstra skade %i%%"
+		"ru"	"Бонусные повреждения %i%%"
+		"fr"	"Plus degats %i%%"
 	}
 
-	"SpritSuccessMessage"
+	"SleighOfHandDescriptionPanel"
 	{
-		"en"	"You've self-revived!"
-		"de"	"Du hast dich wieder aufgerafft!"
-		"it"	"Ti sei rialzato da solo!"
-		"da"	"Du genoplivede dig selv!"
-		"ru"	"Вы успешно поднялись!"
-		"fr"	"Vous vous avez relance!"
-	}
-
-	"SpiritTimerFinishedMessage"
-	{
-		"en"	"You feel strong enough to self-revive again!"
-		"de"	"Du fuehlst dich stark genug, um selbst wieder aufzustehen!"
-		"it"	"Ti senti abbastanza forte per rialzarti da solo di nuovo!"
-		"da"	"Du fшler dig stжrk nok igen til at genoplive dig selv!"
-		"ru"	"Вы чувствуете себя достаточно сильным чтобы встать!"
-		"fr"	"Vous pouvez vous relancer maintenant!"
+		"en"	"Reload faster %i%%"
+		"de"	"Schneller Nachladen %i%%"
+		"it"	"Ricarica piщ velocem %i%%"
+		"da"	"Genlad hurtigere %i%%"
+		"ru"	"Перезаряжать быстрее %i%%"
+		"fr"	"Recharger plus vite %i%%"
 	}
 
 	"UnbreakableHint"
@@ -298,16 +318,6 @@
 		"da"	"selv-genoplivning ved holdkammerat incap, cooldown"
 		"ru"	"Самовосстановление когда напарник слег, кулдаун"
 		"fr"	"se relancer quand un ami tombe, temps de recharge"
-	}
-
-	"SleighOfHandDescriptionPanel"
-	{
-		"en"	"reload faster"
-		"de"	"schneller Nachladen"
-		"it"	"ricarica piщ velocem"
-		"da"	"genlad hurtigere"
-		"ru"	"Перезаряжать быстрее"
-		"fr"	"recharger plus vite"
 	}
 
 	"NotSet"
@@ -527,14 +537,5 @@
 		"de"	"triple swing"
 		"da"	"triple swing"
 		"fr"	"triple swing"
-	}
-	"SpiritBWWarning"
-	{
-		"en"	"Warning: You are now in BLACK AND WHITE health!!!"
-		"it"	"Warning: You are now in BLACK AND WHITE health!!!"
-		"ru"	"Warning: You are now in BLACK AND WHITE health!!!"
-		"de"	"Warning: You are now in BLACK AND WHITE health!!!"
-		"da"	"Warning: You are now in BLACK AND WHITE health!!!"
-		"fr"	"Warning: You are now in BLACK AND WHITE health!!!"
 	}
 }

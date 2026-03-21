@@ -4299,7 +4299,7 @@ public Action:Spirit_CooldownTimer (Handle:timer, any:iCid)
 		&& IsPlayerAlive(iCid)==true
 		&& GetClientTeam(iCid)==2
 		&& IsFakeClient(iCid)==false)
-		PrintHintText(iCid,"%t", "SpiritTimerFinishedMessage");
+		PrintHintText(iCid,"%t", "MessageHintSpiritTimerFinished");
 
 	return Plugin_Stop;
 }
@@ -4356,9 +4356,9 @@ public Action:Spirit_ChangeHP (Handle:timer, any:hPack)
 
 		//show a message if it's not a bot
 		if (iRevCount_ret+1 >= 2)
-			PrintHintText(iCid, "%t", "SpiritBWWarning");
+			PrintHintText(iCid, "%t", "MessageHintSpiritBWWarning");
 		else
-			PrintHintText(iCid,"Spirit: %t!", "SpritSuccessMessage");
+			PrintHintText(iCid,"Spirit: %t!", "MessageHintSpiritSuccess");
 	}
 
 	//always destroy the timer, since it's possible spirit may not have executed
@@ -4368,7 +4368,7 @@ public Action:Spirit_ChangeHP (Handle:timer, any:hPack)
 
 public Action:Spirit_Warning1(Handle:timer, any:iCid)
 {
-	PrintToChat(iCid,"\x01***** \x03%t \x01*****", "SpiritBWWarning");
+	PrintToChat(iCid,"\x01***** \x03%t \x01*****", "MessageHintSpiritBWWarning");
 
 	KillTimer(timer);
 	return Plugin_Stop;
@@ -5017,9 +5017,9 @@ public Handle:Menu_ShowChoices (iCid)
 	//show sur1 perk
 	iPerk = g_iSur1[iCid];
 	if (iPerk == 1 && g_iStopping_enable==1)
-		Format(st_perk,128,"Stopping Power (+%i%% %t)", RoundToNearest(g_flStopping_dmgmult*100), "BonusDamageText" );
+		Format(st_perk,128,"Stopping Power (%t)",  "StoppingPowerDescriptionPanel", RoundToNearest(g_flStopping_dmgmult*100));
 	else if (iPerk == 2 && g_iSoH_enable==1)
-		Format(st_perk,128,"Sleight of Hand (%t +%i%%)", "SleighOfHandDescriptionPanel", RoundToNearest(100 * ((1/g_flSoH_rate)-1) ) ) ;
+		Format(st_perk,128,"Sleight of Hand (%t)", "SleighOfHandDescriptionPanel", RoundToNearest(100 * ((1/g_flSoH_rate)-1) ) ) ;
 	else if (iPerk == 3 && g_iPyro_enable==1)
 		Format(st_perk,128,"Pyrotechnician (%t)", "PyroDescriptionPanel");
 	else if (iPerk == 4 && g_iMA_enable==1)
@@ -5118,7 +5118,7 @@ public Handle:Menu_Sur1Perk (client)
 		}
 		Format(st_display,64,"Stopping Power %s",st_current);
 		DrawPanelItem(menu,st_display);
-		Format(st_display,64,"+%i%% %t", RoundToNearest(g_flStopping_dmgmult*100), "BonusDamageText" );
+		Format(st_display,64,"%t", "StoppingPowerDescriptionPanel", RoundToNearest(g_flStopping_dmgmult*100) );
 		DrawPanelText(menu,st_display);
 	}
 
@@ -5136,7 +5136,7 @@ public Handle:Menu_Sur1Perk (client)
 		}
 		Format(st_display,64,"Sleight of Hand %s",st_current);
 		DrawPanelItem(menu,st_display);
-		Format(st_display,64,"%t +%i%%", "SleighOfHandDescriptionPanel", RoundToNearest(100 * ((1/g_flSoH_rate)-1) ) );
+		Format(st_display,64,"%t", "SleighOfHandDescriptionPanel", RoundToNearest(100 * ((1/g_flSoH_rate)-1) ) );
 		DrawPanelText(menu,st_display);
 	}
 
