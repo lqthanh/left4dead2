@@ -635,7 +635,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	}
 
 	RegPluginLibrary("perkmod2");
-		CreateNative("perkmod2_IsEnable_Perk_StoppingPower", Native_IsEnable_Perk_StoppingPower);
+	CreateNative("perkmod2_IsEnable_Perk_StoppingPower", Native_IsEnable_Perk_StoppingPower);
 	CreateNative("perkmod2_IsEnable_Perk_SleightOfHand", Native_IsEnable_Perk_SleightOfHand);
 	CreateNative("perkmod2_IsEnable_Perk_Pyrotechnician", Native_IsEnable_Perk_Pyrotechnician);
 	CreateNative("perkmod2_IsEnable_Perk_MartialArtist", Native_IsEnable_Perk_MartialArtist);
@@ -5826,87 +5826,82 @@ bool IsPrimaryWeapon(char[] classname)
 // =======================================================================
 // #region Native
 
-bool Native_IsValidClientIndex(int client)
-{
-	return client > 0 && client <= MaxClients;
-}
-
 any Native_IsEnable_Perk_StoppingPower(Handle plugin, int numParams)
 {
 	int client = GetNativeCell(1);
-	return Native_IsValidClientIndex(client) && IsEnable_Perk_StoppingPower(client);
+	return IsEnable_Perk_StoppingPower(client);
 }
 
 any Native_IsEnable_Perk_SleightOfHand(Handle plugin, int numParams)
 {
 	int client = GetNativeCell(1);
-	return Native_IsValidClientIndex(client) && IsEnable_Perk_SleightOfHand(client);
+	return IsEnable_Perk_SleightOfHand(client);
 }
 
 any Native_IsEnable_Perk_Pyrotechnician(Handle plugin, int numParams)
 {
 	int client = GetNativeCell(1);
-	return Native_IsValidClientIndex(client) && IsEnable_Perk_Pyrotechnician(client);
+	return IsEnable_Perk_Pyrotechnician(client);
 }
 
 any Native_IsEnable_Perk_MartialArtist(Handle plugin, int numParams)
 {
 	int client = GetNativeCell(1);
-	return Native_IsValidClientIndex(client) && IsEnable_Perk_MartialArtist(client);
+	return IsEnable_Perk_MartialArtist(client);
 }
 
 any Native_IsEnable_Perk_ChristmasGift(Handle plugin, int numParams)
 {
 	int client = GetNativeCell(1);
-	return Native_IsValidClientIndex(client) && IsEnable_Perk_ChristmasGift(client);
+	return IsEnable_Perk_ChristmasGift(client);
 }
 
 any Native_IsEnable_Perk_Unbreakable(Handle plugin, int numParams)
 {
 	int client = GetNativeCell(1);
-	return Native_IsValidClientIndex(client) && IsEnable_Perk_Unbreakable(client);
+	return IsEnable_Perk_Unbreakable(client);
 }
 
 any Native_IsEnable_Perk_Spirit(Handle plugin, int numParams)
 {
 	int client = GetNativeCell(1);
-	return Native_IsValidClientIndex(client) && IsEnable_Perk_Spirit(client);
+	return IsEnable_Perk_Spirit(client);
 }
 
 any Native_IsEnable_Perk_HelpingHand(Handle plugin, int numParams)
 {
 	int client = GetNativeCell(1);
-	return Native_IsValidClientIndex(client) && IsEnable_Perk_HelpingHand(client);
+	return IsEnable_Perk_HelpingHand(client);
 }
 
 any Native_IsEnable_Perk_PackCat(Handle plugin, int numParams)
 {
 	int client = GetNativeCell(1);
-	return Native_IsValidClientIndex(client) && IsEnable_Perk_PackCat(client);
+	return IsEnable_Perk_PackCat(client);
 }
 
 any Native_IsEnable_Perk_PackRat(Handle plugin, int numParams)
 {
 	int client = GetNativeCell(1);
-	return Native_IsValidClientIndex(client) && IsEnable_Perk_PackRat(client);
+	return IsEnable_Perk_PackRat(client);
 }
 
 any Native_IsEnable_Perk_ChemReliant(Handle plugin, int numParams)
 {
 	int client = GetNativeCell(1);
-	return Native_IsValidClientIndex(client) && IsEnable_Perk_ChemReliant(client);
+	return IsEnable_Perk_ChemReliant(client);
 }
 
 any Native_IsEnable_Perk_HardToKill(Handle plugin, int numParams)
 {
 	int client = GetNativeCell(1);
-	return Native_IsValidClientIndex(client) && IsEnable_Perk_HardToKill(client);
+	return IsEnable_Perk_HardToKill(client);
 }
 
 any Native_IsEnable_Perk_ExtremeConditioning(Handle plugin, int numParams)
 {
 	int client = GetNativeCell(1);
-	return Native_IsValidClientIndex(client) && IsEnable_Perk_ExtremeConditioning(client);
+	return IsEnable_Perk_ExtremeConditioning(client);
 }
 
 any Native_Pyro_OnWeaponFire(Handle plugin, int numParams)
