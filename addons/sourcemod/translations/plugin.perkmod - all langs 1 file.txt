@@ -210,6 +210,26 @@
 		"fr"	"Recharger plus vite %i%%"
 	}
 
+	"ChristmasGiftDescriptionPanel"
+	{
+		"en"	"Special Infected drop gifts when killed."
+		"de"	"Besondere Infizierte lassen Geschenke fallen, wenn sie getötet werden."
+		"it"	"Gli infetti speciali lasciano regali quando vengono uccisi."
+		"da"	"Særlige inficerede dråber gaver, når de bliver dræbt."
+		"ru"	"При убийстве особых зараженных выпадают подарки."
+		"fr"	"Les infectés spéciaux lâchent des cadeaux une fois tués."
+	}
+
+	"ExtremeConditioningDescriptionPanel"
+	{
+		"en"	"Speed Bonus %i%%"
+		"de"	"Geschwindigkeitsbonus %i%%"
+		"it"	"Bonus velocitа %i%%"
+		"da"	"Hastighedsbonus %i%%"
+		"ru"	"Бонус скорости %i%%"
+		"fr"	"Bonus de vitesse %i%%"
+	}
+
 	"UnbreakableHint"
 	{
 		"en"	"bonus health"
@@ -300,16 +320,6 @@
 		"fr"	"porter 2 grenades au lieu d'un"
 	}
 
-	"ChristmasGiftDescriptionPanel"
-	{
-		"en"	"Special Infected drop gifts when killed."
-		"de"	"Besondere Infizierte lassen Geschenke fallen, wenn sie getötet werden."
-		"it"	"Gli infetti speciali lasciano regali quando vengono uccisi."
-		"da"	"Særlige inficerede dråber gaver, når de bliver dræbt."
-		"ru"	"При убийстве особых зараженных выпадают подарки."
-		"fr"	"Les infectés spéciaux lâchent des cadeaux une fois tués."
-	}
-
 	"SpiritDescriptionPanel"
 	{
 		"en"	"self-revive on teammate incap, cooldown"
@@ -367,16 +377,6 @@
 		"da"	"genopfyld, når ammunition er opgraderet, medbring mere ammunition"
 		"ru"	"пополнение при обновлении боеприпасов, Нести больше боезапаса"
 		"fr"	"rechargez lorsque les munitions sont améliorées, porter plus de ammunition"
-	}
-
-	"MartialArtistDescriptionPanelCoop"
-	{
-		"en"	"run faster"
-		"de"	"schneller laufen"
-		"it"	"corsa piщ veloce"
-		"da"	"lшb hurtigere"
-		"ru"	"Более быстрый бег"
-		"fr"	"courir plus vite"
 	}
 
 	"HardToKillDescriptionPanel"

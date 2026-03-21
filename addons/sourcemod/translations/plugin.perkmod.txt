@@ -105,6 +105,16 @@
 		"en"	"Reload faster %i%%"
 	}
 
+	"ChristmasGiftDescriptionPanel"
+	{
+		"en"	"Special Infected drop gifts when killed."
+	}
+
+	"ExtremeConditioningDescriptionPanel"
+	{
+		"en"	"Speed Bonus %i%%"
+	}
+
 	"UnbreakableHint"
 	{
 		"en"	"bonus health"
@@ -148,11 +158,6 @@
 	"PyroDescriptionPanel"
 	{
 		"en"	"carry 2 grenades instead of 1"
-	}
-
-	"ChristmasGiftDescriptionPanel"
-	{
-		"en"	"Special Infected drop gifts when killed."
 	}
 
 	"SpiritDescriptionPanel"
@@ -239,13 +244,6 @@
 	{
 		"en"	"more health buffer"
 	}
-
-	"MartialArtistDescriptionPanelCoop"
-	{
-		"en"	"run faster"
-	}
-
-
 
 	"MartialArtistDescriptionPanel"
 	{

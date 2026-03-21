@@ -5079,7 +5079,7 @@ public Handle:Menu_ShowChoices (iCid)
 	else if (iPerk == 3 && g_iHard_enable==1)
 		Format(st_perk,128,"Hard to Kill (+%i%% %t)", RoundToNearest(g_flHard_hpmult*100), "HardToKillDescriptionPanel" );
 	else if (iPerk == 4 && g_iExtreme_enable==1)
-		Format(st_perk,128,"Extreme Conditioning (+%i%% %t)", RoundToNearest(g_flExtreme_rate*100-100), "MartialArtistDescriptionPanelCoop" );
+		Format(st_perk,128,"Extreme Conditioning (%t)", "ExtremeConditioningDescriptionPanel", RoundToNearest(g_flExtreme_rate*100-100));
 	else
 		Format(st_perk,128,"%t", "NotSet");
 
@@ -5455,7 +5455,7 @@ public Handle:Menu_Sur3Perk (client)
 		}
 		Format(st_display,64,"Extreme Conditioning %s",st_current);
 		DrawPanelItem(menu,st_display);
-		Format(st_display,64,"%t: +%i%%", "MartialArtistDescriptionPanelCoop", RoundToNearest(100*g_flExtreme_rate-100) );
+		Format(st_display,64,"%t", "ExtremeConditioningDescriptionPanel", RoundToNearest(100*g_flExtreme_rate-100) );
 		DrawPanelText(menu,st_display);
 	}
 
