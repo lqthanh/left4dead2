@@ -115,6 +115,21 @@
 		"en"	"Bonus health %i"
 	}
 
+	"PackCatDescriptionPanel"
+	{
+		"en"	"Special Infected refill %i%% ammo."
+	}
+
+	"PackRatDescriptionPanel"
+	{
+		"en"	"Refill when pick ammo upgrade, carry more %i%% ammo"
+	}
+
+	"HardToKillDescriptionPanel"
+	{
+		"en"	"More health when incapped"
+	}
+
 	"ExtremeConditioningDescriptionPanel"
 	{
 		"en"	"Speed Bonus %i%%"
@@ -180,21 +195,6 @@
 		"en"	"give bonus health buffer"
 	}
 
-	"PackCatDescriptionPanel"
-	{
-		"en"	"Special Infected refill %i%% ammo."
-	}
-
-	"PackRatDescriptionPanel"
-	{
-		"en"	"refill when pick ammo upgrade, carry more ammo"
-	}
-
-	"HardToKillDescriptionPanel"
-	{
-		"en"	"more health when incapped"
-	}
-
 	"YourPerksPanel"
 	{
 		"en"	"tPoncho's Perkmod: Your perks for this round"
@@ -233,16 +233,6 @@
 	"ChemReliantDescriptionText2"
 	{
 		"en"	"and you start the round with extra pills"
-	}
-
-	"HardToKillDescriptionText"
-	{
-		"en"	"When you are incapped you have"
-	}
-
-	"HardToKillDescriptionText2"
-	{
-		"en"	"more health buffer"
 	}
 
 	"MartialArtistDescriptionPanel"

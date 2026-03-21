@@ -229,6 +229,36 @@
 		"ru"	"Бонусное здоровье %i"
 		"fr"	"Plus sante %i"
 	}
+	
+	"PackCatDescriptionPanel"
+	{
+		"en"	"Special Infected refill %i%% ammo."
+		"de"	"Spezialinfizierte füllen %i%% Munition nach."
+		"it"	"Ricarica speciale per infetti da %i%% munizioni."
+		"da"	"Speciel inficeret refill %i%% ammunition."
+		"ru"	"Специальный заражённый пополняет %i%% патронов."
+		"fr"	"Recharge spéciale Infectés %i%% munitions."
+	}
+
+	"PackRatDescriptionPanel"
+	{
+		"en"	"Refill when ammo upgraded, carry more %i%% ammo"
+		"de"	"Nachfüllen wenn die munition aufgerüstet ist, trage mehr %i%% munition"
+		"it"	"Ricaricare quando le munizioni vengono aggiornate, puoi portare piщ %i%% munizioni"
+		"da"	"Genopfyld, når ammunition er opgraderet, medbring mere %i%% ammunition"
+		"ru"	"пополнение при обновлении боеприпасов, Нести больше %i%% боезапаса"
+		"fr"	"Rechargez lorsque les munitions sont améliorées, porter plus de %i%% ammunition"
+	}
+
+	"HardToKillDescriptionPanel"
+	{
+		"en"	"More health when incapped"
+		"de"	"Mehr Leben wenn am Boden"
+		"it"	"Piщ salute quando si и a terra"
+		"da"	"Mere helbred ved incap"
+		"ru"	"Больше хп когда вы лежите"
+		"fr"	"Plus de sante quand on tombe"
+	}
 
 	"ExtremeConditioningDescriptionPanel"
 	{
@@ -359,36 +389,6 @@
 		"fr"	"donner plus sante temporaire"
 	}
 
-	"PackCatDescriptionPanel"
-	{
-		"en"	"Special Infected refill %i%% ammo."
-		"de"	"Spezialinfizierte füllen %i%% Munition nach."
-		"it"	"Ricarica speciale per infetti da %i%% munizioni."
-		"da"	"Speciel inficeret refill %i%% ammunition."
-		"ru"	"Специальный заражённый пополняет %i%% патронов."
-		"fr"	"Recharge spéciale Infectés %i%% munitions."
-	}
-
-	"PackRatDescriptionPanel"
-	{
-		"en"	"refill when ammo upgraded, carry more ammo"
-		"de"	"nachfüllen wenn die munition aufgerüstet ist, trage mehr munition"
-		"it"	"ricaricare quando le munizioni vengono aggiornate, puoi portare piщ munizioni"
-		"da"	"genopfyld, når ammunition er opgraderet, medbring mere ammunition"
-		"ru"	"пополнение при обновлении боеприпасов, Нести больше боезапаса"
-		"fr"	"rechargez lorsque les munitions sont améliorées, porter plus de ammunition"
-	}
-
-	"HardToKillDescriptionPanel"
-	{
-		"en"	"more health when incapped"
-		"de"	"mehr Leben wenn am Boden"
-		"it"	"piщ salute quando si и a terra"
-		"da"	"mere helbred ved incap"
-		"ru"	"Больше хп когда вы лежите"
-		"fr"	"plus de sante quand on tombe"
-	}
-
 	"YourPerksPanel"
 	{
 		"en"	"tPoncho's Perkmod: Your perks for this round"
@@ -468,27 +468,6 @@
 		"ru"	"и вы начинаете раунд с таблетками."
 		"fr"	"et vous commencez la ronde avec des pilules"
 	}
-
-	"HardToKillDescriptionText"
-	{
-		"en"	"When you are incapped you have"
-		"de"	"Wenn du umkippst, hast du"
-		"it"	"Quando sei a terra, hai"
-		"da"	"Nеr du er incapped har du"
-		"ru"	"Когда вы лежите, у вас"
-		"fr"	"Quand vous tombez vous avez"
-	}
-
-	"HardToKillDescriptionText2"
-	{
-		"en"	"more health"
-		"de"	"mehr Lebenspunkte"
-		"it"	"piщ salute"
-		"da"	"mere helbred"
-		"ru"	"больше здоровья"
-		"fr"	"plus sante"
-	}
-
 
 	"MartialArtistDescriptionPanel"
 	{

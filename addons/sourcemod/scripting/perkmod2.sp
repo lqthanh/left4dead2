@@ -5067,11 +5067,11 @@ public Handle:Menu_ShowChoices (iCid)
 	//show sur3 perk
 	iPerk = g_iSur3[iCid];
 	if (iPerk == 1 && g_iPack_enable==1)
-		Format(st_perk,128,"Pack Rat (%t +%i%%)", "PackRatDescriptionPanel", RoundToNearest(g_flPack_ammomult*100) );
+		Format(st_perk,128,"Pack Rat (%t)", "PackRatDescriptionPanel", RoundToNearest(g_flPack_ammomult*100) );
 	else if (iPerk == 2 && g_iChem_enable==1)
 		Format(st_perk,128,"Chem Reliant (%t +%i)", "ChemReliantDescriptionPanel", g_iChem_buff);
 	else if (iPerk == 3 && g_iHard_enable==1)
-		Format(st_perk,128,"Hard to Kill (+%i%% %t)", RoundToNearest(g_flHard_hpmult*100), "HardToKillDescriptionPanel" );
+		Format(st_perk,128,"Hard to Kill (%t)", "HardToKillDescriptionPanel");
 	else if (iPerk == 4 && g_iExtreme_enable==1)
 		Format(st_perk,128,"Extreme Conditioning (%t)", "ExtremeConditioningDescriptionPanel", RoundToNearest(g_flExtreme_rate*100-100));
 	else
@@ -5388,7 +5388,7 @@ public Handle:Menu_Sur3Perk (client)
 		}
 		Format(st_display,64,"Pack Rat %s",st_current);
 		DrawPanelItem(menu,st_display);
-		Format(st_display,64,"%t +%i%%", "PackRatDescriptionPanel", RoundToNearest(g_flPack_ammomult*100) );
+		Format(st_display,64,"%t", "PackRatDescriptionPanel", RoundToNearest(g_flPack_ammomult*100) );
 		DrawPanelText(menu,st_display);
 	}
 
@@ -5429,9 +5429,7 @@ public Handle:Menu_Sur3Perk (client)
 		}
 		Format(st_display,64,"Hard to Kill %s",st_current);
 		DrawPanelItem(menu,st_display);
-		Format(st_display,64,"%t", "HardToKillDescriptionText");
-		DrawPanelText(menu,st_display);
-		Format(st_display,64,"+%i%% %t", RoundToNearest(100*g_flHard_hpmult), "HardToKillDescriptionText2" );
+		Format(st_display,64,"%t", "HardToKillDescriptionPanel");
 		DrawPanelText(menu,st_display);
 	}
 
