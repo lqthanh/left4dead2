@@ -182,32 +182,32 @@
 
 	"PyroDescriptionPanel"
 	{
-		"en"	"carry 2 grenades instead of 1"
-		"de"	"trage zwei Granaten statt einer"
-		"it"	"puoi portare 2 granate invece di una"
-		"da"	"bжrer to granater i stedet for йn"
-		"ru"	"Две гранаты вместо одной"
-		"fr"	"porter 2 grenades au lieu d'un"
+		"en"	"Carry 2 grenades, gain random type after %i (sec) not carry any"
+		"de"	"Zwei Granaten tragen, erhalte zufälligen Typ nach %i (sec), keine mitnehmen"
+		"it"	"Porta 2 granate, ottieni tipo casuale dopo %i (sec), non portare"
+		"da"	"Bжr to granater, fе tilfшldigt type efter %i (sec), bжr ikke"
+		"ru"	"Носите 2 гранаты, получаете случайный тип через %i (сек), не несите"
+		"fr"	"Porter 2 grenades, obtenir un type aléatoire après %i (sec), ne pas porter"
 	}
 
 	"PyroDescriptionPanel1"
 	{
-		"en"	"Picking up a grenade gives you two"
-		"de"	"Nimm nicht eine sondern 2 Granaten"
-		"it"	"Raccogliere una granata te ne dа 2"
-		"da"	"At samle en granat op vil give dig to"
-		"ru"	"Подбирание гранаты дает вам сразу две"
-		"fr"	"Prenant une grenade vous donne deux"
+		"en"	"Picking up a grenade gives you two, start the round with 2 grenades"
+		"de"	"Sammle eine Granate auf gibt dir zwei, beginne die Runde mit 2 Granaten"
+		"it"	"Raccogliere una granata ti dà due, inizia il round con 2 granate"
+		"da"	"At samle en granat giver dig to, start runden med 2 granater"
+		"ru"	"Подбирание гранаты дает вам две, начните раунд с 2 гранатами"
+		"fr"	"Ramasser une grenade vous en donne deux, commencez la ronde avec 2 grenades"
 	}
 
 	"PyroDescriptionPanel2"
 	{
-		"en"	"and you start the round with 2 grenades"
-		"de"	"und beginne die Runde mit zwei Granaten"
-		"it"	"e cominci il round con 2 granate"
-		"da"	"og du starter runden med to granater"
-		"ru"	"и вы начинаете раунд с двумя гранатами."
-		"fr"	"et vous commencez la ronde avec deux grenades"
+		"en"	"Gain random type after %i (sec) not carry any"
+		"de"	"Erhalte zufälligen Typ nach %i (sec), nicht mitnehmen"
+		"it"	"Ottieni tipo casuale dopo %i (sec), non portare"
+		"da"	"Fе tilfшldigt type efter %i (sec), bжr ikke"
+		"ru"	"Получите случайный тип через %i (сек), не несите"
+		"fr"	"Obtenez un type aléatoire après %i (sec), ne pas porter"
 	}
 
 	"PyroMessageHintGrenadierCarry"
