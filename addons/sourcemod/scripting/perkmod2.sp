@@ -5167,7 +5167,7 @@ public Handle:Menu_Sur1Perk (client)
 			default: st_current="";
 		}
 		Format(st_display,64,"Martial Artist %s",st_current);
-		DrawPanelText(menu, st_display);
+		DrawPanelItem(menu, st_display);
 		if (g_iMA_maxpenalty <6)
 		{
 			Format(st_display,64,"%t", "MartialArtistDescriptionPanel1");
