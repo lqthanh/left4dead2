@@ -202,12 +202,32 @@
 
 	"SpiritDescriptionPanel"
 	{
-		"en"	"Self-revive on teammate incap, gain bonus %i temp health, cooldown %i (second)"
-		"de"	"Selbstwiederbelebung bei Teammitglied-Incap, gewinne %i temporдres Leben, Abklingzeit %i (Sekunden)"
-		"it"	"Autoriabilitazione quando un compagno viene incapacita, ottieni %i salute temporanea bonus, cooldown %i (secondi)"
-		"da"	"Selv-genoplivning ved holdkammerat incap, fе %i midlertidigt helbred bonus, cooldown %i (sekunder)"
-		"ru"	"Самовосстановление при падении товарища, получаете %i бонусного временного хп, перезарядка %i (секунд)"
-		"fr"	"Auto-rйanimation quand un coйquipier est mis KO, reзois %i vie temporaire bonus, cooldown %i (secondes)"
+		"en"	"Self-revive on teammate incap"
+		"de"	"Selbstwiederbelebung bei Teammitglied-Incap"
+		"it"	"Autoriabilitazione quando un compagno viene incapacita"
+		"da"	"Selv-genoplivning ved holdkammerat incap"
+		"ru"	"Самовосстановление при падении товарища"
+		"fr"	"Auto-rйanimation quand un coйquipier est mis KO"
+	}
+
+	"SpiritDescriptionPanel1"
+	{
+		"en"	"Gain bonus %i temp health, cooldown %i (sec)"
+		"de"	"Gewinne %i temporдres Leben, Abklingzeit %i (sec)"
+		"it"	"Ottieni %i salute temporanea bonus, cooldown %i (sec)"
+		"da"	"Fе %i midlertidigt helbred bonus, cooldown %i (sec)"
+		"ru"	"Получите %i бонусного временного хп, перезарядка %i (sec)"
+		"fr"	"Reзois %i vie temporaire bonus, cooldown %i (sec)"
+	}
+
+	"SpiritDescriptionPanel2"
+	{
+		"en"	"Self-revive, gain %i temp health, cooldown %i (sec)"
+		"de"	"Selbstwiederbelebung, gewinne %i temporдres Leben, Abklingzeit %i (sec)"
+		"it"	"Autoriabilitazione, ottieni %i salute temporanea, cooldown %i (sec)"
+		"da"	"Selv-genoplivning, fе %i midlertidigt helbred, cooldown %i (sec)"
+		"ru"	"Самовосстановление, получите %i бонусного временного хп, перезарядка %i (sec)"
+		"fr"	"Auto-rйanimation, reзois %i vie temporaire, cooldown %i (sec)"
 	}
 
 	"SpiritMessageHintSuccess"
@@ -282,12 +302,12 @@
 
 	"PackCatDescriptionPanel"
 	{
-		"en"	"Special Infected refill %i%% ammo."
-		"de"	"Spezialinfizierte füllen %i%% Munition nach."
-		"it"	"Ricarica speciale per infetti da %i%% munizioni."
-		"da"	"Speciel inficeret refill %i%% ammunition."
-		"ru"	"Специальный заражённый пополняет %i%% патронов."
-		"fr"	"Recharge spéciale Infectés %i%% munitions."
+		"en"	"Special Infected refill %i%% ammo when killed."
+		"de"	"Spezialinfizierte füllen %i%% Munition nach, wenn sie getötet werden."
+		"it"	"Gli infetti speciali ricaricano %i%% munizioni quando vengono uccisi."
+		"da"	"Specielle inficerede genopfylder %i%% ammunition, når de dræbes."
+		"ru"	"При убийстве Специальный заражённый пополняет %i%% патронов."
+		"fr"	"Les infectés spéciaux rechargent %i%% de munitions une fois tués.."
 	}
 
 	"PackRatDescriptionPanel"

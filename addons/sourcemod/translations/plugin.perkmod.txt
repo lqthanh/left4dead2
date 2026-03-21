@@ -102,7 +102,17 @@
 
 	"SpiritDescriptionPanel"
 	{
-		"en"	"Self-revive on teammate incap, gain bonus %i temp health, cooldown %i (second)"
+		"en"	"Self-revive on teammate incap"
+	}
+
+	"SpiritDescriptionPanel1"
+	{
+		"en"	"Gain bonus %i temp health, cooldown %i (sec)"
+	}
+
+	"SpiritDescriptionPanel2"
+	{
+		"en"	"Self-revive, gain %i temp health, cooldown %i (sec)"
 	}
 
 	"SpiritMessageHintSuccess"
@@ -142,7 +152,7 @@
 
 	"PackCatDescriptionPanel"
 	{
-		"en"	"Special Infected refill %i%% ammo."
+		"en"	"Special Infected refill %i%% ammo when killed."
 	}
 
 	"ChemReliantDescriptionPanel"

@@ -5042,7 +5042,7 @@ public Handle:Menu_ShowChoices (iCid)
 	{
 		decl iTime;
 			iTime=g_iSpirit_cd;
-		Format(st_perk,128,"Spirit (%t)", "SpiritDescriptionPanel", g_iSpirit_buff, iTime );
+		Format(st_perk,128,"Spirit (%t)", "SpiritDescriptionPanel2", g_iSpirit_buff, iTime );
 	}
 	else if (iPerk == 3 && g_iHelpHand_enable==1)
 	{
@@ -5274,7 +5274,9 @@ public Handle:Menu_Sur2Perk (client)
 		}
 		Format(st_display,64,"Spirit %s",st_current);
 		DrawPanelItem(menu,st_display);
-		Format(st_display,64,"%t", "SpiritDescriptionPanel", g_iSpirit_buff, g_iSpirit_cd );
+		Format(st_display,64,"%t", "SpiritDescriptionPanel");
+		DrawPanelText(menu,st_display);
+		Format(st_display,64,"%t", "SpiritDescriptionPanel1", g_iSpirit_buff, g_iSpirit_cd );
 		DrawPanelText(menu,st_display);
 	}
 
