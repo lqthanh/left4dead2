@@ -705,6 +705,8 @@ public OnPluginStart()
 	// Helping Hand
 	HookEvent("revive_begin", Event_ReviveBeginPre, EventHookMode_Pre);
 	HookEvent("revive_success", Event_ReviveSuccess);
+	// Pack Cat
+	HookEvent("witch_killed", Event_WitchKilled);
 
 	// Sur3
 	// Pack Rat
@@ -1767,6 +1769,13 @@ public Event_PlayerDeath (Handle:event, const String:name[], bool:dontBroadcast)
 
 	//----DEBUG----
 	//PrintToChatAll("\x03end death routine for \x01%i",iCid);
+
+	int attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
+	if (attacker == 0) return;
+	if (attacker != iCid && GetClientTeam(iCid) == 3)
+	{
+		PC_GiveFullAmmo(attacker);
+	}
 }
 
 //checks to show perks menu on roundstart
@@ -2236,6 +2245,14 @@ public Event_ReviveSuccess (Handle:event, const String:name[], bool:dontBroadcas
 
 	Unbreakable_OnRevive(iSub, iLedge);
 	HelpHand_OnReviveSuccess(iCid,iSub,iLedge);
+}
+
+public Event_WitchKilled (Handle:event, const String:name[], bool:dontBroadcast)
+{
+	new iCid=GetClientOfUserId(GetEventInt(event,"userid"));
+	if (iCid==0) return;
+
+	PC_GiveFullAmmo(iCid);
 }
 
 //if item that was picked up is a grenade type, set carried amount in var
@@ -4517,6 +4534,30 @@ public Action:HelpHand_Delayed (Handle:timer, any:iCid)
 }
 
 //=============================
+// Sur2: Pack Cat
+//=============================
+
+//gives full ammo
+PC_GiveFullAmmo(int client)
+{
+	if (IsEnable_Perk_PackCat(client))
+	{
+		int weapon = GetPlayerWeaponSlot(client, L4D_WEAPON_SLOT_PRIMARY);
+		if( weapon != -1 )
+		{
+			int ammoType = GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType");
+			int maxAmmoCarry = AmmoDef.MaxCarry(ammoType);
+			if (maxAmmoCarry <= 0) return;
+
+			int refill = RoundToNearest(maxAmmoCarry * g_flPackCat_ammorefill);
+			if (IsEnable_Perk_PackRat(client)) refill = RoundToNearest(refill * (1 + g_flPack_ammomult));
+			int currentReserve = L4D_GetReserveAmmo(client, weapon);
+			L4D_SetReserveAmmo(client, weapon, currentReserve + refill);
+		}
+	}
+}
+
+//=============================
 // Sur3: Pack Rat
 //=============================
 
@@ -4530,11 +4571,9 @@ PR_GiveFullAmmo(int client, bool extraClip = false)
 		{
 			int ammoType = GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType");
 			int maxAmmoCarry = AmmoDef.MaxCarry(ammoType);
-
 			if (maxAmmoCarry <= 0) return;
 
 			int refill = RoundToNearest(maxAmmoCarry * (1 + g_flPack_ammomult)) + (extraClip ? GetEntProp(weapon, Prop_Send, "m_iClip1") : 0);
-
 			L4D_SetReserveAmmo(client, weapon, refill);
 		}
 	}
