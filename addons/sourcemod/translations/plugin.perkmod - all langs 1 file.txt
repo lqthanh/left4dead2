@@ -1,16 +1,6 @@
 ﻿"Phrases"
 {
-	"WelcomeMessageHint"
-	{
-		"en"	"Welcome to Perkmod!"
-		"de"	"Willkommen bei Perkmod:"
-       		"it"	"Benvenuto in Perkmod:"
-		"da"	"Velkommen til Perkmod"
-		"ru"	"Добро пожаловать в Перк-Мод: "
-		"fr"	"Bienvenue a Perkmod!"
-	}
-
-	"WelcomeMessageChat"
+	"MessageChatWelcome"
 	{
 		"en"	"Welcome to Perkmod! If the menu doesn't come up, type !perks to display it."
 		"de"	"Willkommen bei Perkmod! Sollte das Menu nicht offen sein, bitte !perks eintippen."
@@ -20,17 +10,307 @@
 		"fr"	"Bienvenue a Perkmod! Si le menu n'apparaits pas, tapez !perks pour afficher le menu."
 	}
 
-	"BonusDamageText"
+	"MessageChatConfirmed"
 	{
-		"en"	"bonus damage"
-		"de"	"Extraschaden"
-		"it"	"Danno extra"
-		"da"	"Ekstra skade"
-		"ru"	"Бонусные повреждения"
-		"fr"	"plus degats"
+		"en"	"You've confirmed your Perk choices; they will now take effect. You may not change your Perks until the next round. \n\n To check your perks, type !perks"
+		"de"	"Du hast deine Staerken bestaetigt, sie treten nun in Effekt. Du kannst keine Дnderungen bis zur naechsten Runde vornehmen. \n\n Um deine Staerken zu sehen, tippe !perks"
+		"it"	"Hai confermato la scelta dei tuoi bonus; ora sono attivati. Non puoi cambiare i tuoi bonus fino al prossimo round. \n\n Per controllare i tuoi bonus, scrivi !perks"
+		"da"	"Du har bekrжftet dine Perk valg; de vil nu trжde i kraft. Du kan ikke жndre dine Perks fшr nжste runde. \n\n for at tjekke dine perk, skriv !perks"
+		"ru"	"Вы подтвердили свой выбор перков; теперь они вступят в силу. Вы не сможете их изменить до начала след. раунда. \n\n Проверить свои перки - !perks"
+		"fr"	"Vous avez confirme des Perks; des Perks fonctionnera maintenant. Vous ne pouvez pas changer des Perks avant de ronde prochaine. \n\n Pour voir des perks, tapez !perks"
 	}
 
-	"SpritSuccessMessage"
+	"MessageHintThanksForChoosing"
+	{
+		"en"	"Thanks and have fun!"
+		"de"	"Danke und viel Spass!"
+		"it"	"Grazie e buon divertimento!"
+		"da"	"Tak og hav det sjovt!"
+		"ru"	"Спасибо и хорошей игры!"
+		"fr"	"Merci!"
+	}
+
+	"MenuInitialDescriptionCustom"
+	{
+		"en"	"Select first option to customize your perks"
+		"de"	"Waehle zuerst Option 1, um deine Staerken(Perks) anzupassen"
+		"it"	"Seleziona prima opzione per scegliere i bonus"
+		"da"	"Vжlg fшrste valg for at tilpasse dine perks"
+		"ru"	"Выберите первый пункт, чтобы настроить свои перки"
+		"fr"	"Choisissez la premiпre option pour personnaliser vos perks"
+	}
+
+	"MenuInitialPanelCustom"
+	{
+		"en"	"Customize Perks"
+		"de"	"Staerken(Perks) waehlen"
+		"it"	"Scegli i bonus"
+		"da"	"Tilpas Perks"
+		"ru"	"Настроить перки"
+		"fr"	"Personnaliser des Perks"
+	}
+
+	"MenuInitialDescriptionRandom"
+	{
+		"en"	"You can randomize your perks, but you can't change them until the round ends."
+		"de"	"Du kannst deine Staerken zufaellig waehlen, aber du kannst sie nicht aendern, bis die Runde endet."
+		"it"	"Puoi randomizzare i tuoi bonus, ma non puoi cambiarli fino alla fine del round."
+		"da"	"Du kan randomisere dine perks, men du kan ikke aendre dem fшr runden er slut."
+		"ru"	"Вы можете случайно выбрать перки, но не можете изменить их до конца раунда."
+		"fr"	"Vous pouvez randomiser vos perks, mais vous ne pouvez pas les changer avant la fin de la ronde."
+	}
+
+	"MenuInitialPanelRandom"
+	{
+		"en"	"Randomize Perks"
+		"de"	"Zufaellig waehlen"
+		"it"	"Assegna casualmente i bonus"
+		"da"	"Tilfжldiggшr Perks"
+		"ru"	"Случайно выбрать перки"
+		"fr"	"Randomiser des Perks"
+	}
+
+	"MenuInitialDescriptionAuto"
+	{
+		"en"	"Otherwise, you can use whatever perks you've selected already, or by default"
+		"de"	"Andernfalls kannst du die Perks verwenden, die du bereits ausgewaehlt hast, oder die Standardwerte."
+		"it"	"Altrimenti puoi usare i perk che hai gia' selezionato o quelli predefiniti."
+		"da"	"Ellers kan du bruge de perks, du allerede har valgt, eller standardindstillingerne."
+		"ru"	"В противном случае вы можете использовать перки, которые уже выбрали, или по умолчанию."
+		"fr"	"Sinon, vous pouvez utiliser les perks que vous avez deja selectionnes, ou les valeurs par defaut."
+	}
+
+	"MenuInitialPanelAuto"
+	{
+		"en"	"Auto choose default / previous perks"
+		"de"	"Automatisch Standard-/vorherige Staerken wählen"
+		"it"	"Scegli automaticamente i perk predefiniti/precedenti"
+		"da"	"Vælg automatisk standard/forrige perks"
+		"ru"	"Автоматический выбор стандартных/предыдущих перков"
+		"fr"	"Choisir automatiquement les perks par défaut/précédents"
+	}
+
+	"MenuTopDescription"
+	{
+		"en"	"Select a submenu to choose a perk"
+		"de"	"Waehle eine Klasse fuer moegliche Staerken"
+		"it"	"Seleziona un sottomenu per scegliere i bonus"
+		"da"	"Vжlg en undermenu for at vжlge en perk"
+		"ru"	"Выберите подменю чтобы выбрать перк"
+		"fr"	"Selectionnez un sous-menu pour choisir un perk"
+	}
+
+	"MenuTopDoneDescription"
+	{
+		"en"	"In order for your perks to work, you MUST hit 'DONE'"
+		"de"	"Damit die Staerken wirken, musst du 'FERTIG' druecken"
+		"it"	"Affinchи i tuoi bonus funzionino, DEVI selezionare 'FINE'"
+		"da"	"For at dine perks skal virke, SKAL du trykke 'FЖRDIG'"
+		"ru"	"Чтобы ваши перки работали, вы ДОЛЖНЫ нажать 'ГОТОВО'"
+		"fr"	"Pour utiliser des perks, on doit selectionner 'FINI'"
+	}
+
+	"MenuTopDonePanel"
+	{
+		"en"	"DONE"
+		"de"	"FERTIG"
+		"it"	"FINE"
+		"da"	"FЖRDIG"
+		"ru"	"ГОТОВО"
+		"fr"	"FINI"
+	}
+
+	"MenuConfirmConfirmDescription"
+	{
+		"en"	"Are you sure? Once confirmed you cannot change your perks until the next round!"
+		"de"	"Bist du sicher? Einmal bestaetigt kannst du bis Rundenende keine Дnderungen vornehmen!"
+		"it"	"Sei sicuro? Dopo che avrai confermato, non potrai cambiare i tuoi bonus fino al prossimo round"
+		"da"	"Er du sikker? Nеr det er valgt kan det ikke жndres dine perks intil nжste runde!"
+		"ru"	"Вы уверены? Подтвердив выбор, вы не сможете изменить свои перки до начала след. раунда!"
+		"fr"	"Etes-vous sur? Quand on confirme on ne pas change des perks avant de ronde prochaine!"
+	}
+
+	"MenuConfirmConfirmPanel"
+	{
+		"en"	"CONFIRM"
+		"de"	"BESTДTIGEN"
+		"it"	"CONFERMA"
+		"da"	"BEKRЖFT"
+		"ru"	"ПОДТВЕРДИТЬ"
+		"fr"	"CONFIRMER"
+	}
+
+	"MenuConfirmCancelDescription"
+	{
+		"en"	"If you cancel remember that your perks will not take effect until you hit confirm!"
+		"de"	"Wenn du abbrichst bedenke dass du keine Staerken erhaelst bis du bestaetigen gedrueckt hast!"
+		"it"	"Se esci adesso, ricorda che i tuoi bonus non saranno attivi finchи non avrai selezionato conferma!"
+		"da"	"Hvis du annulerer, husk at dine perks ikke vil tage effekt indtil du trykker bekrжft!"
+		"ru"	"Выбрав отмену, помните что ваши перки не активируются до тех пор, пока вы не нажмете 'ПОДТВЕРДИТЬ'!"
+		"fr"	"Si on annule on doit se revenir que on ne peut pas utiliser des perks avant de confirmer!"
+	}
+
+	"MenuConfirmCancelPanel"
+	{
+		"en"	"CANCEL"
+		"de"	"ABBRECHEN"
+		"it"	"CANCELLA"
+		"da"	"ANNULER"
+		"ru"	"ОТМЕНА"
+		"fr"	"ANNULER"
+	}
+
+	"StoppingPowerDescriptionPanel"
+	{
+		"en"	"Bonus damage %i%%"
+		"de"	"Extraschaden %i%%"
+		"it"	"Danno extra %i%%"
+		"da"	"Ekstra skade %i%%"
+		"ru"	"Бонусные повреждения %i%%"
+		"fr"	"Plus degats %i%%"
+	}
+
+	"SleighOfHandDescriptionPanel"
+	{
+		"en"	"Reload faster %i%%"
+		"de"	"Schneller Nachladen %i%%"
+		"it"	"Ricarica piщ velocem %i%%"
+		"da"	"Genlad hurtigere %i%%"
+		"ru"	"Перезаряжать быстрее %i%%"
+		"fr"	"Recharger plus vite %i%%"
+	}
+
+	"PyroDescriptionPanel"
+	{
+		"en"	"Carry 2 grenades, gain random type after %i (sec) not carry any"
+		"de"	"Zwei Granaten tragen, erhalte zufälligen Typ nach %i (sec), keine mitnehmen"
+		"it"	"Porta 2 granate, ottieni tipo casuale dopo %i (sec), non portare"
+		"da"	"Bжr to granater, fе tilfшldigt type efter %i (sec), bжr ikke"
+		"ru"	"Носите 2 гранаты, получаете случайный тип через %i (сек), не несите"
+		"fr"	"Porter 2 grenades, obtenir un type aléatoire après %i (sec), ne pas porter"
+	}
+
+	"PyroDescriptionPanel1"
+	{
+		"en"	"Picking up a grenade gives you two, start the round with 2 grenades"
+		"de"	"Sammle eine Granate auf gibt dir zwei, beginne die Runde mit 2 Granaten"
+		"it"	"Raccogliere una granata ti dà due, inizia il round con 2 granate"
+		"da"	"At samle en granat giver dig to, start runden med 2 granater"
+		"ru"	"Подбирание гранаты дает вам две, начните раунд с 2 гранатами"
+		"fr"	"Ramasser une grenade vous en donne deux, commencez la ronde avec 2 grenades"
+	}
+
+	"PyroDescriptionPanel2"
+	{
+		"en"	"Gain random type after %i (sec) not carry any"
+		"de"	"Erhalte zufälligen Typ nach %i (sec), nicht mitnehmen"
+		"it"	"Ottieni tipo casuale dopo %i (sec), non portare"
+		"da"	"Fе tilfшldigt type efter %i (sec), bжr ikke"
+		"ru"	"Получите случайный тип через %i (сек), не несите"
+		"fr"	"Obtenez un type aléatoire après %i (sec), ne pas porter"
+	}
+
+	"PyroMessageHintGrenadierCarry"
+	{
+		"en"	"You are carrying %i %s(s)"
+		"de"	"Du traegst jetzt %i %s(s)"
+		"it"	"Hai %i %s(s)"
+		"da"	"Du bжrer %i %s(s)"
+		"ru"	"Вы несете %i %s(s)"
+		"fr"	"Vous avez %i %s(s)"
+	}
+
+	"PyroMessageHintGrenadierCantTake2Grenades"
+	{
+		"en"	"You only picked up one %s. Throw your second grenade before picking up another."
+		"de"	"Du hast nur eine %s aufgehoben. Wirf die zweite Granate, bevor du eine weitere aufnimmst."
+		"it"	"Hai preso solo una %s. Lancia la tua seconda granata prima di prenderne un'altra."
+		"da"	"Du samlede kun en %s. Kast din anden granat, fшr du samler en anden op."
+		"ru"	"Вы подобрали только одну %s. Бросьте вторую гранату, прежде чем поднять другую."
+		"fr"	"Vous avez seulement un %s. Jetez votre deuxiиme grenade avant d'en ramasser une autre."
+	}
+
+	"PyroMessageHintGrenadierCounter"
+	{
+		"en"	"You have %i %s(s) left."
+		"de"	"Du hast noch %i %s(s)."
+		"it"	"Ti rimangono %i %s(s)."
+		"da"	"Du har %i %s(s) tilbage."
+		"ru"	"У вас осталось %i %s(s)."
+		"fr"	"Il vous reste %i %s(s)."
+	}
+
+	"MartialArtistDescriptionPanel"
+	{
+		"en"	"Strike more swing with melee"
+		"de"	"Treffe mehrmals hintereinander mit Nahkampf"
+		"it"	"Colpisci piщ colpi con il corpo a corpo"
+		"da"	"Slг flere sving med nжrkamp"
+		"ru"	"Наносите больше ударов ближнего боя"
+		"fr"	"Frappez plus de coups au corps а corps"
+	}
+
+	"MartialArtistDescriptionPanel1"
+	{
+		"en"	"Strike more swing with melee, reduced shove fatigue"
+		"de"	"Treffe mehrmals mit Nahkampf, reduzierte Schubmьdigkeit"
+		"it"	"Colpisci piщ colpi con il corpo a corpo, fatica di spinta ridotta"
+		"da"	"Slг flere sving med nжrkamp, reduceret skubtrжthed"
+		"ru"	"Наносите больше ударов ближнего боя, уменьшенная усталость от толчков"
+		"fr"	"Frappez plus de coups au corps а corps, fatigue de poussйe rйduite"
+	}
+
+	"ChristmasGiftDescriptionPanel"
+	{
+		"en"	"Special Infected drop gifts when killed."
+		"de"	"Besondere Infizierte lassen Geschenke fallen, wenn sie getötet werden."
+		"it"	"Gli infetti speciali lasciano regali quando vengono uccisi."
+		"da"	"Særlige inficerede dråber gaver, når de bliver dræbt."
+		"ru"	"При убийстве особых зараженных выпадают подарки."
+		"fr"	"Les infectés spéciaux lâchent des cadeaux une fois tués."
+	}
+
+	"UnbreakableDescriptionPanel"
+	{
+		"en"	"Bonus health %i"
+		"de"	"Zusaetzliches Leben %i"
+		"it"	"Salute extra %i"
+		"da"	"Ekstra helbred %i"
+		"ru"	"Бонусное здоровье %i"
+		"fr"	"Plus sante %i"
+	}
+
+	"SpiritDescriptionPanel"
+	{
+		"en"	"Self-revive, gain %i temp health, cooldown %i (sec)"
+		"de"	"Selbstwiederbelebung, gewinne %i temporдres Leben, Abklingzeit %i (sec)"
+		"it"	"Autoriabilitazione, ottieni %i salute temporanea, cooldown %i (sec)"
+		"da"	"Selv-genoplivning, fе %i midlertidigt helbred, cooldown %i (sec)"
+		"ru"	"Самовосстановление, получите %i бонусного временного хп, перезарядка %i (sec)"
+		"fr"	"Auto-rйanimation, reзois %i vie temporaire, cooldown %i (sec)"
+	}
+
+	"SpiritDescriptionPanel1"
+	{
+		"en"	"Self-revive on teammate incap"
+		"de"	"Selbstwiederbelebung bei Teammitglied-Incap"
+		"it"	"Autoriabilitazione quando un compagno viene incapacita"
+		"da"	"Selv-genoplivning ved holdkammerat incap"
+		"ru"	"Самовосстановление при падении товарища"
+		"fr"	"Auto-rйanimation quand un coйquipier est mis KO"
+	}
+
+	"SpiritDescriptionPanel2"
+	{
+		"en"	"Gain bonus %i temp health, cooldown %i (sec)"
+		"de"	"Gewinne %i temporдres Leben, Abklingzeit %i (sec)"
+		"it"	"Ottieni %i salute temporanea bonus, cooldown %i (sec)"
+		"da"	"Fе %i midlertidigt helbred bonus, cooldown %i (sec)"
+		"ru"	"Получите %i бонусного временного хп, перезарядка %i (sec)"
+		"fr"	"Reзois %i vie temporaire bonus, cooldown %i (sec)"
+	}
+
+	"SpiritMessageHintSuccess"
 	{
 		"en"	"You've self-revived!"
 		"de"	"Du hast dich wieder aufgerafft!"
@@ -40,7 +320,7 @@
 		"fr"	"Vous vous avez relance!"
 	}
 
-	"SpiritTimerFinishedMessage"
+	"SpiritMessageHintTimerFinished"
 	{
 		"en"	"You feel strong enough to self-revive again!"
 		"de"	"Du fuehlst dich stark genug, um selbst wieder aufzustehen!"
@@ -50,124 +330,104 @@
 		"fr"	"Vous pouvez vous relancer maintenant!"
 	}
 
-	"UnbreakableHint"
+	"SpiritMessageHintBWWarning"
 	{
-		"en"	"bonus health"
-		"de"	"Zusaetzliches Leben"
-		"it"	"Salute extra"
-		"da"	"Ekstra helbred"
-		"ru"	"Бонусное здоровье"
-		"fr"	"plus sante"
+		"en"	"Warning: You are now in BLACK AND WHITE health!!!"
+		"it"	"Warning: You are now in BLACK AND WHITE health!!!"
+		"ru"	"Warning: You are now in BLACK AND WHITE health!!!"
+		"de"	"Warning: You are now in BLACK AND WHITE health!!!"
+		"da"	"Warning: You are now in BLACK AND WHITE health!!!"
+		"fr"	"Warning: You are now in BLACK AND WHITE health!!!"
 	}
 
-	"GrenadierCarryHint"
+	"HelpingHandDescriptionPanel"
 	{
-		"en"	"You are carrying"
-		"de"	"Du traegst jetzt"
-		"it"	"Hai"
-		"da"	"Du bжrer pе"
-		"ru"	"Вы несете"
-		"fr"	"Vous avez"
+		"en"	"Give bonus %i temp health"
+		"de"	"Gib %i temporдres Leben als Bonus"
+		"it"	"Dа un bonus di %i salute temporanea"
+		"da"	"Giv %i midlertidigt helbred som bonus"
+		"ru"	"Дать %i бонусного временного хп"
+		"fr"	"Donner %i santй temporaire bonus"
 	}
 
-	"GrenadierCantTake2Grenades_A"
+	"HelpingHandDescriptionPanel2"
 	{
-		"en"	"You only picked up one"
-		"de"	"Du hast nur eine"
-		"it"	"Hai preso solo una"
-		"da"	"Du samlede kun йn op"
-		"ru"	"Вы подобрали только одну"
-		"fr"	"Vous avez seulement un"
+		"en"	"Revive others faster, give bonus %i temp health"
+		"de"	"Andere schneller wiederbeleben, gebe %i temporдres Leben als Bonus"
+		"it"	"Revitalizzare gli altri piщ velocemente, da un bonus di %i salute temporanea"
+		"da"	"Genopliv andre hurtigere, giv %i midlertidigt helbred som bonus"
+		"ru"	"Вы поднимаете других быстрее, давайте %i бонусного временного хп"
+		"fr"	"Revivre les autres plus vite, donner %i de santй temporaire bonus"
 	}
 
-	"GrenadierCantTake2Grenades_B"
+	"HelpingHandMessageHintDonor"
 	{
-		"en"	"Throw your second grenade before picking up another."
-		"de"	"aufgehoben! Wirf die zweite Granate, bevor du Neue aufhebst."
-	 	"it"	"Lancia la tua seconda granata prima di prenderne un'altra."
-		"da"	"Kast din anden granat fшr du samler en anden op."
-		"ru"	"Киньте свою вторую гранату перед тем как поднять следующую."
-		"fr"	"Lancez votre grenade seconde avant de prenez d'autre."
+		"en"	"Gave bonus temporary health to %s"
+		"de"	"Gab zusaetzliches Health beim Aufhelfen an %s"
+		"it"	"Ha dato salute extra temporanea a %s"
+		"da"	"Gav ekstra midlertidigt helbred til %s"
+		"ru"	"дал бонусное временное здоровье %s"
+		"fr"	"Bous avez donne plus de sante temporaire a %s"
 	}
 
-	"GrenadierCounter_A"
+	"HelpingHandMessageHintReceiver"
 	{
-		"en"	"You have"
-		"de"	"Du hast noch"
-		"it"	"Hai"
-		"da"	"Du har"
-		"ru"	"У вас"
-		"fr"	"Vous avez"
+		"en"	"%s gave you bonus temporary health!"
+		"de"	"%s gab dir zusaetzliches Health beim Aufhelfen!"
+		"it"	"%s ti ha dato salute extra temporanea!"
+		"da"	"%s gav dig ekstra midlertidigt helbred!"
+		"ru"	"%s дал вам бонусное временное здоровье"
+		"fr"	"%s a vous donne plus de sante temporaire!"
 	}
 
-	"GrenadierCounter_B"
+	"PackCatDescriptionPanel"
 	{
-		"en"	"left"
-		"de"	"uebrig"
-		"it"	"rimaste"
-		"da"	"tilbage"
-		"ru"	"осталось"
-		"fr"	"restant"
+		"en"	"Special Infected refill %i%% ammo when killed."
+		"de"	"Spezialinfizierte füllen %i%% Munition nach, wenn sie getötet werden."
+		"it"	"Gli infetti speciali ricaricano %i%% munizioni quando vengono uccisi."
+		"da"	"Specielle inficerede genopfylder %i%% ammunition, når de dræbes."
+		"ru"	"При убийстве Специальный заражённый пополняет %i%% патронов."
+		"fr"	"Les infectés spéciaux rechargent %i%% de munitions une fois tués.."
 	}
 
-	"HelpingHandDonorHint"
+	"PackRatDescriptionPanel"
 	{
-		"en"	"gave bonus temporary health to"
-		"de"	"gab zusaetzliches Health beim Aufhelfen an"
-		"it"	"ha dato salute extra temporanea a"
-		"da"	"gav ekstra midlertidigt helbred til"
-		"ru"	"дал бонусное временное здоровье"
-		"fr"	"vous avez donne plus de sante temporaire a"
+		"en"	"Refill when ammo upgraded, carry more %i%% ammo"
+		"de"	"Nachfüllen wenn die munition aufgerüstet ist, trage mehr %i%% munition"
+		"it"	"Ricaricare quando le munizioni vengono aggiornate, puoi portare piщ %i%% munizioni"
+		"da"	"Genopfyld, når ammunition er opgraderet, medbring mere %i%% ammunition"
+		"ru"	"пополнение при обновлении боеприпасов, Нести больше %i%% боезапаса"
+		"fr"	"Rechargez lorsque les munitions sont améliorées, porter plus de %i%% ammunition"
 	}
 
-	"HelpingHandReceiverHint"
+	"ChemReliantDescriptionPanel"
 	{
-		"en"	"gave you bonus temporary health!"
-		"de"	"gab dir zusaetzliches Health beim Aufhelfen!"
-		"it"	"ti ha dato salute extra temporanea!"
-		"da"	"gav dig ekstra midlertidigt helbred!"
-		"ru"	"дал вам бонусное временное здоровье"
-		"fr"	"a vous donne plus de sante temporaire!"
+		"en"	"Start the round with pills, %i bonus temp health when using pills"
+		"de"	"Starte die Runde mit Pillen, %i Bonus-Temp-Leben bei Pilleneinnahme"
+		"it"	"Inizia il round con pillole, %i salute temporanea bonus usando le pillole"
+		"da"	"Start runden med piller, %i bonus midlertidigt helbred ved brug af piller"
+		"ru"	"Начните раунд с таблетками, %i бонусного временного здоровья при использовании таблеток"
+		"fr"	"Commencez le round avec des pilules, %i de vie temporaire bonus avec les pilules"
 	}
 
-	"MapPerksPanel"
+	"HardToKillDescriptionPanel"
 	{
-		"en"	"Your perks for this round"
-		"de"	"Deine Staerken fuer diese Runde"
-		"it"	"I tuoi bonus per questo round"
-		"da"	"Dine perks for denne runde"
-		"ru"	"Ваши перки на этот раунд"
-		"fr"	"Votre perks pour cette ronde"
+		"en"	"More health when incapped"
+		"de"	"Mehr Leben wenn am Boden"
+		"it"	"Piщ salute quando si и a terra"
+		"da"	"Mere helbred ved incap"
+		"ru"	"Больше хп когда вы лежите"
+		"fr"	"Plus de sante quand on tombe"
 	}
 
-	"PyroDescriptionPanel"
+	"ExtremeConditioningDescriptionPanel"
 	{
-		"en"	"carry 2 grenades instead of 1"
-		"de"	"trage zwei Granaten statt einer"
-		"it"	"puoi portare 2 granate invece di una"
-		"da"	"bжrer to granater i stedet for йn"
-		"ru"	"Две гранаты вместо одной"
-		"fr"	"porter 2 grenades au lieu d'un"
-	}
-
-	"SpiritDescriptionPanel"
-	{
-		"en"	"self-revive on teammate incap, cooldown"
-		"de"	"Steh von selbst auf, wenn ein Kamerad umfaellt, Aufladezeit"
-		"it"	"puoi rialzarti da terra quando un compagno viene incapacitato, si ricarica nel tempo"
-		"da"	"selv-genoplivning ved holdkammerat incap, cooldown"
-		"ru"	"Самовосстановление когда напарник слег, кулдаун"
-		"fr"	"se relancer quand un ami tombe, temps de recharge"
-	}
-
-	"SleighOfHandDescriptionPanel"
-	{
-		"en"	"reload faster"
-		"de"	"schneller Nachladen"
-		"it"	"ricarica piщ velocem"
-		"da"	"genlad hurtigere"
-		"ru"	"Перезаряжать быстрее"
-		"fr"	"recharger plus vite"
+		"en"	"Speed Bonus %i%%"
+		"de"	"Geschwindigkeitsbonus %i%%"
+		"it"	"Bonus velocitа %i%%"
+		"da"	"Hastighedsbonus %i%%"
+		"ru"	"Бонус скорости %i%%"
+		"fr"	"Bonus de vitesse %i%%"
 	}
 
 	"NotSet"
@@ -178,463 +438,5 @@
 		"da"	"Ikke sat"
 		"ru"	"Не установлен"
 		"fr"	"Pas fixe"
-	}
-	"ChemReliantDescriptionPanel"
-	{
-		"en"	"bonus temp health using pills"
-		"de"	"extra Leben von Pillen"
-		"it"	"salute extra usando le pillole"
-		"da"	"ekstra midlertidigt helbred ved brug af piller"
-		"ru"	"Бонусное хп от использования таблеток"
-		"fr"	"plus de sante temporaire avec des pilules"
-	}
-
-	"HelpingHandDescriptionPanel"
-	{
-		"en"	"give bonus health buffer"
-		"de"	"gib beim Aufhelfen mehr Leben"
-		"it"	"dа piщ salute temporanea"
-		"da"	"giv ekstra helbred buffer"
-		"ru"	"дополнительный запас временного хп"
-		"fr"	"donner plus sante temporaire"
-	}
-
-	"PackRatDescriptionPanel"
-	{
-		"en"	"carry more ammo"
-		"de"	"trage mehr Munition"
-		"it"	"puoi portare piщ munizioni"
-		"da"	"bжr pе mere ammo"
-		"ru"	"Нести больше боезапаса"
-		"fr"	"porter plus de ammunition"
-	}
-
-	"MartialArtistDescriptionPanelCoop"
-	{
-		"en"	"run faster"
-		"de"	"schneller laufen"
-		"it"	"corsa piщ veloce"
-		"da"	"lшb hurtigere"
-		"ru"	"Более быстрый бег"
-		"fr"	"courir plus vite"
-	}
-
-	"HardToKillDescriptionPanel"
-	{
-		"en"	"more health when incapped"
-		"de"	"mehr Leben wenn am Boden"
-		"it"	"piщ salute quando si и a terra"
-		"da"	"mere helbred ved incap"
-		"ru"	"Больше хп когда вы лежите"
-		"fr"	"plus de sante quand on tombe"
-	}
-
-	"InitialMenuPanel1"
-	{
-		"en"	"This server is using Perkmod"
-		"de"	"Dieser Server nutzt Perkmod"
-		"it"	"Questo server usa Perkmod"
-		"da"	"Denne server bruger Perkmod"
-		"ru"	"Этот сервер использует Перк-Мод"
-		"fr"	"Ce serveur utilise Perkmod"
-	}
-
-	"InitialMenuPanel2"
-	{
-		"en"	"Select option 1 to customize your perks"
-		"de"	"Druecke 1, um deine Staerken(Perks) neu zu waehlen"
-		"it"	"Seleziona 1 per scegliere i bonus"
-		"da"	"Vжlg option 1 for at tilpasse dine perks"
-		"ru"	"Выбирите пункт 1, чтобы настроить свои перки"
-		"fr"	"Choisissez l'option 1 pour personnaliser des perks"
-	}
-
-	"InitialMenuPanel3"
-	{
-		"en"	"Customize Perks"
-		"de"	"Staerken(Perks) waehlen"
-		"it"	"Scegli i bonus"
-		"da"	"Tilpas Perks"
-		"ru"	"Настроить перки"
-		"fr"	"Personnaliser des Perks"
-	}
-
-	"InitialMenuPanel4"
-	{
-		"en"	"You can opt to randomize your perks"
-		"de"	"Du kannst auch den Zufall walten lassen"
-		"it"	"Puoi assegnare casualmente i bonus"
-		"da"	"Du kan vжlge at gшre Perks tilfжldige"
-		"ru"	"Вы можете выбрать случайную настройку перков"
-		"fr"	"Vous pouvez randomiser des perks"
-	}
-
-	"InitialMenuPanel5"
-	{
-		"en"	"but you can't change them afterwards"
-		"de"	"aber danach stehen sie fuer die Runde fest"
-		"it"	"ma non potrai cambiarli fino alla fine del round"
-		"da"	"men du kan ikke жndre dem bagefter"
-		"ru"	"но вы не сможете поменять их потом."
-		"fr"	"mais on ne peut pas changer pour la reste de la ronde"
-	}
-
-	"InitialMenuPanel6"
-	{
-		"en"	"Randomize Perks"
-		"de"	"Zufaellig waehlen"
-		"it"	"Assegna casualmente i bonus"
-		"da"	"Tilfжldiggшr Perks"
-		"ru"	"Случайно выбрать перки"
-		"fr"	"Randomiser des Perks"
-	}
-
-	"InitialMenuPanel7"
-	{
-		"en"	"Otherwise, you can use whatever"
-		"de"	"Ansonsten kannst du auch die Staerken"
-		"it"	"Oppure, puoi usare i bonus"
-		"da"	"Ellers kan du bruge hvad end"
-		"ru"	"Иначе, вы можете использовать любые"
-		"fr"	"Ou vous pouvez utiliser"
-	}
-
-	"InitialMenuPanel8"
-	{
-		"en"	"perks you've selected already"
-		"de"	"der letzten Runde uebernehmen"
-		"it"	"che hai gia selezionato l'ultimo round"
-		"da"	"Perks du allerede har valgt"
-		"ru"	"перки, которые вы уже выбрали,"
-		"fr"	"les perks qui vous avez choissise"
-	}
-
-	"InitialMenuPanel9"
-	{
-		"en"	"by using option 3"
-		"de"	"indem du 3 drueckst"
-		"it"	"premendo 3"
-		"da"	"ved at vжlge option 3"
-		"ru"	"используя пункт 3."
-		"fr"	"avec l'option 3"
-	}
-
-	"InitialMenuPanel10"
-	{
-		"en"	"PLAY NOW!"
-		"de"	"EINFACH LOS!"
-		"it"	"GIOCA ADESSO!"
-		"da"	"SPIL NU!"
-		"ru"	"ИГРАТЬ СЕЙЧАС!"
-		"fr"	"JOUER MAINTENANT!"
-	}
-
-	"ThanksForChoosingMessage"
-	{
-		"en"	"Thanks and have fun!"
-		"de"	"Danke und viel Spass!"
-		"it"	"Grazie e buon divertimento!"
-		"da"	"Tak og hav det sjovt!"
-		"ru"	"Спасибо и хорошей игры!"
-		"fr"	"Merci!"
-	}
-
-	"ChooseSubMenuPanel"
-	{
-		"en"	"Select a submenu to choose a perk"
-		"de"	"Waehle eine Klasse fuer moegliche Staerken"
-		"it"	"Seleziona un sottomenu per scegliere i bonus"
-		"da"	"Vжlg en undermenu for at vжlge en perk"
-		"ru"	"Выберите подменю чтобы выбрать перк"
-		"fr"	"Selectionnez un sous-menu pour choisir un perk"
-	}
-
-	"DoneNagPanel1"
-	{
-		"en"	"In order for your perks to work"
-		"de"	"Damit die Staerken wirken"
-		"it"	"Affinchи i tuoi bonus funzionino"
-		"da"	"For at dine perks skal virke"
-		"ru"	"Чтобы ваши перки работали,"
-		"fr"	"Pour utiliser des perks"
-	}
-
-	"DoneNagPanel2"
-	{
-		"en"	"you MUST hit 'done'"
-		"de"	"musst du 'FERTIG' druecken"
-		"it"	"DEVI selezionare fine"
-		"da"	"SKAL du trykke 'FЖRDIG'"
-		"ru"	"вы ДОЛЖНЫ нажать 'ГОТОВО'"
-		"fr"	"on doit selectionner 'FINI'"
-	}
-
-	"DoneNagPanel3"
-	{
-		"en"	"DONE"
-		"de"	"FERTIG"
-		"it"	"FINE"
-		"da"	"FЖRDIG"
-		"ru"	"ГОТОВО"
-		"fr"	"FINI"
-	}
-
-	"ConfirmNagPanel1"
-	{
-		"en"	"Are you sure?"
-		"de"	"Bist du sicher?"
-		"it"	"Sei sicuro?"
-		"da"	"Er du sikker?"
-		"ru"	"Вы уверены?"
-		"fr"	"Etes-vous sur?"
-	}
-
-	"ConfirmNagPanel2"
-	{
-		"en"	"Once confirmed you cannot change"
-		"de"	"Einmal bestaetigt kannst du bis"
-		"it"	"Dopo che avrai confermato, non potrai cambiare"
-		"da"	"Nеr det er valgt kan det ikke жndres"
-		"ru"	"Подтвердив выбор, вы не сможете изменить"
-		"fr"	"Quand on confirme on ne pas change"
-	}
-
-	"ConfirmNagPanel3"
-	{
-		"en"	"your perks until the next round!"
-		"de"	"Rundenende keine Дnderungen vornehmen!"
-		"it"	"i tuoi bonus fino al prossimo round"
-		"da"	"dine perks intil nжste runde!"
-		"ru"	"свои перки до начала след. раунда!"
-		"fr"	"des perks avant de ronde prochaine!"
-	}
-
-	"ConfirmNagPanel4"
-	{
-		"en"	"CONFIRM"
-		"de"	"BESTДTIGEN"
-		"it"	"CONFERMA"
-		"da"	"BEKRЖFT"
-		"ru"	"ПОДТВЕРДИТЬ"
-		"fr"	"CONFIRMER"
-	}
-
-	"ConfirmNagPanel5"
-	{
-		"en"	"If you cancel remember that your"
-		"de"	"Wenn du abbrichst bedenke dass du"
-		"it"	"Se esci adesso, ricorda che i tuoi"
-		"da"	"Hvis du annulerer, husk at dine"
-		"ru"	"Выбрав отмену, помните что ваши"
-		"fr"	"Si on annule on doit se revenir que"
-	}
-
-	"ConfirmNagPanel6"
-	{
-		"en"	"perks will not take effect until"
-		"de"	"keine Staerken erhaelst bis du"
-		"it"	"bonus non saranno attivi finchи"
-		"da"	"perks ikke vil tage effekt indtil"
-		"ru"	"перки не активируются до тех пор,"
-		"fr"	"on ne peut pas utiliser des perks avant"
-	}
-
-	"ConfirmNagPanel7"
-	{
-		"en"	"you hit confirm!"
-		"de"	"bestaetigen gedrueckt hast"
-		"it"	"non avrai selezionato conferma!"
-		"da"	"du trykker bekrжft"
-		"ru"	"пока вы не нажмете 'ПОДТВЕРДИТЬ'!"
-		"fr"	"de confirmer!"
-	}
-
-	"ConfirmNagPanel8"
-	{
-		"en"	"CANCEL"
-		"de"	"ABBRECHEN"
-		"it"	"CANCELLA"
-		"da"	"ANNULER"
-		"ru"	"ОТМЕНА"
-		"fr"	"ANNULER"
-	}
-
-	"ConfirmedMessage"
-	{
-		"en"	"You've confirmed your Perk choices; they will now take effect. You may not change your Perks until the next round. \n\n To check your perks, type !perks"
-		"de"	"Du hast deine Staerken bestaetigt, sie treten nun in Effekt. Du kannst keine Дnderungen bis zur naechsten Runde vornehmen. \n\n Um deine Staerken zu sehen, tippe !perks"
-		"it"	"Hai confermato la scelta dei tuoi bonus; ora sono attivati. Non puoi cambiare i tuoi bonus fino al prossimo round. \n\n Per controllare i tuoi bonus, scrivi !perks"
-		"da"	"Du har bekrжftet dine Perk valg; de vil nu trжde i kraft. Du kan ikke жndre dine Perks fшr nжste runde. \n\n for at tjekke dine perk, skriv !perks"
-		"ru"	"Вы подтвердили свой выбор перков; теперь они вступят в силу. Вы не сможете их изменить до начала след. раунда. \n\n Проверить свои перки - !perks"
-		"fr"	"Vous avez confirme des Perks; des Perks fonctionnera maintenant. Vous ne pouvez pas changer des Perks avant de ronde prochaine. \n\n Pour voir des perks, tapez !perks"
-	}
-
-	"YourPerksPanel"
-	{
-		"en"	"tPoncho's Perkmod: Your perks for this round"
-		"de"	"tPoncho's Perkmod: Deine Staerken diese Runde"
-		"it"	"tPoncho's Perkmod: I tuoi bonus per questo round"
-		"da"	"tPoncho's Perkmod: Dine perks for denne runde"
-		"ru"	"tPoncho's Perkmod: Ваши перки на этот раунд"
-		"fr"	"tPoncho's Perkmod: Votre perks pour cette ronde"
-	}
-
-	"DisplayDisabledText"
-	{
-		"en"	"disabled"
-		"de"	"inaktiv"
-		"it"	"disattivato"
-		"da"	"slеet fra"
-		"ru"	"отключено"
-		"fr"	"desactivee"
-	}
-
-	"PyroDescriptionText1"
-	{
-		"en"	"Picking up a grenade gives you two"
-		"de"	"Nimm nicht eine sondern 2 Granaten"
-		"it"	"Raccogliere una granata te ne dа 2"
-		"da"	"At samle en granat op vil give dig to"
-		"ru"	"Подбирание гранаты дает вам сразу две"
-		"fr"	"Prenant une grenade vous donne deux"
-	}
-
-	"PyroDescriptionText2"
-	{
-		"en"	"and you start the round with 2 grenades"
-		"de"	"und beginne die Runde mit zwei Granaten"
-		"it"	"e cominci il round con 2 granate"
-		"da"	"og du starter runden med to granater"
-		"ru"	"и вы начинаете раунд с двумя гранатами."
-		"fr"	"et vous commencez la ronde avec deux grenades"
-	}
-
-	"SpiritDescriptionText"
-	{
-		"en"	"When a teammate goes down you will self-revive"
-		"de"	"Wenn ein Kamerad umfaellt, stehst du wieder auf"
-		"it"	"Quando un compagno cade a terra, ti rialzerai da solo"
-		"da"	"Nеr en holdkammerat gеr ned vil du selv-genoplive"
-		"ru"	"Если напарник падает вы можете встать, если вы сами лежите."
-		"fr"	"Quand un ami tombe vous vous relancerez"
-	}
-
-	"SpritDescriptionText2"
-	{
-		"en"	"bonus health buffer, cooldown"
-		"de"	"Bonus Health, Aufladezeit"
-		"it"	"salute extra temporanea, si ricarica nel tempo"
-		"da"	"ekstra helbred, cooldown"
-		"ru"	"бонусное временное хп, кулдаун."
-		"fr"	"plus de sante temporaire, temps de recharge"
-	}
-
-	"ChemReliantDescriptionText"
-	{
-		"en"	"You gain bonus health buffer when taking pills"
-		"de"	"Du erhaelst mehr Leben wenn du Pillen schluckst"
-		"it"	"Ottieni piщ salute temporanea usando le pillole"
-		"da" 	"Du opnеr ekstra helbred ved at tage piller"
-		"ru"	"Вы получаете бонусное хп, используя таблетки,"
-		"fr"	"Vous recevez plus sante temporaire avec des pilules"
-	}
-
-	"ChemReliantDescriptionText2"
-	{
-		"en"	"and you start the round with extra pills"
-		"de"	"und beginnst die Runde mit Pillen"
-		"it"	"e cominci il round con le pillole"
-		"da"	"og du starter runden med ekstra piller"
-		"ru"	"и вы начинаете раунд с таблетками."
-		"fr"	"et vous commencez la ronde avec des pilules"
-	}
-
-	"HardToKillDescriptionText"
-	{
-		"en"	"When you are incapped you have"
-		"de"	"Wenn du umkippst, hast du"
-		"it"	"Quando sei a terra, hai"
-		"da"	"Nеr du er incapped har du"
-		"ru"	"Когда вы лежите, у вас"
-		"fr"	"Quand vous tombez vous avez"
-	}
-
-	"HardToKillDescriptionText2"
-	{
-		"en"	"more health"
-		"de"	"mehr Lebenspunkte"
-		"it"	"piщ salute"
-		"da"	"mere helbred"
-		"ru"	"больше здоровья"
-		"fr"	"plus sante"
-	}
-
-
-	"MartialArtistDescriptionPanel"
-	{
-		"en"	"triple swing, half the melee fatigue"
-		"de"	"triple swing, halbierte Nahkampfermuedung"
-		"it"	"Doppio swing, metа dell'affaticamento da mischia."
-		"da"	"triple swing, halveret melee trжthed"
-		"ru"	"Быстрые рукопашные удары, меньше усталость в ближнем бою"
-		"fr"	"triple swing, demi de melee fatigue"
-	}
-
-	"MartialArtistDescriptionPanel1"
-	{
-		"en"	"You can strike three times in rapid succession with a melee weapon"
-		"it"	"Puoi colpire due volte in rapida successione con un'arma da corpo a corpo"
-		"fr"	"Vous pouvez balancer trois temps tres vites avec un arme de melee"
-		"ru"	"Быстрые рукопашных атаки"
-		"de"	""
-		"da"	""
-	}
-
-	"MartialArtistDescriptionPanel2"
-	{
-		"en"	"and you have a reduced maximum shove penalty"
-		"it"	"ed hai una penalità ridotta di affaticamento."
-		"fr"	"et vous avez moins de peine de pousser"
-		"ru"	"и меньшая усталость от них"
-		"de"	""
-		"da"	""
-	}
-
-	"HelpingHandDescriptionPanel2"
-	{
-		"en"	"revive others faster, give bonus health buffer"
-		"it"	"Revitalizzare gli altri ti darà un bonus in salute."
-		"ru"	"Вы поднимаете других быстрее и даёте им бонусный буфер здоровья"
-		"fr"	"donner l'aide plus vite et plus de sante temporaire"
-		"de"	""
-		"da"	""
-	}
-
-	"LittleLeaguerDescriptionPanel"
-	{
-		"en"	"spawn with a katana"
-		"ru"	"Появись с катаной"
-		"de"	""
-		"da"	""
-		"fr"	""
-		"it"	"recois un batte de katana"
-	}
-	"MartialArtistDescriptionPanel_noreduc"
-	{
-		"en"	"triple swing"
-		"it"	"triple swing"
-		"ru"	"triple swing"
-		"de"	"triple swing"
-		"da"	"triple swing"
-		"fr"	"triple swing"
-	}
-	"SpiritBWWarning"
-	{
-		"en"	"Warning: You are now in BLACK AND WHITE health!!!"
-		"it"	"Warning: You are now in BLACK AND WHITE health!!!"
-		"ru"	"Warning: You are now in BLACK AND WHITE health!!!"
-		"de"	"Warning: You are now in BLACK AND WHITE health!!!"
-		"da"	"Warning: You are now in BLACK AND WHITE health!!!"
-		"fr"	"Warning: You are now in BLACK AND WHITE health!!!"
 	}
 }

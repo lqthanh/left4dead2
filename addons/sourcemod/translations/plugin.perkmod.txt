@@ -1,324 +1,222 @@
 ﻿"Phrases"
 {
-	"WelcomeMessageHint"
-	{
-		"en"	"Welcome to Perkmod!"
-	}
-
-	"WelcomeMessageChat"
+	"MessageChatWelcome"
 	{
 		"en"	"Welcome to Perkmod! If the menu doesn't come up, type !perks to display it."
 	}
 
-	"BonusDamageText"
+	"MessageChatConfirmed"
 	{
-		"en"	"bonus damage"
+		"en"	"You've confirmed your Perk choices; they will now take effect. You may not change your Perks until the next round. \n\n To check your perks, type !perks"
 	}
 
-	"SpritSuccessMessage"
+	"MessageHintThanksForChoosing"
 	{
-		"en"	"You've self-revived!"
+		"en"	"Thanks and have fun!"
 	}
 
-	"SpiritTimerFinishedMessage"
+	"MenuInitialDescriptionCustom"
 	{
-		"en"	"You feel strong enough to self-revive again!"
+		"en"	"Select first option to customize your perks"
 	}
 
-	"UnbreakableHint"
+	"MenuInitialPanelCustom"
 	{
-		"en"	"bonus health"
+		"en"	"Customize Perks"
 	}
 
-	"GrenadierCarryHint"
+	"MenuInitialDescriptionRandom"
 	{
-		"en"	"You are carrying"
+		"en"	"You can randomize your perks, but you can't change them until the round ends."
 	}
 
-	"GrenadierCantTake2Grenades_A"
+	"MenuInitialPanelRandom"
 	{
-		"en"	"You only picked up one"
+		"en"	"Randomize Perks"
 	}
 
-	"GrenadierCantTake2Grenades_B"
+	"MenuInitialDescriptionAuto"
 	{
-		"en"	"Throw your second grenade before picking up another."
+		"en"	"Otherwise, you can use whatever perks you've selected already, or by default"
 	}
 
-	"GrenadierCounter_A"
+	"MenuInitialPanelAuto"
 	{
-		"en"	"You have"
+		"en"	"Auto Chose default / previous Perks"
 	}
 
-	"GrenadierCounter_B"
+	"MenuTopDescription"
 	{
-		"en"	"left"
+		"en"	"Select a submenu to choose a perk"
 	}
 
-	"HelpingHandDonorHint"
+	"MenuTopDoneDescription"
 	{
-		"en"	"gave bonus temporary health to"
+		"en"	"In order for your perks to work, you MUST hit 'DONE'"
 	}
 
-	"HelpingHandReceiverHint"
+	"MenuTopDonePanel"
 	{
-		"en"	"gave you bonus temporary health!"
+		"en"	"DONE"
 	}
 
-	"MapPerksPanel"
+	"MenuConfirmConfirmDescription"
 	{
-		"en"	"Your perks for this round"
+		"en"	"Are you sure? Once confirmed you cannot change your perks until the next round!"
 	}
 
-	"PyroDescriptionPanel"
+	"MenuConfirmConfirmPanel"
 	{
-		"en"	"carry 2 grenades instead of 1"
+		"en"	"CONFIRM"
 	}
 
-	"SpiritDescriptionPanel"
+	"MenuConfirmCancelDescription"
 	{
-		"en"	"self-revive on teammate incap, cooldown"
+		"en"	"If you cancel remember that your perks will not take effect until you hit confirm!"
+	}
+
+	"MenuConfirmCancelPanel"
+	{
+		"en"	"CANCEL"
+	}
+
+	"StoppingPowerDescriptionPanel"
+	{
+		"en"	"Bonus damage %i%%"
 	}
 
 	"SleighOfHandDescriptionPanel"
 	{
-		"en"	"reload faster"
+		"en"	"Reload faster %i%%"
+	}
+
+	"PyroDescriptionPanel"
+	{
+		"en"	"Carry 2 grenades, gain random type after %i (sec) not carry any"
+	}
+
+	"PyroDescriptionPanel1"
+	{
+		"en"	"Picking up a grenade gives you two, start the round with 2 grenades"
+	}
+
+	"PyroDescriptionPanel2"
+	{
+		"en"	"Gain random type after %i (sec) not carry any"
+	}
+
+	"PyroMessageHintGrenadierCarry"
+	{
+		"en"	"You are carrying %i %s(s)"
+	}
+
+	"PyroMessageHintGrenadierCantTake2Grenades"
+	{
+		"en"	"You only picked up one %s. Throw your second grenade before picking up another."
+	}
+
+	"PyroMessageHintGrenadierCounter"
+	{
+		"en"	"You have %i %s(s) left."
+	}
+
+	"MartialArtistDescriptionPanel"
+	{
+		"en"	"Strike more swing with melee"
+	}
+
+	"MartialArtistDescriptionPanel1"
+	{
+		"en"	"Strike more swing with melee, reduced shove fatigue"
+	}
+
+	"ChristmasGiftDescriptionPanel"
+	{
+		"en"	"Special Infected drop gifts when killed."
+	}
+
+	"UnbreakableDescriptionPanel"
+	{
+		"en"	"Bonus health %i"
+	}
+
+	"SpiritDescriptionPanel"
+	{
+		"en"	"Self-revive, gain %i temp health, cooldown %i (sec)"
+	}
+
+	"SpiritDescriptionPanel1"
+	{
+		"en"	"Self-revive on teammate incap"
+	}
+
+	"SpiritDescriptionPanel2"
+	{
+		"en"	"Gain bonus %i temp health, cooldown %i (sec)"
+	}
+
+	"SpiritMessageHintSuccess"
+	{
+		"en"	"You've self-revived!"
+	}
+
+	"SpiritMessageHintTimerFinished"
+	{
+		"en"	"You feel strong enough to self-revive again!"
+	}
+
+	"SpiritMessageHintBWWarning"
+	{
+		"en"	"Warning: You are now in BLACK AND WHITE health!!!"
+	}
+
+	"HelpingHandDescriptionPanel"
+	{
+		"en"	"Give bonus %i temp health"
+	}
+
+	"HelpingHandDescriptionPanel2"
+	{
+		"en"	"Revive others faster, give bonus %i temp health"
+	}
+
+	"HelpingHandMessageHintDonor"
+	{
+		"en"	"Gave bonus temporary health to %s"
+	}
+
+	"HelpingHandMessageHintReceiver"
+	{
+		"en"	"%s gave you bonus temporary health!"
+	}
+
+	"PackCatDescriptionPanel"
+	{
+		"en"	"Special Infected refill %i%% ammo when killed."
+	}
+
+	"ChemReliantDescriptionPanel"
+	{
+		"en"	"Start the round with pills, %i bonus temp health using pills"
+	}
+
+	"PackRatDescriptionPanel"
+	{
+		"en"	"Refill when pick ammo upgrade, carry more %i%% ammo"
+	}
+
+	"HardToKillDescriptionPanel"
+	{
+		"en"	"More health when incapped"
+	}
+
+	"ExtremeConditioningDescriptionPanel"
+	{
+		"en"	"Speed Bonus %i%%"
 	}
 
 	"NotSet"
 	{
 		"en"	"Not set"
-	}
-
-	"ChemReliantDescriptionPanel"
-	{
-		"en"	"bonus temp health using pills"
-	}
-
-	"HelpingHandDescriptionPanel"
-	{
-		"en"	"give bonus health buffer"
-	}
-
-	"PackRatDescriptionPanel"
-	{
-		"en"	"carry more ammo"
-	}
-
-	"HardToKillDescriptionPanel"
-	{
-		"en"	"more health when incapped"
-	}
-
-	"InitialMenuPanel1"
-	{
-		"en"	"This server is using Perkmod"
-	}
-
-	"InitialMenuPanel2"
-	{
-		"en"	"Select option 1 to customize your perks"
-	}
-
-	"InitialMenuPanel3"
-	{
-		"en"	"Customize Perks"
-	}
-
-	"InitialMenuPanel4"
-	{
-		"en"	"You can opt to randomize your perks"
-	}
-
-	"InitialMenuPanel5"
-	{
-		"en"	"but you can't change them afterwards"
-	}
-
-	"InitialMenuPanel6"
-	{
-		"en"	"Randomize Perks"
-	}
-
-	"InitialMenuPanel7"
-	{
-		"en"	"Otherwise, you can use whatever"
-	}
-
-	"InitialMenuPanel8"
-	{
-		"en"	"perks you've selected already"
-	}
-
-	"InitialMenuPanel9"
-	{
-		"en"	"by using option 3"
-	}
-
-	"InitialMenuPanel10"
-	{
-		"en"	"PLAY NOW!"
-	}
-
-	"ThanksForChoosingMessage"
-	{
-		"en"	"Thanks and have fun!"
-	}
-
-	"ChooseSubMenuPanel"
-	{
-		"en"	"Select a submenu to choose a perk"
-	}
-
-	"DoneNagPanel1"
-	{
-		"en"	"In order for your perks to work"
-	}
-
-	"DoneNagPanel2"
-	{
-		"en"	"you MUST hit 'done'"
-	}
-
-	"DoneNagPanel3"
-	{
-		"en"	"DONE"
-	}
-
-	"ConfirmNagPanel1"
-	{
-		"en"	"Are you sure?"
-	}
-
-	"ConfirmNagPanel2"
-	{
-		"en"	"Once confirmed you cannot change"
-	}
-
-	"ConfirmNagPanel3"
-	{
-		"en"	"your perks until the next round!"
-	}
-
-	"ConfirmNagPanel4"
-	{
-		"en"	"CONFIRM"
-	}
-
-	"ConfirmNagPanel5"
-	{
-		"en"	"If you cancel remember that your"
-	}
-
-	"ConfirmNagPanel6"
-	{
-		"en"	"perks will not take effect until"
-	}
-
-	"ConfirmNagPanel7"
-	{
-		"en"	"you hit confirm!"
-	}
-
-	"ConfirmNagPanel8"
-	{
-		"en"	"CANCEL"
-	}
-
-	"ConfirmedMessage"
-	{
-		"en"	"You've confirmed your Perk choices; they will now take effect. You may not change your Perks until the next round. \n\n To check your perks, type !perks"
-	}
-
-	"YourPerksPanel"
-	{
-		"en"	"tPoncho's Perkmod: Your perks for this round"
-	}
-
-	"DisplayDisabledText"
-	{
-		"en"	"disabled"
-	}
-
-	"PyroDescriptionText1"
-	{
-		"en"	"Picking up a grenade gives you two"
-	}
-
-	"PyroDescriptionText2"
-	{
-		"en"	"and you start the round with 2 grenades"
-	}
-
-	"SpiritDescriptionText"
-	{
-		"en"	"When a teammate goes down you will self-revive"
-	}
-
-	"SpritDescriptionText2"
-	{
-		"en"	"bonus health buffer, cooldown"
-	}
-
-	"ChemReliantDescriptionText"
-	{
-		"en"	"You gain bonus health buffer when taking pills"
-	}
-
-	"ChemReliantDescriptionText2"
-	{
-		"en"	"and you start the round with extra pills"
-	}
-
-	"HardToKillDescriptionText"
-	{
-		"en"	"When you are incapped you have"
-	}
-
-	"HardToKillDescriptionText2"
-	{
-		"en"	"more health buffer"
-	}
-
-	"MartialArtistDescriptionPanelCoop"
-	{
-		"en"	"run faster"
-	}
-
-
-
-	"MartialArtistDescriptionPanel"
-	{
-		"en"	"double swing, half the shove fatigue"
-	}
-
-	"MartialArtistDescriptionPanel1"
-	{
-		"en"	"You can strike twice in rapid succession with a melee weapon"
-	}
-
-	"MartialArtistDescriptionPanel2"
-	{
-		"en"	"and you have a reduced maximum shove penalty"
-	}
-
-	"HelpingHandDescriptionPanel2"
-	{
-		"en"	"revive others faster, give bonus health buffer"
-	}
-
-	"LittleLeaguerDescriptionPanel"
-	{
-		"en"	"spawn with a katana"
-	}
-
-
-	"MartialArtistDescriptionPanel_noreduc"
-	{
-		"en"	"triple swing"
-	}
-	"SpiritBWWarning"
-	{
-		"en"	"Warning: You are now in BLACK AND WHITE health!!!"
 	}
 }

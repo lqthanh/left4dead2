@@ -1,4 +1,4 @@
-// =======================================================================
+﻿// =======================================================================
 // #region Information
 
 /*========================================================================
@@ -261,18 +261,18 @@
 		Another quick hotfix, this time the ability cooldown perks shouldn't be broken with every patch.
 
 - version 1.0.rw:
+		Remove GameMode Tracking.
 		Remove SI perks.
-		Remove Survivor Primary Double Tap perk.
+		Remove Survivor Primary Double Tap.
+		Remove Survivor Tertiary Little Leaguer.
 		QOL:
 			Fix, Update Menu.
 			Added Native Function.
 
 - version 1.1.rw:
-		Perks:
-			Change Pyrotechnician: 
-				For a set amount of time, you will be given a ( pipe bomb -> random type )
-			Change Unbreakable: heal full HP
-			Change Little Leaguer: gives a ( baseball bat -> katana )
+		Add Survivor Primary Christmas Gift.
+		Add Survivor Secondary Pack Cat.
+		Rewrite Survivor Tertiary Pack Rat.
 
 ==========================================================================
 ========================================================================*/
@@ -405,7 +405,6 @@ new g_iShotRelStateO	= -1;
 new g_iNextAttO			= -1;
 new g_iTimeIdleO		= -1;
 new g_iLaggedMovementO	= -1;
-new g_iClassO			= -1;
 new g_iVMStartTimeO		= -1;
 new g_iViewModelO		= -1;
 new g_iIncapO			= -1;
@@ -422,35 +421,6 @@ new g_iIncapO			= -1;
 //windows and linux offsets are checked
 //during roundstart by comparing an offset
 //to known offset numbers
-
-// netprop: m_nextActivationTimer
-//new g_iNextActO = 1084;
-new g_iNextActO;
-// netprop: m_attackTimer??
-//new g_iAttackTimerO = 5452;
-new g_iAttackTimerO;
-//new g_iNextActO = 1068;
-//new g_iAttackTimerO = 5436;
-
-//these are for L4D2, Linux
-//new g_iNextActO_linux = 1088;
-//new g_iAttackTimerO_linux = 5444;
-
-
-
-//=============================
-// Declare Variables that track
-// base L4D ConVars
-//=============================
-
-//tracks game mode
-//0 = campaign, realism
-//1 = survival
-//2 = versus, scavenge, team variants
-new g_iL4D_GameMode;
-
-//tracks if the game is L4D 1 or 2
-new g_iL4D_12 = 0;
 
 //prevents certain functions from spamming too often
 new bool:g_bIsRoundStart	 = false;
@@ -473,158 +443,111 @@ new bool:g_bIsLoading		 = false;
 //stopping power, damage multiplier
 //one-size-fits-all
 new Handle:g_hStopping_enable;
-new Handle:g_hStopping_enable_sur;
-new Handle:g_hStopping_enable_vs;
 new Handle:g_hStopping_dmgmult;
 //associated var
 new g_iStopping_enable;
-new g_iStopping_enable_sur;
-new g_iStopping_enable_vs;
 new Float:g_flStopping_dmgmult;
 
 //sleight of hand, reload rate
 //one-size-fits-all
 new Handle:g_hSoH_enable;
-new Handle:g_hSoH_enable_sur;
-new Handle:g_hSoH_enable_vs;
 new Handle:g_hSoH_rate;
 //associated var
 new g_iSoH_enable;
-new g_iSoH_enable_sur;
-new g_iSoH_enable_vs;
 new Float:g_flSoH_rate;
 
 //pyrotechnician
 new Handle:g_hPyro_enable;
-new Handle:g_hPyro_enable_sur;
-new Handle:g_hPyro_enable_vs;
 new Handle:g_hPyro_maxticks;
 //associated vars
 new g_iPyro_enable;
-new g_iPyro_enable_sur;
-new g_iPyro_enable_vs;
 new g_iPyro_maxticks;
 
 //martial artist, movement rate
 //campaign, non-campaign
 new Handle:g_hMA_enable;
-new Handle:g_hMA_enable_sur;
-new Handle:g_hMA_enable_vs;
 new Handle:g_hMA_maxpenalty;
 //associated var
 new g_iMA_enable;
-new g_iMA_enable_sur;
-new g_iMA_enable_vs;
 new g_iMA_maxpenalty;
+
+//christmas gift
+new Handle:g_hChristmas_enable;
+//associated var
+new g_iChristmas_enable;
 
 //SUR2 PERKS
 //unbreakable, bonus hp
 //one-size-fits-all
 new Handle:g_hUnbreak_enable;
-new Handle:g_hUnbreak_enable_sur;
-new Handle:g_hUnbreak_enable_vs;
 new Handle:g_hUnbreak_hp;
 new Handle:g_hUnbreak_hr;
 //associated var
 new g_iUnbreak_enable;
-new g_iUnbreak_enable_sur;
-new g_iUnbreak_enable_vs;
 new g_iUnbreak_hp;
 new Float:g_fUnbreak_hr;
 
 //spirit, bonus buffer and cooldown
 //campaign, survival, versus
 new Handle:g_hSpirit_enable;
-new Handle:g_hSpirit_enable_sur;
-new Handle:g_hSpirit_enable_vs;
 new Handle:g_hSpirit_buff;
 new Handle:g_hSpirit_cd;
-new Handle:g_hSpirit_cd_sur;
-new Handle:g_hSpirit_cd_vs;
 //associated vars
 new g_iSpirit_enable;
-new g_iSpirit_enable_sur;
-new g_iSpirit_enable_vs;
 new g_iSpirit_buff;
 new g_iSpirit_cd;
-new g_iSpirit_cd_sur;
-new g_iSpirit_cd_vs;
 
 //helping hand, bonus buffer and time multiplier
 //versus, non-versus
 new Handle:g_hHelpHand_enable;
-new Handle:g_hHelpHand_enable_sur;
-new Handle:g_hHelpHand_enable_vs;
 new Handle:g_hHelpHand_convar;
 new Handle:g_hHelpHand_timemult;
 new Handle:g_hHelpHand_buff;
-new Handle:g_hHelpHand_buff_vs;
 //associated vars
 new g_iHelpHand_enable;
-new g_iHelpHand_enable_sur;
-new g_iHelpHand_enable_vs;
 new g_iHelpHand_convar;
 new Float:g_flHelpHand_timemult;
 new g_iHelpHand_buff;
-new g_iHelpHand_buff_vs;
+
+//pack cat, ammo refill
+new Handle:g_hPackCat_enable;
+new Handle:g_hPackCat_ammorefill;
+//associated vars
+new g_iPackCat_enable;
+new Float:g_flPackCat_ammorefill;
 
 //SUR3 PERKS
 //pack rat, bonus ammo multiplier
 //one-size-fits-all
 new Handle:g_hPack_enable;
-new Handle:g_hPack_enable_sur;
-new Handle:g_hPack_enable_vs;
 new Handle:g_hPack_ammomult;
 //associated var
 new g_iPack_enable;
-new g_iPack_enable_sur;
-new g_iPack_enable_vs;
 new Float:g_flPack_ammomult;
 
 //chem reliant, bonus buffer
 //one-size-fits-all
 new Handle:g_hChem_enable;
-new Handle:g_hChem_enable_sur;
-new Handle:g_hChem_enable_vs;
 new Handle:g_hChem_buff;
 //associated var
 new g_iChem_enable;
-new g_iChem_enable_sur;
-new g_iChem_enable_vs;
 new g_iChem_buff;
 
 //hard to kill, hp multiplier
 //one-size-fits-all
 new Handle:g_hHard_enable;
-new Handle:g_hHard_enable_sur;
-new Handle:g_hHard_enable_vs;
 new Handle:g_hHard_hpmult;
 //associated var
 new g_iHard_enable;
-new g_iHard_enable_sur;
-new g_iHard_enable_vs;
 new Float:g_flHard_hpmult;
 
 //extreme conditioning, movement rate
 //campaign, non-campaign
 new Handle:g_hExtreme_enable;
-new Handle:g_hExtreme_enable_sur;
-new Handle:g_hExtreme_enable_vs;
 new Handle:g_hExtreme_rate;
 //associated var
 new g_iExtreme_enable;
-new g_iExtreme_enable_sur;
-new g_iExtreme_enable_vs;
 new Float:g_flExtreme_rate;
-
-//little leaguer
-new Handle:g_hLittle_enable;
-new Handle:g_hLittle_enable_sur;
-new Handle:g_hLittle_enable_vs;
-//associated var
-new g_iLittle_enable;
-new g_iLittle_enable_sur;
-new g_iLittle_enable_vs;
 
 
 //BOT CONTROLLER VARS
@@ -679,9 +602,7 @@ new g_iSur3_enable;
 //option for servers to completely
 //disable perks for infected or survivors
 new Handle:g_hSurAll_enable;
-new Handle:g_hInfAll_enable;
 new g_iSurAll_enable;
-new g_iInfAll_enable;
 
 //this var keeps track of whether
 //to enable Stopping or not, so we don't
@@ -706,9 +627,29 @@ new Handle:g_hMenuAutoShow_enable;
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
+	EngineVersion engine = GetEngineVersion();
+	if( engine != Engine_Left4Dead2 )
+	{
+		strcopy(error, err_max, "Plugin only supports Left 4 Dead 2.");
+		return APLRes_SilentFailure;
+	}
+
 	RegPluginLibrary("perkmod2");
-	
+	CreateNative("perkmod2_IsEnable_Perk_StoppingPower", Native_IsEnable_Perk_StoppingPower);
+	CreateNative("perkmod2_IsEnable_Perk_SleightOfHand", Native_IsEnable_Perk_SleightOfHand);
+	CreateNative("perkmod2_IsEnable_Perk_Pyrotechnician", Native_IsEnable_Perk_Pyrotechnician);
+	CreateNative("perkmod2_IsEnable_Perk_MartialArtist", Native_IsEnable_Perk_MartialArtist);
+	CreateNative("perkmod2_IsEnable_Perk_ChristmasGift", Native_IsEnable_Perk_ChristmasGift);
+	CreateNative("perkmod2_IsEnable_Perk_Unbreakable", Native_IsEnable_Perk_Unbreakable);
+	CreateNative("perkmod2_IsEnable_Perk_Spirit", Native_IsEnable_Perk_Spirit);
+	CreateNative("perkmod2_IsEnable_Perk_HelpingHand", Native_IsEnable_Perk_HelpingHand);
+	CreateNative("perkmod2_IsEnable_Perk_PackCat", Native_IsEnable_Perk_PackCat);
+	CreateNative("perkmod2_IsEnable_Perk_PackRat", Native_IsEnable_Perk_PackRat);
+	CreateNative("perkmod2_IsEnable_Perk_ChemReliant", Native_IsEnable_Perk_ChemReliant);
+	CreateNative("perkmod2_IsEnable_Perk_HardToKill", Native_IsEnable_Perk_HardToKill);
+	CreateNative("perkmod2_IsEnable_Perk_ExtremeConditioning", Native_IsEnable_Perk_ExtremeConditioning);
 	CreateNative("perkmod2_Pyro_OnWeaponFire", Native_Pyro_OnWeaponFire);
+
 	return APLRes_Success;
 }
 
@@ -716,21 +657,6 @@ public OnPluginStart()
 {
 	//Plugin version for online tracking
 	CreateConVar("l4d_perkmod_version", PLUGIN_VERSION, "Version of Perkmod2 for L4D2", FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY);
-
-	decl String:stGame[32];
-	GetGameFolderName(stGame, 32);
-	if (StrEqual(stGame, "left4dead2", false)==true)
-	{
-		g_iL4D_12 = 2;
-		LogMessage("L4D 2 detected.");
-	}
-	else if (StrEqual(stGame, "left4dead", false)==true)
-	{
-		g_iL4D_12 = 1;
-		LogMessage("L4D 1 detected.");
-	}
-	else
-		SetFailState("Perkmod only supports L4D 1 or 2.");
 	
 	//PERK FUNCTIONS
 	//anything here that pertains to the actual
@@ -772,6 +698,10 @@ public OnPluginStart()
 	HookEvent("tongue_pull_stopped", Event_TongueRelease_newsmokerid);
 	HookEvent("choke_end", Event_TongueRelease);
 	HookEvent("choke_stopped", Event_TongueRelease_newsmokerid);
+	HookEvent("jockey_ride", Event_JockeyRide);
+	HookEvent("jockey_ride_end", Event_JockeyRideEnd);
+	HookEvent("charger_pummel_start", Event_ChargerPummelStart);
+	HookEvent("charger_pummel_end", Event_ChargerPummelEnd);
 	// Helping Hand
 	HookEvent("revive_begin", Event_ReviveBeginPre, EventHookMode_Pre);
 	HookEvent("revive_success", Event_ReviveSuccess);
@@ -781,28 +711,15 @@ public OnPluginStart()
 	HookEvent("item_pickup", Event_ItemPickup);
 	HookEvent("spawner_give_item", Event_ItemPickup);
 	HookEvent("ammo_pickup", Event_AmmoPickup);
+	HookEvent("receive_upgrade", Event_ReceiveUpgrade);
 	// Chem Reliant
 	HookEvent("pills_used", Event_PillsUsed, EventHookMode_Pre);
+	HookEvent("adrenaline_used", Event_PillsUsed, EventHookMode_Pre);
 	// Hard To Kill
 	HookEvent("player_incapacitated", Event_Incap);
 
-	//l4d2 only hooks
-	if (g_iL4D_12 == 2)
-	{
-		// Sur2
-		// Spirit
-		HookEvent("jockey_ride", Event_JockeyRide);
-		HookEvent("jockey_ride_end", Event_JockeyRideEnd);
-		HookEvent("charger_pummel_start", Event_ChargerPummelStart);
-		HookEvent("charger_pummel_end", Event_ChargerPummelEnd);
-		// Sur3
-		// Chem Reliant
-		HookEvent("adrenaline_used", Event_PillsUsed, EventHookMode_Pre);
-	}
-
 	RegConsoleCmd("sm_perks", MenuOpen_OnSay);
 	RegConsoleCmd("sm_setperks", SS_SetPerks);
-	HookConVarChange(FindConVar("mp_gamemode"),Convar_GameMode);
 
 	//debug
 	//RegConsoleCmd("say", Debug_OnSay);
@@ -826,16 +743,10 @@ public OnPluginStart()
 	g_iNextAttO			=	FindSendPropInfo("CTerrorPlayer","m_flNextAttack");
 	g_iTimeIdleO		=	FindSendPropInfo("CTerrorGun","m_flTimeWeaponIdle");
 	g_iLaggedMovementO	=	FindSendPropInfo("CTerrorPlayer","m_flLaggedMovementValue");
-	g_iClassO			=	FindSendPropInfo("CTerrorPlayer","m_zombieClass");
 	g_iVMStartTimeO		=	FindSendPropInfo("CTerrorViewModel","m_flLayerStartTime");
 	g_iViewModelO		=	FindSendPropInfo("CTerrorPlayer","m_hViewModel");
 	g_iIncapO			=	FindSendPropInfo("CTerrorPlayer","m_isIncapacitated");
 	//g_iClipO			=	FindSendPropInfo("CTerrorGun","m_iClip1");
-	
-	g_iNextActO			=	FindSendPropInfo("CBaseAbility","m_nextActivationTimer");
-	LogMessage("Retrieved g_iNextActO = %i", g_iNextActO);
-	g_iAttackTimerO		=	FindSendPropInfo("CClaw","m_attackTimer");
-	LogMessage("Retrieved g_iAttackTimerO = %i", g_iAttackTimerO);
 
 	//CREATE AND INITIALIZE CONVARS
 	//everything related to the convars that adjust
@@ -844,7 +755,7 @@ public OnPluginStart()
 
 	//finally, run a command to exec the .cfg file
 	//to load the server's preferences for these cvars
-	AutoExecConfig(true , "perkmod2_rw");
+	AutoExecConfig(true , "perkmod2");
 
 	//and load translations
 	LoadTranslations("plugin.perkmod");
@@ -878,22 +789,6 @@ CreateConvars()
 	HookConVarChange(g_hStopping_enable, Convar_Stopping_en);
 	g_iStopping_enable = 1;
 
-	g_hStopping_enable_sur = CreateConVar(
-		"l4d_perkmod_stoppingpower_enable_survival" ,
-		"1" ,
-		"Stopping Power perk: Allows the perk to be chosen by players in survival, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hStopping_enable_sur, Convar_Stopping_en_sur);
-	g_iStopping_enable_sur = 1;
-
-	g_hStopping_enable_vs = CreateConVar(
-		"l4d_perkmod_stoppingpower_enable_versus" ,
-		"1" ,
-		"Stopping Power perk: Allows the perk to be chosen by players in versus, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hStopping_enable_vs, Convar_Stopping_en_vs);
-	g_iStopping_enable_vs = 1;
-
 	//sleight of hand
 	g_hSoH_rate = CreateConVar(
 		"l4d_perkmod_sleightofhand_rate" ,
@@ -910,22 +805,6 @@ CreateConvars()
 		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
 	HookConVarChange(g_hSoH_enable, Convar_SoH_en);
 	g_iSoH_enable = 1;
-
-	g_hSoH_enable_sur = CreateConVar(
-		"l4d_perkmod_sleightofhand_enable_survival" ,
-		"1" ,
-		"Sleight of Hand perk: Allows the perk to be chosen by players in survival, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hSoH_enable_sur, Convar_SoH_en_sur);
-	g_iSoH_enable_sur = 1;
-
-	g_hSoH_enable_vs = CreateConVar(
-		"l4d_perkmod_sleightofhand_enable_versus" ,
-		"1" ,
-		"Sleight of Hand perk: Allows the perk to be chosen by players in versus, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hSoH_enable_vs, Convar_SoH_en_vs);
-	g_iSoH_enable_vs = 1;
 
 	//pyrotechnician
 	g_hPyro_maxticks = CreateConVar(
@@ -944,22 +823,6 @@ CreateConvars()
 	HookConVarChange(g_hPyro_enable, Convar_Pyro_en);
 	g_iPyro_enable = 1;
 
-	g_hPyro_enable_sur = CreateConVar(
-		"l4d_perkmod_pyrotechnician_enable_survival" ,
-		"1" ,
-		"Pyrotechnician perk: Allows the perk to be chosen by players in survival, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hPyro_enable_sur, Convar_Pyro_en_sur);
-	g_iPyro_enable_sur = 1;
-
-	g_hPyro_enable_vs = CreateConVar(
-		"l4d_perkmod_pyrotechnician_enable_versus" ,
-		"1" ,
-		"Pyrotechnician perk: Allows the perk to be chosen by players in versus, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hPyro_enable_vs, Convar_Pyro_en_vs);
-	g_iPyro_enable_vs = 1;
-
 	//martial artist
 	g_hMA_maxpenalty = CreateConVar(
 		"l4d_perkmod_martialartist_maximumpenalty" ,
@@ -977,21 +840,14 @@ CreateConvars()
 	HookConVarChange(g_hMA_enable, Convar_MA_en);
 	g_iMA_enable = 1;
 
-	g_hMA_enable_sur = CreateConVar(
-		"l4d_perkmod_martialartist_enable_survival" ,
+	//christmas gift
+	g_hChristmas_enable = CreateConVar(
+		"l4d_perkmod_christmasgift_enable" ,
 		"1" ,
-		"Martial Artist perk: Allows the perk to be chosen by players in survival, 0=disabled, 1=enabled" ,
+		"Christmas Gift perk: Allows the perk to be chosen by players in campaign, 0=disabled, 1=enabled" ,
 		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hMA_enable_sur, Convar_MA_en_sur);
-	g_iMA_enable_sur = 1;
-
-	g_hMA_enable_vs = CreateConVar(
-		"l4d_perkmod_martialartist_enable_versus" ,
-		"1" ,
-		"Martial Artist perk: Allows the perk to be chosen by players in versus, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hMA_enable_vs, Convar_MA_en_vs);
-	g_iMA_enable_vs = 1;
+	HookConVarChange(g_hChristmas_enable, Convar_Christmas_en);
+	g_iChristmas_enable = 1;
 
 	//unbreakable
 	g_hUnbreak_hp = CreateConVar(
@@ -1018,22 +874,6 @@ CreateConvars()
 	HookConVarChange(g_hUnbreak_enable, Convar_Unbreak_en);
 	g_iUnbreak_enable = 1;
 
-	g_hUnbreak_enable_sur = CreateConVar(
-		"l4d_perkmod_unbreakable_enable_survival" ,
-		"1" ,
-		"Unbreakable perk: Allows the perk to be chosen by players in survival, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hUnbreak_enable_sur, Convar_Unbreak_en_sur);
-	g_iUnbreak_enable_sur = 1;
-
-	g_hUnbreak_enable_vs = CreateConVar(
-		"l4d_perkmod_unbreakable_enable_versus" ,
-		"1" ,
-		"Unbreakable perk: Allows the perk to be chosen by players in versus, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hUnbreak_enable_vs, Convar_Unbreak_en_vs);
-	g_iUnbreak_enable_vs = 1;
-
 	//spirit
 	g_hSpirit_buff = CreateConVar(
 		"l4d_perkmod_spirit_bonusbuffer" ,
@@ -1051,22 +891,6 @@ CreateConvars()
 	HookConVarChange(g_hSpirit_cd, Convar_SpiritCD);
 	g_iSpirit_cd=				60;
 
-	g_hSpirit_cd_sur = CreateConVar(
-		"l4d_perkmod_spirit_cooldown_sur" ,
-		"60" ,
-		"Spirit perk: Cooldown for self-reviving in seconds, survival (clamped between 1 < 1800)" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hSpirit_cd_sur, Convar_SpiritCDsur);
-	g_iSpirit_cd_sur=			60;
-
-	g_hSpirit_cd_vs = CreateConVar(
-		"l4d_perkmod_spirit_cooldown_vs" ,
-		"60" ,
-		"Spirit perk: Cooldown for self-reviving in seconds, versus (clamped between 1 < 1800)" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hSpirit_cd_vs, Convar_SpiritCDvs);
-	g_iSpirit_cd_vs=			60;
-
 	g_hSpirit_enable = CreateConVar(
 		"l4d_perkmod_spirit_enable" ,
 		"1" ,
@@ -1074,22 +898,6 @@ CreateConvars()
 		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
 	HookConVarChange(g_hSpirit_enable, Convar_Spirit_en);
 	g_iSpirit_enable = 1;
-
-	g_hSpirit_enable_sur = CreateConVar(
-		"l4d_perkmod_spirit_enable_survival" ,
-		"1" ,
-		"Spirit perk: Allows the perk to be chosen by players in survival, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hSpirit_enable_sur, Convar_Spirit_en_sur);
-	g_iSpirit_enable_sur = 1;
-
-	g_hSpirit_enable_vs = CreateConVar(
-		"l4d_perkmod_spirit_enable_versus" ,
-		"1" ,
-		"Spirit perk: Allows the perk to be chosen by players in versus, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hSpirit_enable_vs, Convar_Spirit_en_vs);
-	g_iSpirit_enable_vs = 1;
 
 	//helping hand
 	g_hHelpHand_timemult = CreateConVar(
@@ -1108,14 +916,6 @@ CreateConvars()
 	HookConVarChange(g_hHelpHand_buff, Convar_HelpBuff);
 	g_iHelpHand_buff = 15;
 
-	g_hHelpHand_buff_vs = CreateConVar(
-		"l4d_perkmod_helpinghand_bonusbuffer_vs" ,
-		"10" ,
-		"Helping Hand perk: Bonus health buffer given to allies after reviving them, versus (clamped between 0 < 170)" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hHelpHand_buff_vs, Convar_HelpBuffvs);
-	g_iHelpHand_buff_vs = 10;
-
 	g_hHelpHand_enable = CreateConVar(
 		"l4d_perkmod_helpinghand_enable" ,
 		"1" ,
@@ -1124,22 +924,6 @@ CreateConvars()
 	HookConVarChange(g_hHelpHand_enable, Convar_Help_en);
 	g_iHelpHand_enable = 1;
 
-	g_hHelpHand_enable_sur = CreateConVar(
-		"l4d_perkmod_helpinghand_enable_survival" ,
-		"1" ,
-		"Helping Hand perk: Allows the perk to be chosen by players in survival, 0=disabled, 1=enabled (NOTE: This perk normally adjusts the survivor_revive_duration ConVar; disabling this perk will stop the plugin from adjusting this ConVar)" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hHelpHand_enable_sur, Convar_Help_en_sur);
-	g_iHelpHand_enable_sur = 1;
-
-	g_hHelpHand_enable_vs = CreateConVar(
-		"l4d_perkmod_helpinghand_enable_versus" ,
-		"1" ,
-		"Helping Hand perk: Allows the perk to be chosen by players in versus, 0=disabled, 1=enabled (NOTE: This perk normally adjusts the survivor_revive_duration ConVar; disabling this perk will stop the plugin from adjusting this ConVar)" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hHelpHand_enable_vs, Convar_Help_en_vs);
-	g_iHelpHand_enable_vs = 1;
-
 	g_hHelpHand_convar = CreateConVar(
 		"l4d_perkmod_helpinghand_enable_convarchanges" ,
 		"1" ,
@@ -1147,6 +931,23 @@ CreateConvars()
 		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
 	HookConVarChange(g_hHelpHand_convar, Convar_Help_convar);
 	g_iHelpHand_convar = 1;
+
+	//pack cat
+	g_hPackCat_ammorefill = CreateConVar(
+		"l4d_perkmod_packcat_ammorefill" ,
+		"0.04" ,
+		"Pack Cat perk: Special Infected refill this amount of ammo (clamped between 0.01 < 0.25)" ,
+		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
+	HookConVarChange(g_hPackCat_ammorefill, Convar_PackCat_ammorefill);
+	g_flPackCat_ammorefill = 0.04;
+
+	g_hPackCat_enable = CreateConVar(
+		"l4d_perkmod_packcat_enable" ,
+		"1" ,
+		"Pack Cat perk: Allows the perk to be chosen by players in campaign, 0=disabled, 1=enabled" ,
+		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
+	HookConVarChange(g_hPackCat_enable, Convar_PackCat_en);
+	g_iPackCat_enable = 1;
 
 	//pack rat
 	g_hPack_ammomult = CreateConVar(
@@ -1165,22 +966,6 @@ CreateConvars()
 	HookConVarChange(g_hPack_enable, Convar_Pack_en);
 	g_iPack_enable = 1;
 
-	g_hPack_enable_sur = CreateConVar(
-		"l4d_perkmod_packrat_enable_survival" ,
-		"1" ,
-		"Pack Rat perk: Allows the perk to be chosen by players in survival, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hPack_enable_sur, Convar_Pack_en_sur);
-	g_iPack_enable_sur = 1;
-
-	g_hPack_enable_vs = CreateConVar(
-		"l4d_perkmod_packrat_enable_versus" ,
-		"1" ,
-		"Pack Rat perk: Allows the perk to be chosen by players in versus, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hPack_enable_vs, Convar_Pack_en_vs);
-	g_iPack_enable_vs = 1;
-
 	//chem reliant
 	g_hChem_buff = CreateConVar(
 		"l4d_perkmod_chemreliant_bonusbuffer" ,
@@ -1197,22 +982,6 @@ CreateConvars()
 		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
 	HookConVarChange(g_hChem_enable, Convar_Chem_en);
 	g_iChem_enable = 1;
-
-	g_hChem_enable_sur = CreateConVar(
-		"l4d_perkmod_chemreliant_enable_survival" ,
-		"1" ,
-		"Chem Reliant perk: Allows the perk to be chosen by players in survival, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hChem_enable_sur, Convar_Chem_en_sur);
-	g_iChem_enable_sur = 1;
-
-	g_hChem_enable_vs = CreateConVar(
-		"l4d_perkmod_chemreliant_enable_versus" ,
-		"1" ,
-		"Chem Reliant perk: Allows the perk to be chosen by players in versus, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hChem_enable_vs, Convar_Chem_en_vs);
-	g_iChem_enable_vs = 1;
 
 	//hard to kill
 	g_hHard_hpmult = CreateConVar(
@@ -1231,22 +1000,6 @@ CreateConvars()
 	HookConVarChange(g_hHard_enable, Convar_Hard_en);
 	g_iHard_enable = 1;
 
-	g_hHard_enable_sur = CreateConVar(
-		"l4d_perkmod_hardtokill_enable_survival" ,
-		"1" ,
-		"Hard to Kill perk: Allows the perk to be chosen by players in survival, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hHard_enable_sur, Convar_Hard_en_sur);
-	g_iHard_enable_sur = 1;
-
-	g_hHard_enable_vs = CreateConVar(
-		"l4d_perkmod_hardtokill_enable_versus" ,
-		"1" ,
-		"Hard to Kill perk: Allows the perk to be chosen by players in versus, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hHard_enable_vs, Convar_Hard_en_vs);
-	g_iHard_enable_vs = 1;
-
 	//extreme conditioning
 	g_hExtreme_rate = CreateConVar(
 		"l4d_perkmod_extremeconditioning_rate" ,
@@ -1263,49 +1016,6 @@ CreateConvars()
 		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
 	HookConVarChange(g_hExtreme_enable, Convar_Extreme_en);
 	g_iExtreme_enable = 1;
-
-	g_hExtreme_enable_sur = CreateConVar(
-		"l4d_perkmod_extremeconditioning_enable_survival" ,
-		"1" ,
-		"Extreme Conditioning perk: Allows the perk to be chosen by players in survival, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hExtreme_enable_sur, Convar_Extreme_en_sur);
-	g_iExtreme_enable_sur = 1;
-
-	g_hExtreme_enable_vs = CreateConVar(
-		"l4d_perkmod_extremeconditioning_enable_versus" ,
-		"1" ,
-		"Extreme Conditioning perk: Allows the perk to be chosen by players in versus, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hExtreme_enable_vs, Convar_Extreme_en_vs);
-	g_iExtreme_enable_vs = 1;
-
-	//little leaguer
-	g_hLittle_enable = CreateConVar(
-		"l4d_perkmod_littleleaguer_enable" ,
-		"1" ,
-		"Little Leaguer perk: Allows the perk to be chosen by players in campaign, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hLittle_enable, Convar_Little_en);
-	g_iLittle_enable = 1;
-
-	g_hLittle_enable_sur = CreateConVar(
-		"l4d_perkmod_littleleaguer_enable_survival" ,
-		"1" ,
-		"Little Leaguer perk: Allows the perk to be chosen by players in survival, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hLittle_enable_sur, Convar_Little_en_sur);
-	g_iLittle_enable_sur = 1;
-
-	g_hLittle_enable_vs = CreateConVar(
-		"l4d_perkmod_littleleaguer_enable_versus" ,
-		"1" ,
-		"Little Leaguer perk: Allows the perk to be chosen by players in versus, 0=disabled, 1=enabled" ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hLittle_enable_vs, Convar_Little_en_vs);
-	g_iLittle_enable_vs = 1;
-
-
 
 	//MISC
 	//bot preferences for perks
@@ -1331,7 +1041,7 @@ CreateConvars()
 	g_hSur1_default = CreateConVar(
 		"l4d_perkmod_default_survivor1" ,
 		"1" ,
-		"Default selected perk for Survivor, Primary: 1 = stopping power, 2 = sleight of hand, 3 = pyrotechnician, 4 = martial artist" ,
+		"Default selected perk for Survivor, Primary: 1 = stopping power, 2 = sleight of hand, 3 = pyrotechnician, 4 = martial artist, 5 = christmas gift" ,
 		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
 	HookConVarChange(g_hSur1_default, Convar_Def_Sur1);
 	g_iSur1_default = 1;
@@ -1339,7 +1049,7 @@ CreateConvars()
 	g_hSur2_default = CreateConVar(
 		"l4d_perkmod_default_survivor2" ,
 		"1" ,
-		"Default selected perk for Survivor, Secondary: 1 = unbreakable, 2 = spirit, 3 = helping hand" ,
+		"Default selected perk for Survivor, Secondary: 1 = unbreakable, 2 = spirit, 3 = helping hand, 4 = pack cat" ,
 		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
 	HookConVarChange(g_hSur2_default, Convar_Def_Sur2);
 	g_iSur2_default = 1;
@@ -1380,14 +1090,6 @@ CreateConvars()
 
 	//perk hierarchy
 	//--------------
-	g_hInfAll_enable = CreateConVar(
-		"l4d_perkmod_perktree_infected_enable" ,
-		"1" ,
-		"If set to 1, players will be allowed to select perks as Special Infected (affects ALL perks for SI)." ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hInfAll_enable, Convar_InfAll);
-	g_iInfAll_enable = 1;
-
 	g_hSurAll_enable = CreateConVar(
 		"l4d_perkmod_perktree_survivor_enable" ,
 		"1" ,
@@ -1427,26 +1129,6 @@ CreateConvars()
 // ConVar Changes
 //=============================
 
-
-//changes in base L4D convars
-//---------------------------
-
-//tracks changes in game mode
-public Convar_GameMode (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	if (StrContains(newValue,"versus",false)!= -1
-		|| StrContains(newValue,"scavenge",false)!= -1)
-		g_iL4D_GameMode=2;
-	else if (StrEqual(newValue,"survival",false)==true)
-		g_iL4D_GameMode=1;
-	else
-		g_iL4D_GameMode=0;
-
-	//----DEBUG----
-	//PrintToChatAll("\x03gamemode change detected, new value: \x01%i",g_iL4D_GameMode);
-}
-
-
 //changes in perkmod convars
 //---------------------------
 
@@ -1475,30 +1157,6 @@ public Convar_Stopping_en (Handle:convar, const String:oldValue[], const String:
 	Stopping_RunChecks();
 }
 
-public Convar_Stopping_en_sur (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iStopping_enable_sur = iI;
-
-	Stopping_RunChecks();
-}
-
-public Convar_Stopping_en_vs (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iStopping_enable_vs = iI;
-
-	Stopping_RunChecks();
-}
-
 //sleight of hand
 public Convar_SoH (Handle:convar, const String:oldValue[], const String:newValue[])
 {
@@ -1520,26 +1178,6 @@ public Convar_SoH_en (Handle:convar, const String:oldValue[], const String:newVa
 	g_iSoH_enable = iI;
 }
 
-public Convar_SoH_en_sur (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iSoH_enable_sur = iI;
-}
-
-public Convar_SoH_en_vs (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iSoH_enable_vs = iI;
-}
-
 //pyrotechnician
 public Convar_Pyro (Handle:convar, const String:oldValue[], const String:newValue[])
 {
@@ -1559,26 +1197,6 @@ public Convar_Pyro_en (Handle:convar, const String:oldValue[], const String:newV
 	else
 		iI=1;
 	g_iPyro_enable = iI;
-}
-
-public Convar_Pyro_en_sur (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iPyro_enable_sur = iI;
-}
-
-public Convar_Pyro_en_vs (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iPyro_enable_vs = iI;
 }
 
 //martial artist
@@ -1605,24 +1223,14 @@ public Convar_MA_en (Handle:convar, const String:oldValue[], const String:newVal
 	g_iMA_enable = iI;
 }
 
-public Convar_MA_en_sur (Handle:convar, const String:oldValue[], const String:newValue[])
+public Convar_Christmas_en (Handle:convar, const String:oldValue[], const String:newValue[])
 {
 	new iI=StringToInt(newValue);
 	if (iI==0)
 		iI=0;
 	else
 		iI=1;
-	g_iMA_enable_sur = iI;
-}
-
-public Convar_MA_en_vs (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iMA_enable_vs = iI;
+	g_iChristmas_enable = iI;
 }
 
 //unbreakable
@@ -1656,26 +1264,6 @@ public Convar_Unbreak_en (Handle:convar, const String:oldValue[], const String:n
 	g_iUnbreak_enable = iI;
 }
 
-public Convar_Unbreak_en_sur (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iUnbreak_enable_sur = iI;
-}
-
-public Convar_Unbreak_en_vs (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iUnbreak_enable_vs = iI;
-}
-
 //spirit
 public Convar_SpiritBuff (Handle:convar, const String:oldValue[], const String:newValue[])
 {
@@ -1697,26 +1285,6 @@ public Convar_SpiritCD (Handle:convar, const String:oldValue[], const String:new
 	g_iSpirit_cd = iI;
 }
 
-public Convar_SpiritCDsur (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI<1)
-		iI=1;
-	else if (iI>1800)
-		iI=1800;
-	g_iSpirit_cd_sur = iI;
-}
-
-public Convar_SpiritCDvs (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI<1)
-		iI=1;
-	else if (iI>1800)
-		iI=1800;
-	g_iSpirit_cd_vs = iI;
-}
-
 public Convar_Spirit_en (Handle:convar, const String:oldValue[], const String:newValue[])
 {
 	new iI=StringToInt(newValue);
@@ -1725,26 +1293,6 @@ public Convar_Spirit_en (Handle:convar, const String:oldValue[], const String:ne
 	else
 		iI=1;
 	g_iSpirit_enable = iI;
-}
-
-public Convar_Spirit_en_sur (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iSpirit_enable_sur = iI;
-}
-
-public Convar_Spirit_en_vs (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iSpirit_enable_vs = iI;
 }
 
 //helping hand
@@ -1768,16 +1316,6 @@ public Convar_HelpBuff (Handle:convar, const String:oldValue[], const String:new
 	g_iHelpHand_buff = iI;
 }
 
-public Convar_HelpBuffvs (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI<1)
-		iI=1;
-	else if (iI>170)
-		iI=170;
-	g_iHelpHand_buff_vs = iI;
-}
-
 public Convar_Help_en (Handle:convar, const String:oldValue[], const String:newValue[])
 {
 	new iI=StringToInt(newValue);
@@ -1788,26 +1326,6 @@ public Convar_Help_en (Handle:convar, const String:oldValue[], const String:newV
 	g_iHelpHand_enable = iI;
 }
 
-public Convar_Help_en_sur (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iHelpHand_enable_sur = iI;
-}
-
-public Convar_Help_en_vs (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iHelpHand_enable_vs = iI;
-}
-
 public Convar_Help_convar (Handle:convar, const String:oldValue[], const String:newValue[])
 {
 	new iI=StringToInt(newValue);
@@ -1816,6 +1334,26 @@ public Convar_Help_convar (Handle:convar, const String:oldValue[], const String:
 	else
 		iI=1;
 	g_iHelpHand_convar = iI;
+}
+
+public Convar_PackCat_ammorefill (Handle:convar, const String:oldValue[], const String:newValue[])
+{
+	new Float:flF=StringToFloat(newValue);
+	if (flF<0.01)
+		flF=0.01;
+	else if (flF>0.25)
+		flF=0.25;
+	g_flPackCat_ammorefill = flF;
+}
+
+public Convar_PackCat_en (Handle:convar, const String:oldValue[], const String:newValue[])
+{
+	new iI=StringToInt(newValue);
+	if (iI==0)
+		iI=0;
+	else
+		iI=1;
+	g_iPackCat_enable = iI;
 }
 
 //pack rat
@@ -1839,26 +1377,6 @@ public Convar_Pack_en (Handle:convar, const String:oldValue[], const String:newV
 	g_iPack_enable = iI;
 }
 
-public Convar_Pack_en_sur (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iPack_enable_sur = iI;
-}
-
-public Convar_Pack_en_vs (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iPack_enable_vs = iI;
-}
-
 //chem reliant
 public Convar_Chem (Handle:convar, const String:oldValue[], const String:newValue[])
 {
@@ -1880,26 +1398,6 @@ public Convar_Chem_en (Handle:convar, const String:oldValue[], const String:newV
 	g_iChem_enable = iI;
 }
 
-public Convar_Chem_en_sur (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iChem_enable_sur = iI;
-}
-
-public Convar_Chem_en_vs (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iChem_enable_vs = iI;
-}
-
 //hard to kill
 public Convar_Hard (Handle:convar, const String:oldValue[], const String:newValue[])
 {
@@ -1919,26 +1417,6 @@ public Convar_Hard_en (Handle:convar, const String:oldValue[], const String:newV
 	else
 		iI=1;
 	g_iHard_enable = iI;
-}
-
-public Convar_Hard_en_sur (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iHard_enable_sur = iI;
-}
-
-public Convar_Hard_en_vs (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iHard_enable_vs = iI;
 }
 
 //extreme conditioning
@@ -1963,57 +1441,6 @@ public Convar_Extreme_en (Handle:convar, const String:oldValue[], const String:n
 	g_iExtreme_enable = iI;
 }
 
-public Convar_Extreme_en_sur (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iExtreme_enable_sur = iI;
-}
-
-public Convar_Extreme_en_vs (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iExtreme_enable_vs = iI;
-}
-
-//little leaguer
-public Convar_Little_en (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iLittle_enable = iI;
-}
-
-public Convar_Little_en_sur (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iLittle_enable_sur = iI;
-}
-
-public Convar_Little_en_vs (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-	g_iLittle_enable_vs = iI;
-}
-
 //default perks
 public Convar_Def_Sur1 (Handle:convar, const String:oldValue[], const String:newValue[])
 {
@@ -2031,8 +1458,8 @@ public Convar_Def_Sur2 (Handle:convar, const String:oldValue[], const String:new
 	new iI=StringToInt(newValue);
 	if (iI<=0)
 		iI=1;
-	else if (iI>3)
-		iI=3;
+	else if (iI>4)
+		iI=4;
 
 	g_iSur2_default=iI;
 }
@@ -2107,18 +1534,6 @@ public Convar_Sur3_en (Handle:convar, const String:oldValue[], const String:newV
 		iI=1;
 
 	g_iSur3_enable=iI;
-	RunChecksAll();
-}
-
-public Convar_InfAll (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-
-	g_iInfAll_enable=iI;
 	RunChecksAll();
 }
 
@@ -2206,42 +1621,9 @@ public Event_PlayerSpawn (Handle:event, const String:name[], bool:dontBroadcast)
 		return;
 	}
 
-	if (iTeam == 3
-		&& g_iInfAll_enable == 0)
+	if (iTeam == 3)
 	{
 		g_iConfirm[iCid] = 0;
-		return;
-	}
-
-	new iClass = GetEntData(iCid, g_iClassO);
-
-	//check for smoker first
-	if (iClass == 1)
-	{
-		//----DEBUG----
-		//PrintToChatAll("\x03smoker model detected");
-
-		//run a max health check before
-		//doing anything else
-		new iMaxHP = GetConVarInt(FindConVar("z_gas_health"));
-		if ( GetEntProp(iCid,Prop_Data,"m_iHealth") > iMaxHP)
-			SetEntProp(iCid,Prop_Data,"m_iHealth", iMaxHP );
-
-		//----DEBUG----
-		//PrintToChatAll("\x03spawned smoker \x01%i\x03 health \x01%i\x03, maxhp \x01%i", iCid, GetEntProp(iCid,Prop_Data,"m_iHealth"), iMaxHP );
-
-		return;
-	}
-
-	//lastly, check for boomer
-	else if (iClass == 2)
-	{
-		//run a max health check before
-		//doing anything else
-		new iMaxHP = GetConVarInt(FindConVar("z_exploding_health"));
-		if ( GetEntProp(iCid,Prop_Data,"m_iHealth") > iMaxHP)
-			SetEntProp(iCid,Prop_Data,"m_iHealth", iMaxHP );
-
 		return;
 	}
 }
@@ -2249,18 +1631,17 @@ public Event_PlayerSpawn (Handle:event, const String:name[], bool:dontBroadcast)
 //call menu on first spawn, otherwise set default values for bots
 public Event_PlayerFirstSpawn (Handle:event, const String:name[], bool:dontBroadcast)
 {
-	if (g_bIsLoading == true
-		|| g_bIsRoundStart == true)
-		return;
+	if (g_bIsLoading == true || g_bIsRoundStart == true) return;
 
 	new iCid=GetClientOfUserId(GetEventInt(event,"userid"));
 	if (iCid==0) return;
-	if (g_iConfirm[iCid]==0
-		&& IsFakeClient(iCid)==false)
+
+	if (GetClientTeam(iCid) == 3) return;
+
+	if (g_iConfirm[iCid]==0 && IsFakeClient(iCid)==false)
 	{
 		CreateTimer(3.0,Timer_ShowTopMenu,iCid);
-		PrintHintText(iCid,"%t", "WelcomeMessageHint");
-		PrintToChat(iCid,"\x03[SM] %t", "WelcomeMessageChat");
+		PrintToChat(iCid,"\x03[SM] %t", "MessageChatWelcome");
 	}
 }
 
@@ -2398,41 +1779,6 @@ public Event_RoundStart (Handle:event, const String:name[], bool:dontBroadcast)
 	else
 		g_bIsRoundStart = true;
 
-	//----DEBUG----
-	//PrintToChatAll("\x03round start detected");
-
-	//for l4d1, need to change some offsets
-	/*if (g_iL4D_12 == 1)
-	{
-		//L4D1, Windows
-		g_iNextActO = 888;
-		g_iAttackTimerO = 1488;
-	}
-	else if (g_iL4D_12 == 2)
-	{
-		//check for Linux or Windows by checking
-		//a base offset, NextPrimaryAttack for weapons
-		//--------------------------------------------
-		//numbers have changed since last valve update
-		//usually +4 - next activation timer changed for
-		//both windows and linux, attack timer changed
-		//only for linux, next primary attack changed
-		//for both windows and linux
-
-		if (g_iNextPAttO == 5088)
-		{
-			//L4D2, Windows
-			g_iNextActO = 1068;
-			g_iAttackTimerO = 5436;
-		}
-		else if (g_iNextPAttO == 5104)
-		{
-			//L4D2, Linux
-			g_iNextActO = 1092;
-			g_iAttackTimerO = 5448;
-		}
-	}*/
-
 	//AutoExecConfig(false , "perkmod");
 
 	for (new iI=1 ; iI<=MaxClients ; iI++)
@@ -2489,18 +1835,6 @@ public Event_RoundStart (Handle:event, const String:name[], bool:dontBroadcast)
 	//permissions on game frame
 	RunChecksAll();
 
-	//detect gamemode and difficulty
-	new String:stArg[MAXPLAYERS+1];
-	//next, check gamemode
-	GetConVarString(FindConVar("mp_gamemode"),stArg,64);
-	if (StrContains(stArg,"versus",false)!= -1
-		|| StrContains(stArg,"scavenge",false)!= -1)
-		g_iL4D_GameMode=2;
-	else if (StrEqual(stArg,"survival",false)==true)
-		g_iL4D_GameMode=1;
-	else
-		g_iL4D_GameMode=0;
-
 	//start global timer that
 	//forces bots to have some perks
 	//among other things
@@ -2514,9 +1848,6 @@ public Event_RoundStart (Handle:event, const String:name[], bool:dontBroadcast)
 	//finally, tell plugin that loading is over and that roundstart can run again
 	g_bIsRoundStart = false;
 	g_bIsLoading = false;
-
-	//----DEBUG----
-	//PrintToChatAll("\x03-difficulty \x01%i\x03, gamemode \x01%i",g_iL4D_Difficulty,g_iL4D_GameMode);
 
 	//----DEBUG----
 	//PrintToChatAll("\x03-end round start routine");
@@ -2912,8 +2243,6 @@ public Event_ItemPickup (Handle:event, const String:name[], bool:dontBroadcast)
 {
 	new iCid=GetClientOfUserId(GetEventInt(event,"userid"));
 	if (iCid==0) return;
-	if (g_iConfirm[iCid]==0)
-		return;
 
 	new String:stWpn[24];
 	GetEventString(event,"item",stWpn,24);
@@ -2922,25 +2251,28 @@ public Event_ItemPickup (Handle:event, const String:name[], bool:dontBroadcast)
 	Pyro_Pickup(iCid,stWpn);
 
 	//check for pack rat perk
-	PR_Pickup(iCid, stWpn);
+	if (IsPrimaryWeapon(stWpn)) PR_GiveFullAmmo(iCid);
 }
 
 //on ammo pickup, check if pack rat is in effect
 public Event_AmmoPickup (Handle:event, const String:name[], bool:dontBroadcast)
 {
 	new iCid=GetClientOfUserId(GetEventInt(event,"userid"));
-	if (iCid==0)
-		return;
+	if (iCid==0) return;
 
-	if (g_iSur3[iCid]==1
-		&& g_iConfirm[iCid]==1
-		&& g_iSur3_enable==1
-		&& (g_iPack_enable==1			&&	g_iL4D_GameMode==0
-			|| g_iPack_enable_sur==1	&&	g_iL4D_GameMode==1
-			|| g_iPack_enable_vs==1		&&	g_iL4D_GameMode==2))
-	{
-		PR_GiveFullAmmo(iCid);
-	}
+	PR_GiveFullAmmo(iCid);
+}
+
+public Event_ReceiveUpgrade (Handle:event, const String:name[], bool:dontBroadcast)
+{
+	new iCid=GetClientOfUserId(GetEventInt(event,"userid"));
+	if (iCid==0) return;
+
+	char upgrade[128];
+	GetEventString(event,"upgrade",upgrade,128);
+
+	// == (INCENDIARY_AMMO or EXPLOSIVE_AMMO)
+	if (!StrEqual(upgrade,"LASER_SIGHT",false)) PR_GiveFullAmmo(iCid, true);
 }
 
 //on drug use
@@ -3076,11 +2408,6 @@ public Action:TimerPerks (Handle:timer, any:data)
 	return Plugin_Continue;
 }
 
-
-
-
-
-
 //on drying from slime, remove hud changes
 RunChecksAll ()
 {
@@ -3160,11 +2487,7 @@ public Action:Timer_ShowTopMenu (Handle:timer, any:iCid)
 	new iT = GetClientTeam(iCid);
 
 	//don't show menu if perks are disabled
-	if ((g_iSurAll_enable == 0
-		&& iT == 2)
-		||
-		(g_iInfAll_enable == 0
-		&& iT == 3))
+	if ((g_iSurAll_enable == 0 && iT == 2) || (iT == 3))
 	{
 		g_iConfirm[iCid] = 0;
 		return Plugin_Stop;
@@ -3207,39 +2530,38 @@ AssignRandomPerks (iCid)
 	iPerkCount=0;
 
 	//1 stopping power
-	if (g_iStopping_enable==1			&&	g_iL4D_GameMode==0
-		|| g_iStopping_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iStopping_enable_vs==1		&&	g_iL4D_GameMode==2)
+	if (g_iStopping_enable==1)
 	{
 		iPerkCount++;
 		iPerkType[iPerkCount]=1;
 	}
 
 	//2 sleight of hand
-	if (g_iSoH_enable==1		&&	g_iL4D_GameMode==0
-		|| g_iSoH_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iSoH_enable_vs==1	&&	g_iL4D_GameMode==2)
+	if (g_iSoH_enable==1)
 	{
 		iPerkCount++;
 		iPerkType[iPerkCount]=2;
 	}
 
 	//3 pyrotechnician
-	if (g_iPyro_enable==1			&&	g_iL4D_GameMode==0
-		|| g_iPyro_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iPyro_enable_vs==1		&&	g_iL4D_GameMode==2)
+	if (g_iPyro_enable==1)
 	{
 		iPerkCount++;
 		iPerkType[iPerkCount]=3;
 	}
 
 	//4 martial artist
-	if (g_iMA_enable==1			&&	g_iL4D_GameMode==0
-		|| g_iMA_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iMA_enable_vs==1	&&	g_iL4D_GameMode==2)
+	if (g_iMA_enable==1)
 	{
 		iPerkCount++;
 		iPerkType[iPerkCount]=4;
+	}
+
+	//5 christmas gift
+	if (g_iChristmas_enable==1)
+	{
+		iPerkCount++;
+		iPerkType[iPerkCount]=5;
 	}
 
 	//randomize a perk
@@ -3252,30 +2574,31 @@ AssignRandomPerks (iCid)
 	iPerkCount=0;
 
 	//1 unbreakable
-	if (g_iUnbreak_enable==1		&&	g_iL4D_GameMode==0
-		|| g_iUnbreak_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iUnbreak_enable_vs==1	&&	g_iL4D_GameMode==2)
+	if (g_iUnbreak_enable==1)
 	{
 		iPerkCount++;
 		iPerkType[iPerkCount]=1;
 	}
 
 	//2 spirit
-	if (g_iSpirit_enable==1			&&	g_iL4D_GameMode==0
-		|| g_iSpirit_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iSpirit_enable_vs==1	&&	g_iL4D_GameMode==2)
+	if (g_iSpirit_enable==1)
 	{
 		iPerkCount++;
 		iPerkType[iPerkCount]=2;
 	}
 
 	//3 helping hand
-	if (g_iHelpHand_enable==1			&&	g_iL4D_GameMode==0
-		|| g_iHelpHand_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iHelpHand_enable_vs==1		&&	g_iL4D_GameMode==2)
+	if (g_iHelpHand_enable==1)
 	{
 		iPerkCount++;
 		iPerkType[iPerkCount]=3;
+	}
+
+	//4 pack cat
+	if (g_iPackCat_enable==1)
+	{
+		iPerkCount++;
+		iPerkType[iPerkCount]=4;
 	}
 
 	//randomize a perk
@@ -3289,36 +2612,28 @@ AssignRandomPerks (iCid)
 	iPerkCount=0;
 
 	//1 pack rat
-	if (g_iPack_enable==1			&&	g_iL4D_GameMode==0
-		|| g_iPack_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iPack_enable_vs==1		&&	g_iL4D_GameMode==2)
+	if (g_iPack_enable==1)
 	{
 		iPerkCount++;
 		iPerkType[iPerkCount]=1;
 	}
 
 	//2 chem reliant
-	if (g_iChem_enable==1			&&	g_iL4D_GameMode==0
-		|| g_iChem_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iChem_enable_vs==1		&&	g_iL4D_GameMode==2)
+	if (g_iChem_enable==1)
 	{
 		iPerkCount++;
 		iPerkType[iPerkCount]=2;
 	}
 
 	//3 hard to kill
-	if (g_iHard_enable==1			&&	g_iL4D_GameMode==0
-		|| g_iHard_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iHard_enable_vs==1		&&	g_iL4D_GameMode==2)
+	if (g_iHard_enable==1)
 	{
 		iPerkCount++;
 		iPerkType[iPerkCount]=3;
 	}
 
 	//4 extreme conditioning
-	if (g_iExtreme_enable==1		&&	g_iL4D_GameMode==0
-		|| g_iExtreme_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iExtreme_enable_vs==1	&&	g_iL4D_GameMode==2)
+	if (g_iExtreme_enable==1)
 	{
 		iPerkCount++;
 		iPerkType[iPerkCount]=4;
@@ -3483,10 +2798,7 @@ Bot_Sur3_PickRandom ()
 //run, since damage events can occur pretty often
 Stopping_RunChecks ()
 {
-	if (g_iSur1_enable==1
-		&& (g_iStopping_enable==1		&&	g_iL4D_GameMode==0
-		|| g_iStopping_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iStopping_enable_vs==1		&&	g_iL4D_GameMode==2))
+	if (g_iSur1_enable==1 && g_iStopping_enable==1)
 		g_iStopping_meta_enable=1;
 	else
 		g_iStopping_meta_enable=0;
@@ -3551,10 +2863,7 @@ Stopping_DamageAdd (iAtt, iVic, iTA, iDmgOrig, String:stWpn[])
 SoH_OnReload (iCid)
 {
 	//check if perk is disabled
-	if (g_iSur1_enable==0
-		|| g_iSoH_enable==0		&&	g_iL4D_GameMode==0
-		|| g_iSoH_enable_sur==0	&&	g_iL4D_GameMode==1
-		|| g_iSoH_enable_vs==0	&&	g_iL4D_GameMode==2)
+	if (g_iSur1_enable==0 || g_iSoH_enable==0)
 		return;
 
 	new iSur1 = g_iSur1[iCid];
@@ -3736,15 +3045,7 @@ public Action:SoH_AutoshotgunStart (Handle:timer, Handle:hPack)
 	//but first check the reload state; if it's 2, then it
 	//needs a pump/cock before it can shoot again, and thus
 	//needs more time
-	if (g_iL4D_12 == 2)
 		CreateTimer(0.3,SoH_ShotgunEnd,hPack,TIMER_REPEAT);
-	else if (g_iL4D_12 == 1)
-	{
-		if (GetEntData(iEntid,g_iShotRelStateO)==2)
-			CreateTimer(0.3,SoH_ShotgunEndCock,hPack,TIMER_REPEAT);
-		else
-			CreateTimer(0.3,SoH_ShotgunEnd,hPack,TIMER_REPEAT);
-	}
 
 	//----DEBUG----
 	/*PrintToChatAll("\x03- after mod, start \x01%f\x03, insert \x01%f\x03, end \x01%f",
@@ -3864,15 +3165,7 @@ public Action:SoH_PumpshotgunStart (Handle:timer, Handle:hPack)
 
 	//and then call a timer to periodically check whether the
 	//gun is still reloading or not to reset the animation
-	if (g_iL4D_12 == 2)
 		CreateTimer(0.3,SoH_ShotgunEnd,hPack,TIMER_REPEAT);
-	else if (g_iL4D_12 == 1)
-	{
-		if (GetEntData(iEntid,g_iShotRelStateO)==2)
-			CreateTimer(0.3,SoH_ShotgunEndCock,hPack,TIMER_REPEAT);
-		else
-			CreateTimer(0.3,SoH_ShotgunEnd,hPack,TIMER_REPEAT);
-	}
 
 	//----DEBUG----
 	/*PrintToChatAll("\x03- after mod, start \x01%f\x03, insert \x01%f\x03, end \x01%f",
@@ -4028,11 +3321,7 @@ public Action:SoH_ShotgunEndCock (Handle:timer, any:hPack)
 //on pickup
 Pyro_Pickup(iCid, String:stWpn[])
 {
-	if (g_iSur1[iCid]==3
-		&& g_iSur1_enable==1
-		&& (g_iPyro_enable==1		&&	g_iL4D_GameMode==0
-		|| g_iPyro_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iPyro_enable_vs==1		&&	g_iL4D_GameMode==2))
+	if (IsEnable_Perk_Pyrotechnician(iCid))
 	{
 		//only bother with checks if they aren't throwing
 		if (g_iGrenThrow[iCid]==0)
@@ -4045,7 +3334,7 @@ Pyro_Pickup(iCid, String:stWpn[])
 				decl String:stWpn2[24];
 				if (stWpn[0]=='p')
 					stWpn2="pipe bomb";
-				else if (stWpn[0]=='v' && g_iL4D_12 == 2)
+				else if (stWpn[0]=='v')
 					stWpn2="vomit jar";
 				else
 					stWpn2="molotov";
@@ -4055,7 +3344,7 @@ Pyro_Pickup(iCid, String:stWpn[])
 					|| g_iGren[iCid]==2)
 				{
 					g_iGren[iCid]=2;
-					PrintHintText(iCid,"Pyrotechnician: %t %i %s(s)", "GrenadierCarryHint", g_iGren[iCid], stWpn2);
+					PrintHintText(iCid,"Pyrotechnician: %t", "PyroMessageHintGrenadierCarry", g_iGren[iCid], stWpn2);
 				}
 				//otherwise, only give them one and tell them to
 				//throw the grenade before picking up another one;
@@ -4063,7 +3352,7 @@ Pyro_Pickup(iCid, String:stWpn[])
 				else
 				{
 					g_iGren[iCid]=1;
-					PrintHintText(iCid,"%t %s! %t", "GrenadierCantTake2Grenades_A", stWpn2, "GrenadierCantTake2Grenades_B");
+					PrintHintText(iCid,"%t", "PyroMessageHintGrenadierCantTake2Grenades", stWpn2);
 				}
 			}
 		}
@@ -4077,10 +3366,7 @@ Pyro_Pickup(iCid, String:stWpn[])
 Pyro_OnWeaponFire(iCid, String:stWpn[])
 {
 	//check if perk is enabled
-	if (g_iSur1_enable==0
-		|| g_iPyro_enable==0		&&	g_iL4D_GameMode==0
-		|| g_iPyro_enable_sur==0	&&	g_iL4D_GameMode==1
-		|| g_iPyro_enable_vs==0		&&	g_iL4D_GameMode==2)
+	if (g_iSur1_enable==0 || g_iPyro_enable==0)
 		return;
 
 	if (g_iConfirm[iCid]==0
@@ -4115,7 +3401,7 @@ Pyro_OnWeaponFire(iCid, String:stWpn[])
 				stWpn2="vomit jar";
 			}
 
-			PrintHintText(iCid,"Pyrotechnician: %t %i %s(s) %t", "GrenadierCounter_A", g_iGren[iCid], stWpn2, "GrenadierCounter_B");
+			PrintHintText(iCid,"Pyrotechnician: %t", "PyroMessageHintGrenadierCounter", g_iGren[iCid], stWpn2);
 			CreateTimer(2.0,Grenadier_DelayedGive,iCid);
 		}
 	}
@@ -4166,10 +3452,7 @@ Event_Confirm_Grenadier (iCid)
 		return;
 
 	//check if perk is enabled
-	if (g_iSur1_enable==0
-		|| g_iPyro_enable==0		&&	g_iL4D_GameMode==0
-		|| g_iPyro_enable_sur==0	&&	g_iL4D_GameMode==1
-		|| g_iPyro_enable_vs==0		&&	g_iL4D_GameMode==2)
+	if (g_iSur1_enable==0 || g_iPyro_enable==0)
 		return;
 
 	//reset grenade count on player
@@ -4178,13 +3461,8 @@ Event_Confirm_Grenadier (iCid)
 	new iflags=GetCommandFlags("give");
 	new String:st_give[24];
 
-	decl iMax;
-	if (g_iL4D_12 == 2)
-		iMax = 2;
-	else if (g_iL4D_12 == 1)
-		iMax = 1;
 
-	new iI=GetRandomInt(0,iMax);
+	new iI=GetRandomInt(0,2);
 	if (iI==0)
 		st_give="give pipe_bomb";
 	else if (iI==1)
@@ -4212,11 +3490,7 @@ Pyro_Timer()
 	decl iTicks;
 
 	//check if perk is enabled
-	if (g_iSur1_enable==0
-		|| g_iPyro_maxticks == 0
-		|| g_iPyro_enable==0		&&	g_iL4D_GameMode==0
-		|| g_iPyro_enable_sur==0	&&	g_iL4D_GameMode==1
-		|| g_iPyro_enable_vs==0		&&	g_iL4D_GameMode==2)
+	if (g_iSur1_enable==0 || g_iPyro_maxticks == 0 || g_iPyro_enable==0)
 		return;
 
 	//or if no one has DT, don't bother either
@@ -4249,14 +3523,8 @@ Pyro_Timer()
 			new iflags=GetCommandFlags("give");
 			SetCommandFlags("give", iflags & ~FCVAR_CHEAT);
 
-			decl iMax;
-			if (g_iL4D_12 == 2)
-				iMax = 2;
-			else if (g_iL4D_12 == 1)
-				iMax = 1;
-
 			// give random grenade type
-			new iRandomGrenType=GetRandomInt(0,iMax);
+			new iRandomGrenType=GetRandomInt(0,2);
 			if (iRandomGrenType==0)
 				FakeClientCommand(iCid, "give pipe_bomb");
 			else if (iRandomGrenType==1)
@@ -4342,20 +3610,13 @@ Pyro_Clear (bool:bRoundStart)
 	}
 }
 
-
-
-
-
 //=============================
 // Sur1: Martial Artist
 //=============================
 
 MA_RunChecks ()
 {
-	if (g_iSur1_enable==1
-		|| (g_iMA_enable==1		&&	g_iL4D_GameMode==0)
-		|| (g_iMA_enable_sur==1	&&	g_iL4D_GameMode==1)
-		|| (g_iMA_enable_vs==1	&&	g_iL4D_GameMode==2))
+	if (g_iSur1_enable==1 || g_iMA_enable==1)
 		g_iMA_meta_enable=1;
 	else
 		g_iMA_meta_enable=0;
@@ -4370,10 +3631,7 @@ Event_Confirm_MA (iCid)
 		g_iMARegisterCount=0;
 
 	//check if perk is enabled
-	if (g_iSur1_enable==0
-		|| g_iMA_enable==0		&&	g_iL4D_GameMode==0
-		|| g_iMA_enable_sur==0	&&	g_iL4D_GameMode==1
-		|| g_iMA_enable_vs==0	&&	g_iL4D_GameMode==2)
+	if (g_iSur1_enable==0 || g_iMA_enable==0)
 		return;
 
 	if (IsClientInGame(iCid)==true
@@ -4406,10 +3664,7 @@ MA_Rebuild ()
 		return;
 
 	//check if perk is enabled
-	if (g_iSur1_enable==0
-		|| g_iMA_enable==0		&&	g_iL4D_GameMode==0
-		|| g_iMA_enable_sur==0	&&	g_iL4D_GameMode==1
-		|| g_iMA_enable_vs==0	&&	g_iL4D_GameMode==2)
+	if (g_iSur1_enable==0 || g_iMA_enable==0)
 		return;
 
 	//----DEBUG----
@@ -4495,10 +3750,6 @@ MA_OnGameFrame()
 		{
 			SetEntData(iCid, g_iMeleeFatigueO, g_iMA_maxpenalty);
 		}
-
-
-
-
 
 		//CHECK 1: IS PLAYER USING A KNOWN NON-MELEE WEAPON?
 		//--------------------------------------------------
@@ -4676,28 +3927,20 @@ MA_OnGameFrame()
 	return 0;
 }
 
-
-
-
-
 //=============================
 // Sur2: Unbreakable
 //=============================
 
-//on heal; gives 100% of bonus hp
+//on heal;
 Unbreakable_OnHeal (iCid)
 {
 	//check if perk is enabled
-	if (g_iSur2_enable==0
-		|| g_iUnbreak_enable==0			&&	g_iL4D_GameMode==0
-		|| g_iUnbreak_enable_sur==0		&&	g_iL4D_GameMode==1
-		|| g_iUnbreak_enable_vs==0		&&	g_iL4D_GameMode==2)
+	if (g_iSur2_enable==0 || g_iUnbreak_enable==0)
 		return;
 
 	if (g_iSur2[iCid]==1)
 	{
 		CreateTimer(0.5,Unbreakable_Delayed_Heal,iCid);
-		//SetEntProp(iCid,Prop_Data,"m_iHealth", GetEntProp(iCid,Prop_Data,"m_iHealth")+(g_iUnbreak_hp) );
 
 		//run a check to see if for whatever reason
 		//the player's health is above 200
@@ -4705,8 +3948,6 @@ Unbreakable_OnHeal (iCid)
 		//in which case we set their health to 200
 		if (GetEntProp(iCid,Prop_Data,"m_iHealth") > 200)
 			CreateTimer(0.5,Unbreakable_Delayed_SetHigh,iCid);
-
-		PrintHintText(iCid,"Unbreakable: %t!", "UnbreakableHint");
 	}
 }
 
@@ -4720,10 +3961,7 @@ Event_Confirm_Unbreakable (iCid)
 	new TC=GetClientTeam(iCid);
 
 	//check if perk is enabled
-	if (g_iSur2_enable==0
-		|| g_iUnbreak_enable==0			&&	g_iL4D_GameMode==0
-		|| g_iUnbreak_enable_sur==0		&&	g_iL4D_GameMode==1
-		|| g_iUnbreak_enable_vs==0		&&	g_iL4D_GameMode==2)
+	if (g_iSur2_enable==0 || g_iUnbreak_enable==0)
 	{
 		//if not, check if hp is higher than it should be
 		if (iHP>100
@@ -4747,7 +3985,6 @@ Event_Confirm_Unbreakable (iCid)
 			CreateTimer(0.5,Unbreakable_Delayed_Max,iCid);
 		else if (iHP<=100)
 			CreateTimer(0.5,Unbreakable_Delayed_Normal,iCid);
-		PrintHintText(iCid,"Unbreakable: %t!", "UnbreakableHint");
 
 		//run a check to see if for whatever reason
 		//the player's health is above 200
@@ -4775,14 +4012,10 @@ Unbreakable_OnRescue (iCid)
 	if (g_iSur2[iCid]==1)
 	{
 		//check if perk is enabled
-		if (g_iSur2_enable==0
-			|| g_iUnbreak_enable==0			&&	g_iL4D_GameMode==0
-			|| g_iUnbreak_enable_sur==0		&&	g_iL4D_GameMode==1
-			|| g_iUnbreak_enable_vs==0		&&	g_iL4D_GameMode==2)
+		if (g_iSur2_enable==0 || g_iUnbreak_enable==0)
 			return;
 
 		CreateTimer(0.5,Unbreakable_Delayed_Rescue,iCid);
-		PrintHintText(iCid,"Unbreakable: %t!", "UnbreakableHint");
 
 		//run a check to see if for whatever reason
 		//the player's health is above 200
@@ -4803,13 +4036,9 @@ Unbreakable_OnRevive (iSub, iLedge)
 		&& iLedge == 0)
 	{
 		//check if perk is enabled
-		if (g_iSur1_enable==1
-			&& (g_iUnbreak_enable==1	&&	g_iL4D_GameMode==0
-			|| g_iUnbreak_enable_sur==1	&&	g_iL4D_GameMode==1
-			|| g_iUnbreak_enable_vs==1	&&	g_iL4D_GameMode==2))
+		if (g_iSur1_enable==1 && g_iUnbreak_enable==1)
 		{
 			SetEntDataFloat(iSub,g_iHPBuffO, GetEntDataFloat(iSub,g_iHPBuffO)+(g_iUnbreak_hp/2) ,true);
-			PrintHintText(iSub,"Unbreakable: %t!", "UnbreakableHint");
 		}
 	}
 }
@@ -4910,10 +4139,7 @@ public Action:Unbreakable_Delayed_SetLow (Handle:timer, any:iCid)
 Spirit_Timer ()
 {
 	//check if perk is enabled
-	if (g_iSur2_enable==0		
-		|| g_iSpirit_enable==0		&&	g_iL4D_GameMode==0
-		|| g_iSpirit_enable_sur==0	&&	g_iL4D_GameMode==1
-		|| g_iSpirit_enable_vs==0	&&	g_iL4D_GameMode==2)
+	if (g_iSur2_enable==0 || g_iSpirit_enable==0)
 		return;
 
 	//this var counts how many people are incapped
@@ -5067,7 +4293,7 @@ public Action:Spirit_CooldownTimer (Handle:timer, any:iCid)
 		&& IsPlayerAlive(iCid)==true
 		&& GetClientTeam(iCid)==2
 		&& IsFakeClient(iCid)==false)
-		PrintHintText(iCid,"%t", "SpiritTimerFinishedMessage");
+		PrintHintText(iCid,"%t", "SpiritMessageHintTimerFinished");
 
 	return Plugin_Stop;
 }
@@ -5115,11 +4341,6 @@ public Action:Spirit_ChangeHP (Handle:timer, any:hPack)
 
 		//get the proper cd number for the game mode
 		new iTime;
-		if (g_iL4D_GameMode==2)
-			iTime=g_iSpirit_cd_vs;
-		else if (g_iL4D_GameMode==1)
-			iTime=g_iSpirit_cd_sur;
-		else
 			iTime=g_iSpirit_cd;
 
 		//spirit-specific functions
@@ -5129,9 +4350,9 @@ public Action:Spirit_ChangeHP (Handle:timer, any:hPack)
 
 		//show a message if it's not a bot
 		if (iRevCount_ret+1 >= 2)
-			PrintHintText(iCid, "%t", "SpiritBWWarning");
+			PrintHintText(iCid, "%t", "SpiritMessageHintBWWarning");
 		else
-			PrintHintText(iCid,"Spirit: %t!", "SpritSuccessMessage");
+			PrintHintText(iCid,"Spirit: %t!", "SpiritMessageHintSuccess");
 	}
 
 	//always destroy the timer, since it's possible spirit may not have executed
@@ -5141,7 +4362,7 @@ public Action:Spirit_ChangeHP (Handle:timer, any:hPack)
 
 public Action:Spirit_Warning1(Handle:timer, any:iCid)
 {
-	PrintToChat(iCid,"\x01***** \x03%t \x01*****", "SpiritBWWarning");
+	PrintToChat(iCid,"\x01***** \x03%t \x01*****", "SpiritMessageHintBWWarning");
 
 	KillTimer(timer);
 	return Plugin_Stop;
@@ -5162,10 +4383,7 @@ HelpHand_OnReviveBegin (iCid)
 		return 0;
 
 	//check if perk is enabled
-	if (g_iSur2_enable==0
-		|| g_iHelpHand_enable==0		&&	g_iL4D_GameMode==0
-		|| g_iHelpHand_enable_sur==0	&&	g_iL4D_GameMode==1
-		|| g_iHelpHand_enable_vs==0		&&	g_iL4D_GameMode==2)
+	if (g_iSur2_enable==0 || g_iHelpHand_enable==0)
 		return 0;
 
 	//----DEBUG----
@@ -5199,12 +4417,7 @@ HelpHand_OnReviveSuccess (iCid, iSub, iLedge)
 	//PrintToChatAll("\x05helphand\x03 reviver: \x01%i\x03, subject: \x01%i",iCid,iSub);
 
 	//then check for helping hand
-	if (g_iSur2[iCid]==3
-		&& g_iConfirm[iCid]==1
-		&& g_iSur2_enable==1
-		&& (g_iHelpHand_enable==1		&&	g_iL4D_GameMode==0
-		|| g_iHelpHand_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iHelpHand_enable_vs==1		&&	g_iL4D_GameMode==2))
+	if (g_iSur2[iCid]==3 && g_iConfirm[iCid]==1 && g_iSur2_enable==1 && g_iHelpHand_enable==1)
 	{
 		switch (iLedge)
 		{
@@ -5222,9 +4435,6 @@ HelpHand_OnReviveSuccess (iCid, iSub, iLedge)
 				//PrintToChatAll("\x03-client \x01%i\x03 value at offset: \x01%f",iSub,GetEntDataFloat(iSub,g_iHPBuffO));
 
 				decl iBuff;
-				if (g_iL4D_GameMode==2)
-					iBuff=g_iHelpHand_buff_vs;
-				else
 					iBuff=g_iHelpHand_buff;
 
 				SetEntDataFloat(iSub,g_iHPBuffO, GetEntDataFloat(iSub,g_iHPBuffO)+iBuff ,true);
@@ -5236,9 +4446,9 @@ HelpHand_OnReviveSuccess (iCid, iSub, iLedge)
 
 				new String:st_name[24];
 				GetClientName(iSub,st_name,24);
-				PrintHintText(iCid,"Helping Hand: %t %s!", "HelpingHandDonorHint", st_name);
+				PrintHintText(iCid,"Helping Hand: %t!", "HelpingHandMessageHintDonor", st_name);
 				GetClientName(iCid,st_name,24);
-				PrintHintText(iSub,"Helping Hand: %s %t",st_name, "HelpingHandReceiverHint");
+				PrintHintText(iSub,"Helping Hand: %t!", "HelpingHandMessageHintReceiver", st_name);
 			}
 		}
 	}
@@ -5249,21 +4459,13 @@ HelpHand_OnReviveSuccess (iCid, iSub, iLedge)
 	//only adjust the convar if
 	//convar changes are allowed
 	//for this perk
-	if (g_iHelpHand_convar==1
-		&& g_iSur2_enable==1
-		&& (g_iHelpHand_enable==1		&&	g_iL4D_GameMode==0
-		|| g_iHelpHand_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iHelpHand_enable_vs==1		&&	g_iL4D_GameMode==2))
+	if (g_iHelpHand_convar==1 && g_iSur2_enable==1 && g_iHelpHand_enable==1)
 		SetConVarFloat(FindConVar("survivor_revive_duration"),g_flReviveTime,false,false);
 
 	//and then check if we need to continue allowing crawling
 	//by running checks through everyone...
 	//...but first, check if spirit convar changes are allowed
-	/*if (g_iSur1_enable==1
-		&& g_iSpirit_crawling==1
-		&& (g_iSpirit_enable==1		&&	g_iL4D_GameMode==0
-		|| g_iSpirit_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iSpirit_enable_vs==1	&&	g_iL4D_GameMode==2))
+	/*if (g_iSur1_enable==1 && g_iSpirit_crawling==1 && g_iSpirit_enable==1)
 	{
 		new iCrawlClient=-1;
 		for (new iI2=1 ; iI2<=MaxClients ; iI2++)
@@ -5299,9 +4501,6 @@ public Action:HelpHand_Delayed (Handle:timer, any:iCid)
 		//PrintToChatAll("\x03- health buffer time \x01%i %f",g_iHPBuffTimeO, GetEntDataFloat(iCid,g_iHPBuffTimeO));
 
 		decl iBuff;
-		if (g_iL4D_GameMode==2)
-			iBuff=g_iHelpHand_buff_vs;
-		else
 			iBuff=g_iHelpHand_buff;
 
 		//SetEntProp(iCid,Prop_Data,"m_iHealth", GetEntProp(iCid,Prop_Data,"m_iHealth")+ iBuff/3 );
@@ -5317,164 +4516,29 @@ public Action:HelpHand_Delayed (Handle:timer, any:iCid)
 	return Plugin_Stop;
 }
 
-
-
 //=============================
 // Sur3: Pack Rat
 //=============================
 
-//on gun pickup
-PR_Pickup(iCid, String:stWpn[])
-{
-	if (g_iSur3[iCid]==1
-		&& g_iSur2_enable==1
-		&& (g_iPack_enable==1		&&	g_iL4D_GameMode==0
-		|| g_iPack_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iPack_enable_vs==1		&&	g_iL4D_GameMode==2))
-	{
-		if (StrContains(stWpn, "smg", false)!= -1
-			|| StrContains(stWpn, "rifle", false)!= -1
-			|| StrContains(stWpn, "shotgun", false)!= -1
-			|| StrContains(stWpn, "sniper", false)!= -1	)
-		{
-			PR_GiveFullAmmo(iCid);
-		}
-	}
-}
-
 //gives full ammo
-PR_GiveFullAmmo (iCid)
+PR_GiveFullAmmo(int client, bool extraClip = false)
 {
-	//formula: max + pack rat + max clip size - currently in clip
-	//new iAmmoO=FindDataMapInfo(iCid,"m_iAmmo");
-
-	if (g_iL4D_12 == 2)
+	if (IsEnable_Perk_PackRat(client))
 	{
-		if (g_bPRalreadyApplying[iCid] == false)
+		int weapon = GetPlayerWeaponSlot(client, L4D_WEAPON_SLOT_PRIMARY);
+		if( weapon != -1 )
 		{
-			g_bPRalreadyApplying[iCid] = true;
-			CreateTimer(0.1, PR_GiveFullAmmo_delayed, iCid);
+			int ammoType = GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType");
+			int maxAmmoCarry = AmmoDef.MaxCarry(ammoType);
+
+			if (maxAmmoCarry <= 0) return;
+
+			int refill = RoundToNearest(maxAmmoCarry * (1 + g_flPack_ammomult)) + (extraClip ? GetEntProp(weapon, Prop_Send, "m_iClip1") : 0);
+
+			L4D_SetReserveAmmo(client, weapon, refill);
 		}
-		else
-			return;
-	}
-	else if (g_iL4D_12 == 1)
-	{
-		new iAmmoO=FindDataMapInfo(iCid,"m_iAmmo");
-		decl iAmmoCount;
-
-		//huntingrifle offset +8
-		iAmmoCount = GetEntData(iCid, iAmmoO +8);
-		SetEntData(iCid, iAmmoO	+8, RoundToNearest(iAmmoCount * (1 + g_flPack_ammomult)) );
-		//rifle - offset +12
-		iAmmoCount = GetEntData(iCid, iAmmoO +12);
-		SetEntData(iCid, iAmmoO	+12, RoundToNearest(iAmmoCount * (1 + g_flPack_ammomult)) );
-		//smg - offset +20
-		iAmmoCount = GetEntData(iCid, iAmmoO +20);
-		SetEntData(iCid, iAmmoO	+20, RoundToNearest(iAmmoCount * (1 + g_flPack_ammomult)) );
-		//shotgun - offset +24
-		iAmmoCount = GetEntData(iCid, iAmmoO +24);
-		SetEntData(iCid, iAmmoO	+24, RoundToNearest(iAmmoCount * (1 + g_flPack_ammomult)) );
 	}
 }
-
-//new technique - instead of running off a convar, adjusts ammo
-//relative to what player already has in inventory after a delay
-public Action:PR_GiveFullAmmo_delayed (Handle:timer, any:iCid)
-{
-	KillTimer(timer);
-
-	if (g_bPRalreadyApplying[iCid] == true)
-		g_bPRalreadyApplying[iCid] = false;
-	else
-		return Plugin_Stop;
-	
-	if (IsServerProcessing()==false
-		|| IsValidEntity(iCid) == false
-		|| IsClientInGame(iCid) == false
-		|| IsPlayerAlive(iCid)==false
-		|| GetClientTeam(iCid)!=2)
-		return Plugin_Stop;
-
-	new iAmmoO=FindDataMapInfo(iCid,"m_iAmmo");
-	decl iAmmoO_offset;
-	decl iAmmoCount;
-
-	//checks each weapon type ammo in player's inventory
-	//if non-zero, then assume player has that weapon
-	//and adjust only that weapon's ammo
-
-	//----DEBUG----
-	//new iI = 0;
-	//PrintToChatAll("\x05PR\x03 being feedback loop");
-	//while (iI <= 64)
-	//{
-		//iAmmoCount = GetEntData(iCid, iAmmoO + iI);
-		//PrintToChatAll("\x05PR\x03 iI = \x01%i\x03, value = \x01%i",iI, iAmmoCount);
-		//iI++;
-	//}
-
-	//rifle - offset +12
-	iAmmoO_offset = 12;
-	iAmmoCount = GetEntData(iCid, iAmmoO + iAmmoO_offset);
-	if (iAmmoCount > 0)
-	{
-		SetEntData(iCid, iAmmoO	+ iAmmoO_offset, RoundToNearest(iAmmoCount * (1 + g_flPack_ammomult)) );
-		//return Plugin_Stop;
-	}
-	//smg - offset +20
-	iAmmoO_offset = 20;
-	iAmmoCount = GetEntData(iCid, iAmmoO + iAmmoO_offset);
-	if (iAmmoCount > 0)
-	{
-		SetEntData(iCid, iAmmoO	+ iAmmoO_offset, RoundToNearest(iAmmoCount * (1 + g_flPack_ammomult)) );
-		//return Plugin_Stop;
-	}
-	//auto-shotgun - now offset +32
-	iAmmoO_offset = 32;
-	iAmmoCount = GetEntData(iCid, iAmmoO + iAmmoO_offset);
-	if (iAmmoCount > 0)
-	{
-		SetEntData(iCid, iAmmoO	+ iAmmoO_offset, RoundToNearest(iAmmoCount * (1 + g_flPack_ammomult)) );
-		//return Plugin_Stop;
-	}
-	//pump shotgun - now offset +28
-	iAmmoO_offset = 28;
-	iAmmoCount = GetEntData(iCid, iAmmoO + iAmmoO_offset);
-	if (iAmmoCount > 0)
-	{
-		SetEntData(iCid, iAmmoO	+ iAmmoO_offset, RoundToNearest(iAmmoCount * (1 + g_flPack_ammomult)) );
-		//return Plugin_Stop;
-	}
-	//huntingrifle offset +32 - now +36
-	iAmmoO_offset = 36;
-	iAmmoCount = GetEntData(iCid, iAmmoO + iAmmoO_offset);
-	if (iAmmoCount > 0)
-	{
-		SetEntData(iCid, iAmmoO	+ iAmmoO_offset, RoundToNearest(iAmmoCount * (1 + g_flPack_ammomult)) );
-		//return Plugin_Stop;
-	}
-	//militarysniper offset +36 - now +40
-	iAmmoO_offset = 40;
-	iAmmoCount = GetEntData(iCid, iAmmoO + iAmmoO_offset);
-	if (iAmmoCount > 0)
-	{
-		SetEntData(iCid, iAmmoO	+ iAmmoO_offset, RoundToNearest(iAmmoCount * (1 + g_flPack_ammomult)) );
-		//return Plugin_Stop;
-	}
-	//grenade launcher offset +64
-	iAmmoO_offset = 64;
-	iAmmoCount = GetEntData(iCid, iAmmoO + iAmmoO_offset);
-	if (iAmmoCount > 0)
-	{
-		SetEntData(iCid, iAmmoO	+ iAmmoO_offset, RoundToNearest(iAmmoCount * (1 + g_flPack_ammomult)) );
-		//return Plugin_Stop;
-	}
-
-	return Plugin_Stop;
-}
-
-
 
 //=============================
 // Sur3: Chem Reliant
@@ -5484,10 +4548,7 @@ public Action:PR_GiveFullAmmo_delayed (Handle:timer, any:iCid)
 Chem_OnDrugUsed (iCid)
 {
 	//check if perk is enabled
-	if (g_iSur3_enable==0
-		|| g_iChem_enable==0			&&	g_iL4D_GameMode==0
-		|| g_iChem_enable_sur==0	&&	g_iL4D_GameMode==1
-		|| g_iChem_enable_vs==0		&&	g_iL4D_GameMode==2)
+	if (g_iSur3_enable==0 || g_iChem_enable==0)
 		return 0;
 
 	//----DEBUG----
@@ -5505,11 +4566,7 @@ Chem_OnDrugUsed (iCid)
 		//they have unbreakable or not
 
 		//CASE 1: HAS UNBREAKABLE
-		if (g_iSur2[iCid]==1
-			&& g_iSur3_enable==1
-			&& (g_iUnbreak_enable==1	&&	g_iL4D_GameMode==0
-			|| g_iUnbreak_enable_sur==1	&&	g_iL4D_GameMode==1
-			|| g_iUnbreak_enable_vs==1	&&	g_iL4D_GameMode==2))
+		if (g_iSur2[iCid]==1 && g_iSur3_enable==1 && g_iUnbreak_enable==1)
 		{
 			//CASE 1A:
 			//combined health + chem reliant < max health possible
@@ -5556,16 +4613,12 @@ Event_Confirm_ChemReliant (iCid)
 		return;
 
 	//check if perk is enabled
-	if (g_iSur3_enable==0
-		|| g_iChem_enable==0		&&	g_iL4D_GameMode==0
-		|| g_iChem_enable_sur==0	&&	g_iL4D_GameMode==1
-		|| g_iChem_enable_vs==0		&&	g_iL4D_GameMode==2)
+	if (g_iSur3_enable==0 || g_iChem_enable==0)
 		return;
 
 	new iflags=GetCommandFlags("give");
 	SetCommandFlags("give", iflags & ~FCVAR_CHEAT);
-	if (g_iL4D_12 == 1
-		|| GetRandomInt(0,1)==1)
+	if (GetRandomInt(0,1)==1)
 		FakeClientCommand(iCid,"give pain_pills");
 	else
 		FakeClientCommand(iCid,"give adrenaline");
@@ -5587,10 +4640,7 @@ HardToKill_OnIncap (iCid)
 		|| GetClientTeam(iCid)!=2)
 		return;
 
-	if (g_iSur3_enable==0
-		|| g_iHard_enable==0		&&	g_iL4D_GameMode==0
-		|| g_iHard_enable_sur==0	&&	g_iL4D_GameMode==1
-		|| g_iHard_enable_vs==0		&&	g_iL4D_GameMode==2)
+	if (g_iSur3_enable==0 || g_iHard_enable==0)
 		return;
 
 	if (g_iSur3[iCid]==3)
@@ -5641,10 +4691,7 @@ Extreme_Rebuild ()
 		return;
 
 	//check if perk is enabled
-	if (g_iSur3_enable==0
-		|| g_iExtreme_enable==0		&&	g_iL4D_GameMode==0
-		|| g_iExtreme_enable_sur==0	&&	g_iL4D_GameMode==1
-		|| g_iExtreme_enable_vs==0	&&	g_iL4D_GameMode==2)
+	if (g_iSur3_enable==0 || g_iExtreme_enable==0)
 		return;
 
 	//----DEBUG----
@@ -5670,34 +4717,6 @@ Extreme_Rebuild ()
 	}
 }
 
-//=============================
-// Sur3: Little Leaguer
-//=============================
-
-Event_Confirm_LittleLeaguer (iCid)
-{
-	if (iCid==0
-		|| GetClientTeam(iCid)!=2
-		|| IsPlayerAlive(iCid)==false
-		|| g_iConfirm[iCid]==0
-		|| g_iSur3[iCid]!=5)
-		return;
-
-	//check if perk is enabled
-	if (g_iSur3_enable==0
-		|| g_iChem_enable==0		&&	g_iL4D_GameMode==0
-		|| g_iChem_enable_sur==0	&&	g_iL4D_GameMode==1
-		|| g_iChem_enable_vs==0		&&	g_iL4D_GameMode==2)
-		return;
-
-	new iflags=GetCommandFlags("give");
-	SetCommandFlags("give", iflags & ~FCVAR_CHEAT);
-	FakeClientCommand(iCid,"give katana");
-	SetCommandFlags("give", iflags);
-
-	return;
-}
-
 // #endregion
 // =======================================================================
 
@@ -5710,8 +4729,6 @@ Event_Confirm_LittleLeaguer (iCid)
 //====================================================
 //====================================================
 
-
-
 //======================================
 //	CHAT CHECK, TOP MENU, SELECT SUBMENU
 //======================================
@@ -5722,13 +4739,7 @@ public Action:MenuOpen_OnSay(iCid, args)
 	new iT = GetClientTeam(iCid);
 
 	//don't show the menu if all perks are disabled
-	if (
-		(g_iSurAll_enable == 0
-		&& iT == 2)
-		||
-		(g_iInfAll_enable == 0
-		&& iT == 3)
-		)
+	if ((g_iSurAll_enable == 0 && iT == 2) || (iT == 3))
 	{
 		g_iConfirm[iCid] = 0;
 		return Plugin_Continue;
@@ -5762,14 +4773,9 @@ public Handle:Menu_Initial (iCid)
 	DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
 	DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
 
-	//"This server is using Perkmod"
-	Format(stPanel, 128, "%t", "InitialMenuPanel1");
+	Format(stPanel, 128, "%t", "MenuInitialDescriptionCustom");
 	DrawPanelText(menu, stPanel);
-	//"Select option 1 to customize your perks"
-	Format(stPanel, 128, "%t", "InitialMenuPanel2");
-	DrawPanelText(menu, stPanel);
-	//"Customize Perks"
-	Format(stPanel, 128, "%t", "InitialMenuPanel3");
+	Format(stPanel, 128, "%t", "MenuInitialPanelCustom");
 	DrawPanelItem(menu, stPanel);
 
 	//random perks, enable only if cvar is set
@@ -5779,28 +4785,15 @@ public Handle:Menu_Initial (iCid)
 	}
 	else
 	{
-		//"You can opt to randomize your perks"
-		Format(stPanel, 128, "%t", "InitialMenuPanel4");
+		Format(stPanel, 128, "%t", "MenuInitialDescriptionRandom");
 		DrawPanelText(menu, stPanel);
-		//"but you can't change them afterwards"
-		Format(stPanel, 128, "%t", "InitialMenuPanel5");
-		DrawPanelText(menu, stPanel);
-		//"Randomize Perks"
-		Format(stPanel, 128, "%t", "InitialMenuPanel6");
+		Format(stPanel, 128, "%t", "MenuInitialPanelRandom");
 		DrawPanelItem(menu, stPanel);
 	}
 
-	//"Otherwise, you can use whatever"
-	Format(stPanel, 128, "%t", "InitialMenuPanel7");
+	Format(stPanel, 128, "%t", "MenuInitialDescriptionAuto");
 	DrawPanelText(menu, stPanel);
-	//"perks you've selected already"
-	Format(stPanel, 128, "%t", "InitialMenuPanel8");
-	DrawPanelText(menu, stPanel);
-	//"by using option 3"
-	Format(stPanel, 128, "%t", "InitialMenuPanel9");
-	DrawPanelText(menu, stPanel);
-	//"PLAY NOW!"
-	Format(stPanel, 128, "%t", "InitialMenuPanel10");
+	Format(stPanel, 128, "%t", "MenuInitialPanelAuto");
 	DrawPanelItem(menu, stPanel);
 
 	return menu;
@@ -5818,7 +4811,7 @@ public Menu_ChooseInit (Handle:topmenu, MenuAction:action, param1, param2)
 			case 7:
 				{
 					AssignRandomPerks(param1);
-					PrintHintText(param1,"Perkmod: %t", "ThanksForChoosingMessage");
+					PrintHintText(param1,"Perkmod: %t", "MessageHintThanksForChoosing");
 				}
 			case 8:
 				{
@@ -5827,9 +4820,8 @@ public Menu_ChooseInit (Handle:topmenu, MenuAction:action, param1, param2)
 					Event_Confirm_Grenadier(param1);
 					Event_Confirm_ChemReliant(param1);
 					Event_Confirm_MA(param1);
-					Event_Confirm_LittleLeaguer(param1);
 					Extreme_Rebuild();
-					PrintHintText(param1,"Perkmod: %t", "ThanksForChoosingMessage");
+					PrintHintText(param1,"Perkmod: %t", "MessageHintThanksForChoosing");
 				}
 			default:
 				{
@@ -5849,33 +4841,23 @@ public Menu_ChooseInit (Handle:topmenu, MenuAction:action, param1, param2)
 public Handle:Menu_Top (iCid)
 {
 	new Handle:menu = CreatePanel();
-	SetPanelTitle(menu, "tPoncho's Perkmod - Main Menu");
-	DrawPanelText(menu,"Select a submenu to choose a perk");
 	decl String:st_perk[32];
 	decl String:st_display[MAXPLAYERS+1];
 
+	Format(st_display, 64, "%t", "MenuTopDescription");	
+	DrawPanelText(menu, st_display);
+
 	//set name for sur1 perk
-	if (g_iSur1[iCid]==1
-		&& (g_iStopping_enable==1		&&	g_iL4D_GameMode==0
-		|| g_iStopping_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iStopping_enable_vs==1		&&	g_iL4D_GameMode==2))
+	if (g_iSur1[iCid]==1 && g_iStopping_enable==1)
 		st_perk="Stopping Power";
-	else if (g_iSur1[iCid]==2
-		&& (g_iSoH_enable==1		&&	g_iL4D_GameMode==0
-		|| g_iSoH_enable_sur==1		&&	g_iL4D_GameMode==1
-		|| g_iSoH_enable_vs==1		&&	g_iL4D_GameMode==2))
+	else if (g_iSur1[iCid]==2 && g_iSoH_enable==1)
 		st_perk="Sleight of Hand";
-	else if (g_iSur1[iCid]==3
-		&& (g_iPyro_enable==1		&&	g_iL4D_GameMode==0
-		|| g_iPyro_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iPyro_enable_vs==1		&&	g_iL4D_GameMode==2))
+	else if (g_iSur1[iCid]==3 && g_iPyro_enable==1)
 		st_perk="Pyrotechnician";
-	else if (g_iSur1[iCid]==4
-		&& g_iL4D_12 == 2
-		&& (g_iMA_enable==1		&&	g_iL4D_GameMode==0
-		|| g_iMA_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iMA_enable_vs==1	&&	g_iL4D_GameMode==2))
+	else if (g_iSur1[iCid]==4 && g_iMA_enable==1)
 		st_perk="Martial Artist";
+	else if (g_iSur1[iCid]==5 && g_iChristmas_enable==1)
+		st_perk="Christmas Gift";
 	else
 		st_perk="Not set";
 
@@ -5887,21 +4869,14 @@ public Handle:Menu_Top (iCid)
 
 
 	//set name for sur2 perk
-	if (g_iSur2[iCid]==1
-		&& (g_iUnbreak_enable==1		&&	g_iL4D_GameMode==0
-		|| g_iUnbreak_enable_sur==1		&&	g_iL4D_GameMode==1
-		|| g_iUnbreak_enable_vs==1		&&	g_iL4D_GameMode==2))
+	if (g_iSur2[iCid]==1 && g_iUnbreak_enable==1)
 		st_perk="Unbreakable";
-	else if (g_iSur2[iCid]==2
-		&& (g_iSpirit_enable==1		&&	g_iL4D_GameMode==0
-		|| g_iSpirit_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iSpirit_enable_vs==1	&&	g_iL4D_GameMode==2))
+	else if (g_iSur2[iCid]==2 && g_iSpirit_enable==1)
 		st_perk="Spirit";
-	else if (g_iSur2[iCid]==3
-		&& (g_iHelpHand_enable==1		&&	g_iL4D_GameMode==0
-		|| g_iHelpHand_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iHelpHand_enable_vs==1		&&	g_iL4D_GameMode==2))
+	else if (g_iSur2[iCid]==3 && g_iHelpHand_enable==1)
 		st_perk="Helping Hand";
+	else if (g_iSur2[iCid]==4 && g_iPackCat_enable==1)
+		st_perk="Pack Cat";
 	else
 		st_perk="Not set";
 
@@ -5912,31 +4887,14 @@ public Handle:Menu_Top (iCid)
 		DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
 
 	//set name for sur3 perk
-	if (g_iSur3[iCid]==1
-		&& (g_iPack_enable==1		&&	g_iL4D_GameMode==0
-		|| g_iPack_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iPack_enable_vs==1		&&	g_iL4D_GameMode==2))
+	if (g_iSur3[iCid]==1 && g_iPack_enable==1)
 		st_perk="Pack Rat";
-	else if (g_iSur3[iCid]==2
-		&& (g_iChem_enable==1		&&	g_iL4D_GameMode==0
-		|| g_iChem_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iChem_enable_vs==1		&&	g_iL4D_GameMode==2))
+	else if (g_iSur3[iCid]==2 && g_iChem_enable==1)
 		st_perk="Chem Reliant";
-	else if (g_iSur3[iCid]==3
-		&& (g_iHard_enable==1		&&	g_iL4D_GameMode==0
-		|| g_iHard_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iHard_enable_vs==1		&&	g_iL4D_GameMode==2))
+	else if (g_iSur3[iCid]==3 && g_iHard_enable==1)
 		st_perk="Hard to Kill";
-	else if (g_iSur3[iCid]==4
-		&& (g_iExtreme_enable==1		&&	g_iL4D_GameMode==0
-		|| g_iExtreme_enable_sur==1		&&	g_iL4D_GameMode==1
-		|| g_iExtreme_enable_vs==1		&&	g_iL4D_GameMode==2))
+	else if (g_iSur3[iCid]==4 && g_iExtreme_enable==1)
 		st_perk="Extreme Conditioning";
-	else if (g_iSur3[iCid]==5
-		&& (g_iLittle_enable==1			&&	g_iL4D_GameMode==0
-		|| g_iLittle_enable_sur==1		&&	g_iL4D_GameMode==1
-		|| g_iLittle_enable_vs==1		&&	g_iL4D_GameMode==2))
-		st_perk="Little Leaguer";
 	else
 		st_perk="Not set";
 
@@ -5950,11 +4908,9 @@ public Handle:Menu_Top (iCid)
 	DrawPanelItem(menu,st_display, ITEMDRAW_NOTEXT);
 	DrawPanelItem(menu,st_display, ITEMDRAW_NOTEXT);
 	DrawPanelItem(menu,st_display, ITEMDRAW_NOTEXT);
-	Format(st_display, 64, "%t", "DoneNagPanel1");	
+	Format(st_display, 64, "%t", "MenuTopDoneDescription");	
 	DrawPanelText(menu, st_display);
-	Format(st_display, 64, "%t", "DoneNagPanel2");	
-	DrawPanelText(menu, st_display);
-	Format(st_display, 64, "%t", "DoneNagPanel3");	
+	Format(st_display, 64, "%t", "MenuTopDonePanel");	
 	DrawPanelItem(menu, st_display);
 	return menu;
 }
@@ -5996,24 +4952,13 @@ public Handle:Menu_Confirm (iCid)
 {
 	new Handle:menu = CreatePanel();
 	decl String:panel[128];
-	Format(panel, 128, "%t", "ConfirmNagPanel1");	
-	SetPanelTitle(menu, panel);
-	
-	DrawPanelText(menu,"");
-	
-	Format(panel, 128, "%t", "ConfirmNagPanel2");
-	DrawPanelText(menu,panel);
-	Format(panel, 128, "%t", "ConfirmNagPanel3");
-	DrawPanelText(menu,panel);
-	Format(panel, 128, "%t", "ConfirmNagPanel4");
+	Format(panel, 128, "%t", "MenuConfirmConfirmDescription");	
+	DrawPanelText(menu, panel);
+	Format(panel, 128, "%t", "MenuConfirmConfirmPanel");
 	DrawPanelItem(menu,panel);
-	Format(panel, 128, "%t", "ConfirmNagPanel5");
+	Format(panel, 128, "%t", "MenuConfirmCancelDescription");
 	DrawPanelText(menu,panel);
-	Format(panel, 128, "%t", "ConfirmNagPanel6");
-	DrawPanelText(menu,panel);
-	Format(panel, 128, "%t", "ConfirmNagPanel7");
-	DrawPanelText(menu,panel);
-	Format(panel, 128, "%t", "ConfirmNagPanel8");
+	Format(panel, 128, "%t", "MenuConfirmCancelPanel");
 	DrawPanelItem(menu,panel);
 	return menu;
 }
@@ -6029,13 +4974,12 @@ public Menu_ChooseConfirm (Handle:topmenu, MenuAction:action, param1, param2)
 			case 1:
 			{
 				g_iConfirm[param1]=1;
-				PrintToChat(param1,"\x03[SM] %t", "ConfirmedMessage");
+				PrintToChat(param1,"\x03[SM] %t", "MessageChatConfirmed");
 				Event_Confirm_Unbreakable(param1);
 				Event_Confirm_Grenadier(param1);
 				Event_Confirm_ChemReliant(param1);
 				Event_Confirm_MA(param1);
 				Extreme_Rebuild();
-				Event_Confirm_LittleLeaguer(param1);
 			}
 			case 2:
 				SendPanelToClient(Menu_Top(param1),param1,Menu_ChooseSubMenu,MENU_TIME_FOREVER);
@@ -6063,36 +5007,24 @@ public Handle:Menu_ShowChoices (iCid)
 	SetPanelTitle(menu,"tPoncho's Perkmod");
 	decl String:st_perk[128];
 	decl iPerk;
-	//"Your perks for this round:"
-	Format(st_perk, 128, "%t:", "MapPerksPanel");
 
 	//show sur1 perk
 	iPerk = g_iSur1[iCid];
-	if (iPerk == 1
-		&& (g_iStopping_enable==1		&&	g_iL4D_GameMode==0
-		|| g_iStopping_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iStopping_enable_vs==1		&&	g_iL4D_GameMode==2))
-		Format(st_perk,128,"Stopping Power (+%i%% %t)", RoundToNearest(g_flStopping_dmgmult*100), "BonusDamageText" );
-	else if (iPerk == 2
-		&& (g_iSoH_enable==1		&&	g_iL4D_GameMode==0
-		|| g_iSoH_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iSoH_enable_vs==1	&&	g_iL4D_GameMode==2))
-		Format(st_perk,128,"Sleight of Hand (%t +%i%%)", "SleighOfHandDescriptionPanel", RoundToNearest(100 * ((1/g_flSoH_rate)-1) ) ) ;
-	else if (iPerk == 3
-		&& (g_iPyro_enable==1		&&	g_iL4D_GameMode==0
-		|| g_iPyro_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iPyro_enable_vs==1		&&	g_iL4D_GameMode==2))
-		Format(st_perk,128,"Pyrotechnician (%t)", "PyroDescriptionPanel");
-	else if (iPerk == 4
-		&& (g_iMA_enable==1		&&	g_iL4D_GameMode==0
-		|| g_iMA_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iMA_enable_vs==1	&&	g_iL4D_GameMode==2))
+	if (iPerk == 1 && g_iStopping_enable==1)
+		Format(st_perk,128,"Stopping Power (%t)",  "StoppingPowerDescriptionPanel", RoundToNearest(g_flStopping_dmgmult*100));
+	else if (iPerk == 2 && g_iSoH_enable==1)
+		Format(st_perk,128,"Sleight of Hand (%t)", "SleighOfHandDescriptionPanel", RoundToNearest(100 * ((1/g_flSoH_rate)-1) ) ) ;
+	else if (iPerk == 3 && g_iPyro_enable==1)
+		Format(st_perk,128,"Pyrotechnician (%t)", "PyroDescriptionPanel", g_iPyro_maxticks*2 );
+	else if (iPerk == 4 && g_iMA_enable==1)
 	{
 		if (g_iMA_maxpenalty < 6)
-			Format(st_perk,128,"Martial Artist (%t)", "MartialArtistDescriptionPanel");
+			Format(st_perk,128,"Martial Artist (%t)", "MartialArtistDescriptionPanel1");
 		else
-			Format(st_perk,128,"Martial Artist (%t)", "MartialArtistDescriptionPanel_noreduc");
+			Format(st_perk,128,"Martial Artist (%t)", "MartialArtistDescriptionPanel");
 	}
+	else if (iPerk == 5 && g_iChristmas_enable==1)
+		Format(st_perk,128,"Christmas Gift (%t)", "ChristmasGiftDescriptionPanel");
 	else
 		Format(st_perk,128,"%t", "NotSet");
 
@@ -6104,40 +5036,25 @@ public Handle:Menu_ShowChoices (iCid)
 
 	//show sur2 perk
 	iPerk = g_iSur2[iCid];
-	if (iPerk == 1
-		&& (g_iUnbreak_enable==1	&&	g_iL4D_GameMode==0
-		|| g_iUnbreak_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iUnbreak_enable_vs==1	&&	g_iL4D_GameMode==2))
-		Format(st_perk,128,"Unbreakable (+%i %t)", g_iUnbreak_hp, "UnbreakableHint");
-	else if (iPerk == 2
-		&& (g_iSpirit_enable==1		&&	g_iL4D_GameMode==0
-		|| g_iSpirit_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iSpirit_enable_vs==1	&&	g_iL4D_GameMode==2))
+	if (iPerk == 1 && g_iUnbreak_enable==1)
+		Format(st_perk,128,"Unbreakable (%t)", "UnbreakableDescriptionPanel", g_iUnbreak_hp);
+	else if (iPerk == 2 && g_iSpirit_enable==1)
 	{
 		decl iTime;
-		if (g_iL4D_GameMode==2)
-			iTime=g_iSpirit_cd_vs;
-		else if (g_iL4D_GameMode==1)
-			iTime=g_iSpirit_cd_sur;
-		else
 			iTime=g_iSpirit_cd;
-		Format(st_perk,128,"Spirit (%t: %i min)", "SpiritDescriptionPanel", iTime/60 );
+		Format(st_perk,128,"Spirit (%t)", "SpiritDescriptionPanel", g_iSpirit_buff, iTime );
 	}
-	else if (iPerk == 3
-		&& (g_iHelpHand_enable==1		&&	g_iL4D_GameMode==0
-		|| g_iHelpHand_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iHelpHand_enable_vs==1		&&	g_iL4D_GameMode==2))
+	else if (iPerk == 3 && g_iHelpHand_enable==1)
 	{
 		decl iBuff;
-		if (g_iL4D_GameMode==2)
-			iBuff=g_iHelpHand_buff_vs;
-		else
 			iBuff=g_iHelpHand_buff;
 		if (g_iHelpHand_convar==1)
-			Format(st_perk,128,"Helping Hand (%t +%i)", "HelpingHandDescriptionPanel2", iBuff);
+			Format(st_perk,128,"Helping Hand (%t)", "HelpingHandDescriptionPanel2", iBuff);
 		else
-			Format(st_perk,128,"Helping Hand (%t +%i)", "HelpingHandDescriptionPanel", iBuff);
+			Format(st_perk,128,"Helping Hand (%t)", "HelpingHandDescriptionPanel", iBuff);
 	}
+	else if (iPerk == 4 && g_iPackCat_enable==1)
+		Format(st_perk,128,"Pack Cat (%t)", "PackCatDescriptionPanel", RoundToNearest(g_flPackCat_ammorefill*100));
 	else
 		Format(st_perk,128,"%t", "NotSet");
 
@@ -6149,35 +5066,18 @@ public Handle:Menu_ShowChoices (iCid)
 
 	//show sur3 perk
 	iPerk = g_iSur3[iCid];
-	if (iPerk == 1
-		&& (g_iPack_enable==1		&&	g_iL4D_GameMode==0
-		|| g_iPack_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iPack_enable_vs==1		&&	g_iL4D_GameMode==2))
-		Format(st_perk,128,"Pack Rat (%t +%i%%)", "PackRatDescriptionPanel", RoundToNearest(g_flPack_ammomult*100) );
-	else if (iPerk == 2
-		&& (g_iChem_enable==1		&&	g_iL4D_GameMode==0
-		|| g_iChem_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iChem_enable_vs==1		&&	g_iL4D_GameMode==2))
-		Format(st_perk,128,"Chem Reliant (%t +%i)", "ChemReliantDescriptionPanel", g_iChem_buff);
-	else if (iPerk == 3
-		&& (g_iHard_enable==1			&&	g_iL4D_GameMode==0
-		|| g_iHard_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iHard_enable_vs==1		&&	g_iL4D_GameMode==2))
-		Format(st_perk,128,"Hard to Kill (+%i%% %t)", RoundToNearest(g_flHard_hpmult*100), "HardToKillDescriptionPanel" );
-	else if (iPerk == 4
-		&& (g_iExtreme_enable==1		&&	g_iL4D_GameMode==0
-		|| g_iExtreme_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iExtreme_enable_vs==1	&&	g_iL4D_GameMode==2))
-		Format(st_perk,128,"Extreme Conditioning (+%i%% %t)", RoundToNearest(g_flExtreme_rate*100-100), "MartialArtistDescriptionPanelCoop" );
-	else if (iPerk == 5
-		&& (g_iLittle_enable==1		&&	g_iL4D_GameMode==0
-		|| g_iLittle_enable_sur==1	&&	g_iL4D_GameMode==1
-		|| g_iLittle_enable_vs==1	&&	g_iL4D_GameMode==2))
-		Format(st_perk,128,"Little Leaguer (%t)", "LittleLeaguerDescriptionPanel" );
+	if (iPerk == 1 && g_iPack_enable==1)
+		Format(st_perk,128,"Pack Rat (%t)", "PackRatDescriptionPanel", RoundToNearest(g_flPack_ammomult*100) );
+	else if (iPerk == 2 && g_iChem_enable==1)
+		Format(st_perk,128,"Chem Reliant (%t)", "ChemReliantDescriptionPanel", g_iChem_buff);
+	else if (iPerk == 3 && g_iHard_enable==1)
+		Format(st_perk,128,"Hard to Kill (%t)", "HardToKillDescriptionPanel");
+	else if (iPerk == 4 && g_iExtreme_enable==1)
+		Format(st_perk,128,"Extreme Conditioning (%t)", "ExtremeConditioningDescriptionPanel", RoundToNearest(g_flExtreme_rate*100-100));
 	else
 		Format(st_perk,128,"%t", "NotSet");
 
-	if (g_iSur2_enable==1)
+	if (g_iSur3_enable==1)
 	{
 		DrawPanelItem(menu,"Survivor, tertiary:");
 		DrawPanelText(menu,st_perk);
@@ -6185,10 +5085,6 @@ public Handle:Menu_ShowChoices (iCid)
 
 	return menu;
 }
-
-
-
-
 
 //=============================
 //	SUR1 PERK CHOICE
@@ -6203,9 +5099,7 @@ public Handle:Menu_Sur1Perk (client)
 	decl String:st_current[10];
 
 	//set name for perk 1
-	if (g_iStopping_enable==0			&&	g_iL4D_GameMode==0
-		|| g_iStopping_enable_sur==0	&&	g_iL4D_GameMode==1
-		|| g_iStopping_enable_vs==0		&&	g_iL4D_GameMode==2)
+	if (g_iStopping_enable==0)
 	{
 		DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
 	}
@@ -6218,14 +5112,12 @@ public Handle:Menu_Sur1Perk (client)
 		}
 		Format(st_display,64,"Stopping Power %s",st_current);
 		DrawPanelItem(menu,st_display);
-		Format(st_display,64,"+%i%% %t", RoundToNearest(g_flStopping_dmgmult*100), "BonusDamageText" );
+		Format(st_display,64,"%t", "StoppingPowerDescriptionPanel", RoundToNearest(g_flStopping_dmgmult*100) );
 		DrawPanelText(menu,st_display);
 	}
 
 	//set name for perk 2
-	if (g_iSoH_enable==0			&&	g_iL4D_GameMode==0
-		|| g_iSoH_enable_sur==0		&&	g_iL4D_GameMode==1
-		|| g_iSoH_enable_vs==0		&&	g_iL4D_GameMode==2)
+	if (g_iSoH_enable==0)
 	{
 		DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
 	}
@@ -6238,14 +5130,12 @@ public Handle:Menu_Sur1Perk (client)
 		}
 		Format(st_display,64,"Sleight of Hand %s",st_current);
 		DrawPanelItem(menu,st_display);
-		Format(st_display,64,"%t +%i%%", "SleighOfHandDescriptionPanel", RoundToNearest(100 * ((1/g_flSoH_rate)-1) ) );
+		Format(st_display,64,"%t", "SleighOfHandDescriptionPanel", RoundToNearest(100 * ((1/g_flSoH_rate)-1) ) );
 		DrawPanelText(menu,st_display);
 	}
 
 	//set name for perk 3
-	if (g_iPyro_enable==0			&&	g_iL4D_GameMode==0
-		|| g_iPyro_enable_sur==0	&&	g_iL4D_GameMode==1
-		|| g_iPyro_enable_vs==0		&&	g_iL4D_GameMode==2)
+	if (g_iPyro_enable==0)
 	{
 		DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
 	}
@@ -6258,17 +5148,14 @@ public Handle:Menu_Sur1Perk (client)
 		}
 		Format(st_display,64,"Pyrotechnician %s",st_current);
 		DrawPanelItem(menu,st_display);
-		Format(st_display,64,"%t", "PyroDescriptionText1");
+		Format(st_display,64,"%t", "PyroDescriptionPanel1");
 		DrawPanelText(menu, st_display);
-		Format(st_display,64,"%t", "PyroDescriptionText2");
+		Format(st_display,64,"%t", "PyroDescriptionPanel2", g_iPyro_maxticks*2 );
 		DrawPanelText(menu, st_display);
 	}
 
 	//set name for perk 4
-	if (g_iMA_enable==0			&&	g_iL4D_GameMode==0
-		|| g_iMA_enable_sur==0	&&	g_iL4D_GameMode==1
-		|| g_iMA_enable_vs==0	&&	g_iL4D_GameMode==2
-		|| g_iL4D_12 != 2)
+	if (g_iMA_enable==0)
 	{
 		DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
 	}
@@ -6280,14 +5167,35 @@ public Handle:Menu_Sur1Perk (client)
 			default: st_current="";
 		}
 		Format(st_display,64,"Martial Artist %s",st_current);
-		DrawPanelItem(menu,st_display);
-		Format(st_display,64,"%t", "MartialArtistDescriptionPanel1");
 		DrawPanelText(menu, st_display);
 		if (g_iMA_maxpenalty <6)
 		{
-			Format(st_display,64,"%t", "MartialArtistDescriptionPanel2");
+			Format(st_display,64,"%t", "MartialArtistDescriptionPanel1");
 			DrawPanelText(menu, st_display);
 		}
+		else
+		{
+			Format(st_display,64,"%t", "MartialArtistDescriptionPanel");
+			DrawPanelText(menu, st_display);
+		}
+	}
+
+	//set name for perk 5
+	if (g_iChristmas_enable==0)
+	{
+		DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
+	}
+	else
+	{
+		switch (g_iSur1[client])
+		{
+			case 5: st_current="(CURRENT)";
+			default: st_current="";
+		}
+		Format(st_display,64,"Christmas Gift %s",st_current);
+		DrawPanelItem(menu,st_display);
+		Format(st_display,64,"%t", "ChristmasGiftDescriptionPanel");
+		DrawPanelText(menu, st_display);
 	}
 
 	return menu;
@@ -6313,6 +5221,9 @@ public Menu_ChooseSur1Perk (Handle:menu, MenuAction:action, param1, param2)
 			//martial artist
 			case 4:
 				g_iSur1[param1]=4;
+				//christmas gift
+				case 5:
+					g_iSur1[param1]=5;
 		}
 	}
 
@@ -6335,9 +5246,7 @@ public Handle:Menu_Sur2Perk (client)
 	decl String:st_current[10];
 
 	//set name for perk 1
-	if (g_iUnbreak_enable==0			&&	g_iL4D_GameMode==0
-		|| g_iUnbreak_enable_sur==0		&&	g_iL4D_GameMode==1
-		|| g_iUnbreak_enable_vs==0		&&	g_iL4D_GameMode==2)
+	if (g_iUnbreak_enable==0)
 	{
 		DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
 	}
@@ -6350,14 +5259,12 @@ public Handle:Menu_Sur2Perk (client)
 		}
 		Format(st_display,64,"Unbreakable %s",st_current);
 		DrawPanelItem(menu,st_display);
-		Format(st_display,64,"+%i %t", g_iUnbreak_hp, "UnbreakableHint" );
+		Format(st_display,64,"%t", "UnbreakableDescriptionPanel", g_iUnbreak_hp );
 		DrawPanelText(menu,st_display);
 	}
 
 	//set name for perk 2
-	if (g_iSpirit_enable==0			&&	g_iL4D_GameMode==0
-		|| g_iSpirit_enable_sur==0	&&	g_iL4D_GameMode==1
-		|| g_iSpirit_enable_vs==0	&&	g_iL4D_GameMode==2)
+	if (g_iSpirit_enable==0)
 	{
 		DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
 	}
@@ -6370,23 +5277,14 @@ public Handle:Menu_Sur2Perk (client)
 		}
 		Format(st_display,64,"Spirit %s",st_current);
 		DrawPanelItem(menu,st_display);
-		Format(st_display,64,"%t", "SpiritDescriptionText" );
+		Format(st_display,64,"%t", "SpiritDescriptionPanel1");
 		DrawPanelText(menu,st_display);
-		decl iTime;
-		if (g_iL4D_GameMode==2)
-			iTime=g_iSpirit_cd_vs;
-		else if (g_iL4D_GameMode==1)
-			iTime=g_iSpirit_cd_sur;
-		else
-			iTime=g_iSpirit_cd;
-		Format(st_display,64,"+%i %t: %i min", g_iSpirit_buff, "SpritDescriptionText2", iTime/60 );
+		Format(st_display,64,"%t", "SpiritDescriptionPanel2", g_iSpirit_buff, g_iSpirit_cd );
 		DrawPanelText(menu,st_display);
 	}
 
 	//set name for perk 3
-	if (g_iHelpHand_enable==0			&&	g_iL4D_GameMode==0
-		|| g_iHelpHand_enable_sur==0	&&	g_iL4D_GameMode==1
-		|| g_iHelpHand_enable_vs==0		&&	g_iL4D_GameMode==2)
+	if (g_iHelpHand_enable==0)
 	{
 		DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
 	}
@@ -6401,21 +5299,36 @@ public Handle:Menu_Sur2Perk (client)
 		DrawPanelItem(menu,st_display);
 
 		decl iBuff;
-		if (g_iL4D_GameMode==2)
-			iBuff=g_iHelpHand_buff_vs;
-		else
 			iBuff=g_iHelpHand_buff;
 
 		if (g_iHelpHand_convar==1)
 		{
-			Format(st_display,64,"%t +%i", "HelpingHandDescriptionPanel2", iBuff);
+			Format(st_display,64,"%t", "HelpingHandDescriptionPanel2", iBuff);
 			DrawPanelText(menu,st_display);
 		}
 		else
 		{
-			Format(st_display,64,"%t +%i", "HelpingHandDescriptionPanel", iBuff);
+			Format(st_display,64,"%t", "HelpingHandDescriptionPanel", iBuff);
 			DrawPanelText(menu,st_display);
 		}
+	}
+
+	//set name for perk 4
+	if (g_iPackCat_enable==0)
+	{
+		DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
+	}
+	else
+	{
+		switch (g_iSur2[client])
+		{
+			case 4: st_current="(CURRENT)";
+			default: st_current="";
+		}
+		Format(st_display,64,"Pack Cat %s",st_current);
+		DrawPanelItem(menu,st_display);
+		Format(st_display,64,"%t", "PackCatDescriptionPanel", RoundToNearest(g_flPackCat_ammorefill*100));
+		DrawPanelText(menu,st_display);
 	}
 
 	return menu;
@@ -6438,6 +5351,9 @@ public Menu_ChooseSur2Perk (Handle:menu, MenuAction:action, param1, param2)
 			//helping hand
 			case 3:
 				g_iSur2[param1]=3;
+				//pack cat
+				case 4:
+					g_iSur2[param1]=4;
 		}
 	}
 
@@ -6460,9 +5376,7 @@ public Handle:Menu_Sur3Perk (client)
 	decl String:st_current[10];
 
 	//set name for perk 1
-	if (g_iPack_enable==0			&&	g_iL4D_GameMode==0
-		|| g_iPack_enable_sur==0	&&	g_iL4D_GameMode==1
-		|| g_iPack_enable_vs==0		&&	g_iL4D_GameMode==2)
+	if (g_iPack_enable==0)
 	{
 		DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
 	}
@@ -6475,14 +5389,12 @@ public Handle:Menu_Sur3Perk (client)
 		}
 		Format(st_display,64,"Pack Rat %s",st_current);
 		DrawPanelItem(menu,st_display);
-		Format(st_display,64,"%t +%i%%", "PackRatDescriptionPanel", RoundToNearest(g_flPack_ammomult*100) );
+		Format(st_display,64,"%t", "PackRatDescriptionPanel", RoundToNearest(g_flPack_ammomult*100) );
 		DrawPanelText(menu,st_display);
 	}
 
 	//set name for perk 2
-	if (g_iChem_enable==0			&&	g_iL4D_GameMode==0
-		|| g_iChem_enable_sur==0	&&	g_iL4D_GameMode==1
-		|| g_iChem_enable_vs==0		&&	g_iL4D_GameMode==2)
+	if (g_iChem_enable==0)
 	{
 		DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
 	}
@@ -6495,19 +5407,12 @@ public Handle:Menu_Sur3Perk (client)
 		}
 		Format(st_display,64,"Chem Reliant %s",st_current);
 		DrawPanelItem(menu,st_display);
-		if (g_iChem_buff > 0)
-		{
-			Format(st_display,64,"%t (+%i)", "ChemReliantDescriptionText", g_iChem_buff);
-			DrawPanelText(menu,st_display);
-		}
-		Format(st_display,64,"%t", "ChemReliantDescriptionText2");
+		Format(st_display,64,"%t", "ChemReliantDescriptionPanel", g_iChem_buff);
 		DrawPanelText(menu,st_display);
 	}
 
 	//set name for perk 3
-	if (g_iHard_enable==0			&&	g_iL4D_GameMode==0
-		|| g_iHard_enable_sur==0	&&	g_iL4D_GameMode==1
-		|| g_iHard_enable_vs==0		&&	g_iL4D_GameMode==2)
+	if (g_iHard_enable==0)
 	{
 		DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
 	}
@@ -6520,16 +5425,12 @@ public Handle:Menu_Sur3Perk (client)
 		}
 		Format(st_display,64,"Hard to Kill %s",st_current);
 		DrawPanelItem(menu,st_display);
-		Format(st_display,64,"%t", "HardToKillDescriptionText");
-		DrawPanelText(menu,st_display);
-		Format(st_display,64,"+%i%% %t", RoundToNearest(100*g_flHard_hpmult), "HardToKillDescriptionText2" );
+		Format(st_display,64,"%t", "HardToKillDescriptionPanel");
 		DrawPanelText(menu,st_display);
 	}
 
 	//set name for perk 4
-	if (g_iExtreme_enable==0			&&	g_iL4D_GameMode==0
-		|| g_iExtreme_enable_sur==0		&&	g_iL4D_GameMode==1
-		|| g_iExtreme_enable_vs==0		&&	g_iL4D_GameMode==2)
+	if (g_iExtreme_enable==0)
 	{
 		DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
 	}
@@ -6542,28 +5443,7 @@ public Handle:Menu_Sur3Perk (client)
 		}
 		Format(st_display,64,"Extreme Conditioning %s",st_current);
 		DrawPanelItem(menu,st_display);
-		Format(st_display,64,"%t: +%i%%", "MartialArtistDescriptionPanelCoop", RoundToNearest(100*g_flExtreme_rate-100) );
-		DrawPanelText(menu,st_display);
-	}
-
-	//set name for perk 5
-	if (g_iLittle_enable==0				&&	g_iL4D_GameMode==0
-		|| g_iLittle_enable_sur==0		&&	g_iL4D_GameMode==1
-		|| g_iLittle_enable_vs==0		&&	g_iL4D_GameMode==2
-		|| g_iL4D_12 != 2)
-	{
-		DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
-	}
-	else
-	{
-		switch (g_iSur3[client])
-		{
-			case 5: st_current="(CURRENT)";
-			default: st_current="";
-		}
-		Format(st_display,64,"Little Leaguer %s",st_current);
-		DrawPanelItem(menu,st_display);
-		Format(st_display,64,"%t", "LittleLeaguerDescriptionPanel" );
+		Format(st_display,64,"%t", "ExtremeConditioningDescriptionPanel", RoundToNearest(100*g_flExtreme_rate-100) );
 		DrawPanelText(menu,st_display);
 	}
 
@@ -6590,9 +5470,6 @@ public Menu_ChooseSur3Perk (Handle:menu, MenuAction:action, param1, param2)
 			//extreme cond
 			case 4:
 				g_iSur3[param1]=4;
-			//little leaguer
-			case 5:
-				g_iSur3[param1]=5;
 		}
 	}
 
@@ -6616,13 +5493,7 @@ public Action:SS_SetPerks(iCid, args)
 	new iT = GetClientTeam(iCid);
 
 	//don't show the menu if all perks are disabled
-	if (
-		(g_iSurAll_enable == 0
-		&& iT == 2)
-		||
-		(g_iInfAll_enable == 0
-		&& iT == 3)
-		)
+	if ((g_iSurAll_enable == 0 && iT == 2) || (iT == 3))
 	{
 		g_iConfirm[iCid] = 0;
 		return Plugin_Continue;
@@ -6756,14 +5627,6 @@ public Action:Debug_OnSay(iCid, args)
 
 		return Plugin_Continue;
 	}
-	
-	if (StrEqual(st_chat,"debug nextact",false)==true)
-	{
-		g_iNextActO			=	FindSendPropInfo("CBaseAbility","m_nextActivationTimer");
-		PrintToChat(iCid,"\x03[SM] [DEBUG] g_iNextActO = \x01%i\x03", g_iNextActO);
-
-		return Plugin_Continue;
-	}
 
 	return Plugin_Continue;
 }
@@ -6796,13 +5659,210 @@ public Action:Debug_StaminaTimer (Handle:timer, any:iCid)
 // =======================================================================
 
 // =======================================================================
+// #region Helpers
+
+bool IsEnable_Perk_StoppingPower(int client)
+{
+	return g_iConfirm[client]==1 
+		&& g_iSur1[client]==1 
+		&& g_iSur1_enable==1 
+		&& g_iStopping_enable==1;
+}
+
+bool IsEnable_Perk_SleightOfHand(int client)
+{
+	return g_iConfirm[client]==1 
+		&& g_iSur1[client]==2 
+		&& g_iSur1_enable==1 
+		&& g_iSoH_enable==1;
+}
+
+bool IsEnable_Perk_Pyrotechnician(int client)
+{
+	return g_iConfirm[client]==1 
+		&& g_iSur1[client]==3 
+		&& g_iSur1_enable==1 
+		&& g_iPyro_enable==1;
+}
+
+bool IsEnable_Perk_MartialArtist(int client)
+{
+	return g_iConfirm[client]==1 
+		&& g_iSur1[client]==4 
+		&& g_iSur1_enable==1 
+		&& g_iMA_enable==1;
+}
+
+bool IsEnable_Perk_ChristmasGift(int client)
+{
+	return g_iConfirm[client]==1 
+		&& g_iSur1[client]==5 
+		&& g_iSur1_enable==1 
+		&& g_iChristmas_enable==1;
+}
+
+bool IsEnable_Perk_Unbreakable(int client)
+{
+	return g_iConfirm[client]==1 
+		&& g_iSur2[client]==1 
+		&& g_iSur2_enable==1 
+		&& g_iUnbreak_enable==1;
+}
+
+bool IsEnable_Perk_Spirit(int client)
+{
+	return g_iConfirm[client]==1 
+		&& g_iSur2[client]==2 
+		&& g_iSur2_enable==1 
+		&& g_iSpirit_enable==1;
+}
+
+bool IsEnable_Perk_HelpingHand(int client)
+{
+	return g_iConfirm[client]==1 
+		&& g_iSur2[client]==3 
+		&& g_iSur2_enable==1 
+		&& g_iHelpHand_enable==1;
+}
+
+bool IsEnable_Perk_PackCat(int client)
+{
+	return g_iConfirm[client]==1 
+		&& g_iSur2[client]==4 
+		&& g_iSur2_enable==1 
+		&& g_iPackCat_enable==1;
+}
+
+bool IsEnable_Perk_PackRat(int client)
+{
+	return g_iConfirm[client]==1 
+		&& g_iSur3[client]==1 
+		&& g_iSur3_enable==1 
+		&& g_iPack_enable==1;
+}
+
+bool IsEnable_Perk_ChemReliant(int client)
+{
+	return g_iConfirm[client]==1 
+		&& g_iSur3[client]==2 
+		&& g_iSur3_enable==1 
+		&& g_iChem_enable==1;
+}
+
+bool IsEnable_Perk_HardToKill(int client)
+{
+	return g_iConfirm[client]==1 
+		&& g_iSur3[client]==3 
+		&& g_iSur3_enable==1 
+		&& g_iHard_enable==1;
+}
+
+bool IsEnable_Perk_ExtremeConditioning(int client)
+{
+	return g_iConfirm[client]==1 
+		&& g_iSur3[client]==4 
+		&& g_iSur3_enable==1 
+		&& g_iExtreme_enable==1;
+}
+
+bool IsPrimaryWeapon(char[] classname)
+{
+	return StrContains(classname, "spawn") == -1
+		&& (StrContains(classname, "shotgun") != -1
+			|| StrContains(classname, "smg") != -1
+			|| StrContains(classname, "sniper") != -1
+			|| StrContains(classname, "rifle") != -1
+			|| StrContains(classname, "grenade_launcher") != -1);
+}
+
+// #endregion
+// =======================================================================
+
+// =======================================================================
 // #region Native
+
+any Native_IsEnable_Perk_StoppingPower(Handle plugin, int numParams)
+{
+	int client = GetNativeCell(1);
+	return IsEnable_Perk_StoppingPower(client);
+}
+
+any Native_IsEnable_Perk_SleightOfHand(Handle plugin, int numParams)
+{
+	int client = GetNativeCell(1);
+	return IsEnable_Perk_SleightOfHand(client);
+}
+
+any Native_IsEnable_Perk_Pyrotechnician(Handle plugin, int numParams)
+{
+	int client = GetNativeCell(1);
+	return IsEnable_Perk_Pyrotechnician(client);
+}
+
+any Native_IsEnable_Perk_MartialArtist(Handle plugin, int numParams)
+{
+	int client = GetNativeCell(1);
+	return IsEnable_Perk_MartialArtist(client);
+}
+
+any Native_IsEnable_Perk_ChristmasGift(Handle plugin, int numParams)
+{
+	int client = GetNativeCell(1);
+	return IsEnable_Perk_ChristmasGift(client);
+}
+
+any Native_IsEnable_Perk_Unbreakable(Handle plugin, int numParams)
+{
+	int client = GetNativeCell(1);
+	return IsEnable_Perk_Unbreakable(client);
+}
+
+any Native_IsEnable_Perk_Spirit(Handle plugin, int numParams)
+{
+	int client = GetNativeCell(1);
+	return IsEnable_Perk_Spirit(client);
+}
+
+any Native_IsEnable_Perk_HelpingHand(Handle plugin, int numParams)
+{
+	int client = GetNativeCell(1);
+	return IsEnable_Perk_HelpingHand(client);
+}
+
+any Native_IsEnable_Perk_PackCat(Handle plugin, int numParams)
+{
+	int client = GetNativeCell(1);
+	return IsEnable_Perk_PackCat(client);
+}
+
+any Native_IsEnable_Perk_PackRat(Handle plugin, int numParams)
+{
+	int client = GetNativeCell(1);
+	return IsEnable_Perk_PackRat(client);
+}
+
+any Native_IsEnable_Perk_ChemReliant(Handle plugin, int numParams)
+{
+	int client = GetNativeCell(1);
+	return IsEnable_Perk_ChemReliant(client);
+}
+
+any Native_IsEnable_Perk_HardToKill(Handle plugin, int numParams)
+{
+	int client = GetNativeCell(1);
+	return IsEnable_Perk_HardToKill(client);
+}
+
+any Native_IsEnable_Perk_ExtremeConditioning(Handle plugin, int numParams)
+{
+	int client = GetNativeCell(1);
+	return IsEnable_Perk_ExtremeConditioning(client);
+}
 
 any Native_Pyro_OnWeaponFire(Handle plugin, int numParams)
 {
 	int client = GetNativeCell(1);
-	char weapon[24];
-	GetNativeString(2, weapon, sizeof(weapon));
+	char weapon[24]; GetNativeString(2, weapon, sizeof(weapon));
 
 	Pyro_OnWeaponFire(client, weapon);
 
