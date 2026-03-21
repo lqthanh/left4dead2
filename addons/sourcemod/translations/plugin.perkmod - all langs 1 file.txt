@@ -30,36 +30,6 @@
 		"fr"	"Merci!"
 	}
 
-	"MessageHintSpiritSuccess"
-	{
-		"en"	"You've self-revived!"
-		"de"	"Du hast dich wieder aufgerafft!"
-		"it"	"Ti sei rialzato da solo!"
-		"da"	"Du genoplivede dig selv!"
-		"ru"	"Вы успешно поднялись!"
-		"fr"	"Vous vous avez relance!"
-	}
-
-	"MessageHintSpiritTimerFinished"
-	{
-		"en"	"You feel strong enough to self-revive again!"
-		"de"	"Du fuehlst dich stark genug, um selbst wieder aufzustehen!"
-		"it"	"Ti senti abbastanza forte per rialzarti da solo di nuovo!"
-		"da"	"Du fшler dig stжrk nok igen til at genoplive dig selv!"
-		"ru"	"Вы чувствуете себя достаточно сильным чтобы встать!"
-		"fr"	"Vous pouvez vous relancer maintenant!"
-	}
-
-	"MessageHintSpiritBWWarning"
-	{
-		"en"	"Warning: You are now in BLACK AND WHITE health!!!"
-		"it"	"Warning: You are now in BLACK AND WHITE health!!!"
-		"ru"	"Warning: You are now in BLACK AND WHITE health!!!"
-		"de"	"Warning: You are now in BLACK AND WHITE health!!!"
-		"da"	"Warning: You are now in BLACK AND WHITE health!!!"
-		"fr"	"Warning: You are now in BLACK AND WHITE health!!!"
-	}
-
 	"MenuInitialDescriptionCustom"
 	{
 		"en"	"Select first option to customize your perks"
@@ -230,6 +200,46 @@
 		"fr"	"Plus sante %i"
 	}
 
+	"SpiritDescriptionPanel"
+	{
+		"en"	"Self-revive on teammate incap, gain bonus %i temp health, cooldown %i (second)"
+		"de"	"Selbstwiederbelebung bei Teammitglied-Incap, gewinne %i temporдres Leben, Abklingzeit %i (Sekunden)"
+		"it"	"Autoriabilitazione quando un compagno viene incapacita, ottieni %i salute temporanea bonus, cooldown %i (secondi)"
+		"da"	"Selv-genoplivning ved holdkammerat incap, fе %i midlertidigt helbred bonus, cooldown %i (sekunder)"
+		"ru"	"Самовосстановление при падении товарища, получаете %i бонусного временного хп, перезарядка %i (секунд)"
+		"fr"	"Auto-rйanimation quand un coйquipier est mis KO, reзois %i vie temporaire bonus, cooldown %i (secondes)"
+	}
+
+	"SpiritMessageHintSuccess"
+	{
+		"en"	"You've self-revived!"
+		"de"	"Du hast dich wieder aufgerafft!"
+		"it"	"Ti sei rialzato da solo!"
+		"da"	"Du genoplivede dig selv!"
+		"ru"	"Вы успешно поднялись!"
+		"fr"	"Vous vous avez relance!"
+	}
+
+	"SpiritMessageHintTimerFinished"
+	{
+		"en"	"You feel strong enough to self-revive again!"
+		"de"	"Du fuehlst dich stark genug, um selbst wieder aufzustehen!"
+		"it"	"Ti senti abbastanza forte per rialzarti da solo di nuovo!"
+		"da"	"Du fшler dig stжrk nok igen til at genoplive dig selv!"
+		"ru"	"Вы чувствуете себя достаточно сильным чтобы встать!"
+		"fr"	"Vous pouvez vous relancer maintenant!"
+	}
+
+	"SpiritMessageHintBWWarning"
+	{
+		"en"	"Warning: You are now in BLACK AND WHITE health!!!"
+		"it"	"Warning: You are now in BLACK AND WHITE health!!!"
+		"ru"	"Warning: You are now in BLACK AND WHITE health!!!"
+		"de"	"Warning: You are now in BLACK AND WHITE health!!!"
+		"da"	"Warning: You are now in BLACK AND WHITE health!!!"
+		"fr"	"Warning: You are now in BLACK AND WHITE health!!!"
+	}
+
 	"HelpingHandDescriptionPanel"
 	{
 		"en"	"Give bonus %i temp health"
@@ -380,16 +390,6 @@
 		"fr"	"porter 2 grenades au lieu d'un"
 	}
 
-	"SpiritDescriptionPanel"
-	{
-		"en"	"self-revive on teammate incap, cooldown"
-		"de"	"Steh von selbst auf, wenn ein Kamerad umfaellt, Aufladezeit"
-		"it"	"puoi rialzarti da terra quando un compagno viene incapacitato, si ricarica nel tempo"
-		"da"	"selv-genoplivning ved holdkammerat incap, cooldown"
-		"ru"	"Самовосстановление когда напарник слег, кулдаун"
-		"fr"	"se relancer quand un ami tombe, temps de recharge"
-	}
-
 	"NotSet"
 	{
 		"en"	"Not set"
@@ -418,26 +418,6 @@
 		"da"	"og du starter runden med to granater"
 		"ru"	"и вы начинаете раунд с двумя гранатами."
 		"fr"	"et vous commencez la ronde avec deux grenades"
-	}
-
-	"SpiritDescriptionText"
-	{
-		"en"	"When a teammate goes down you will self-revive"
-		"de"	"Wenn ein Kamerad umfaellt, stehst du wieder auf"
-		"it"	"Quando un compagno cade a terra, ti rialzerai da solo"
-		"da"	"Nеr en holdkammerat gеr ned vil du selv-genoplive"
-		"ru"	"Если напарник падает вы можете встать, если вы сами лежите."
-		"fr"	"Quand un ami tombe vous vous relancerez"
-	}
-
-	"SpritDescriptionText2"
-	{
-		"en"	"bonus health buffer, cooldown"
-		"de"	"Bonus Health, Aufladezeit"
-		"it"	"salute extra temporanea, si ricarica nel tempo"
-		"da"	"ekstra helbred, cooldown"
-		"ru"	"бонусное временное хп, кулдаун."
-		"fr"	"plus de sante temporaire, temps de recharge"
 	}
 
 	"MartialArtistDescriptionPanel"

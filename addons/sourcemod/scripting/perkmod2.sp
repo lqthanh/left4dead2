@@ -4293,7 +4293,7 @@ public Action:Spirit_CooldownTimer (Handle:timer, any:iCid)
 		&& IsPlayerAlive(iCid)==true
 		&& GetClientTeam(iCid)==2
 		&& IsFakeClient(iCid)==false)
-		PrintHintText(iCid,"%t", "MessageHintSpiritTimerFinished");
+		PrintHintText(iCid,"%t", "SpiritMessageHintTimerFinished");
 
 	return Plugin_Stop;
 }
@@ -4350,9 +4350,9 @@ public Action:Spirit_ChangeHP (Handle:timer, any:hPack)
 
 		//show a message if it's not a bot
 		if (iRevCount_ret+1 >= 2)
-			PrintHintText(iCid, "%t", "MessageHintSpiritBWWarning");
+			PrintHintText(iCid, "%t", "SpiritMessageHintBWWarning");
 		else
-			PrintHintText(iCid,"Spirit: %t!", "MessageHintSpiritSuccess");
+			PrintHintText(iCid,"Spirit: %t!", "SpiritMessageHintSuccess");
 	}
 
 	//always destroy the timer, since it's possible spirit may not have executed
@@ -4362,7 +4362,7 @@ public Action:Spirit_ChangeHP (Handle:timer, any:hPack)
 
 public Action:Spirit_Warning1(Handle:timer, any:iCid)
 {
-	PrintToChat(iCid,"\x01***** \x03%t \x01*****", "MessageHintSpiritBWWarning");
+	PrintToChat(iCid,"\x01***** \x03%t \x01*****", "SpiritMessageHintBWWarning");
 
 	KillTimer(timer);
 	return Plugin_Stop;
@@ -5042,7 +5042,7 @@ public Handle:Menu_ShowChoices (iCid)
 	{
 		decl iTime;
 			iTime=g_iSpirit_cd;
-		Format(st_perk,128,"Spirit (%t: %i min)", "SpiritDescriptionPanel", iTime/60 );
+		Format(st_perk,128,"Spirit (%t)", "SpiritDescriptionPanel", g_iSpirit_buff, iTime );
 	}
 	else if (iPerk == 3 && g_iHelpHand_enable==1)
 	{
@@ -5274,11 +5274,7 @@ public Handle:Menu_Sur2Perk (client)
 		}
 		Format(st_display,64,"Spirit %s",st_current);
 		DrawPanelItem(menu,st_display);
-		Format(st_display,64,"%t", "SpiritDescriptionText" );
-		DrawPanelText(menu,st_display);
-		decl iTime;
-			iTime=g_iSpirit_cd;
-		Format(st_display,64,"+%i %t: %i min", g_iSpirit_buff, "SpritDescriptionText2", iTime/60 );
+		Format(st_display,64,"%t", "SpiritDescriptionPanel", g_iSpirit_buff, g_iSpirit_cd );
 		DrawPanelText(menu,st_display);
 	}
 

@@ -15,21 +15,6 @@
 		"en"	"Thanks and have fun!"
 	}
 
-	"MessageHintSpiritSuccess"
-	{
-		"en"	"You've self-revived!"
-	}
-
-	"MessageHintSpiritTimerFinished"
-	{
-		"en"	"You feel strong enough to self-revive again!"
-	}
-
-	"MessageHintSpiritBWWarning"
-	{
-		"en"	"Warning: You are now in BLACK AND WHITE health!!!"
-	}
-
 	"MenuInitialDescriptionCustom"
 	{
 		"en"	"Select first option to customize your perks"
@@ -115,6 +100,26 @@
 		"en"	"Bonus health %i"
 	}
 
+	"SpiritDescriptionPanel"
+	{
+		"en"	"Self-revive on teammate incap, gain bonus %i temp health, cooldown %i (second)"
+	}
+
+	"SpiritMessageHintSuccess"
+	{
+		"en"	"You've self-revived!"
+	}
+
+	"SpiritMessageHintTimerFinished"
+	{
+		"en"	"You feel strong enough to self-revive again!"
+	}
+
+	"SpiritMessageHintBWWarning"
+	{
+		"en"	"Warning: You are now in BLACK AND WHITE health!!!"
+	}
+
 	"HelpingHandDescriptionPanel"
 	{
 		"en"	"Give bonus %i temp health"
@@ -190,11 +195,6 @@
 		"en"	"carry 2 grenades instead of 1"
 	}
 
-	"SpiritDescriptionPanel"
-	{
-		"en"	"self-revive on teammate incap, cooldown"
-	}
-
 	"NotSet"
 	{
 		"en"	"Not set"
@@ -208,16 +208,6 @@
 	"PyroDescriptionText2"
 	{
 		"en"	"and you start the round with 2 grenades"
-	}
-
-	"SpiritDescriptionText"
-	{
-		"en"	"When a teammate goes down you will self-revive"
-	}
-
-	"SpritDescriptionText2"
-	{
-		"en"	"bonus health buffer, cooldown"
 	}
 
 	"MartialArtistDescriptionPanel"
