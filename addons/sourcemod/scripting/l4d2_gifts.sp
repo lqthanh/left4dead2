@@ -7,6 +7,11 @@
 #include <left4dhooks>
 #include <l4d2_weapons>
 #include <multicolors>
+#tryinclude <perkmod2>
+
+#if !defined _perkmod2_included_
+	native int perkmod2_IsEnable_Perk_ChristmasGift(int client, char[] weapon);
+#endif
 
 #define PLUGIN_VERSION		"3.5-2024/5/5"
 
@@ -30,10 +35,26 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 		strcopy(error, err_max, "Plugin only supports Left 4 Dead 2.");
 		return APLRes_SilentFailure;
 	}
+
+	MarkNativeAsOptional("perkmod2_IsEnable_Perk_ChristmasGift");
 	
 	ZC_TANK = 8;
 	bLate = late;
 	return APLRes_Success; 
+}
+
+bool g_bAvailable_perkmod2;
+public void OnAllPluginsLoaded()
+{
+	g_bAvailable_perkmod2 = LibraryExists("perkmod2");
+}
+public void OnLibraryAdded(const char[] name)
+{
+	g_bAvailable_perkmod2 = LibraryExists("perkmod2");
+}
+public void OnLibraryRemoved(const char[] name)
+{
+	g_bAvailable_perkmod2 = LibraryExists("perkmod2");
 }
 
 #define MAXENTITIES                   2048
@@ -633,6 +654,12 @@ void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast)
 	
 	int victim = GetClientOfUserId(event.GetInt("userid"));
 	int attacker = GetClientOfUserId(event.GetInt("attacker"));
+
+	if ( g_bAvailable_perkmod2 ) {
+		if ( !perkmod2_IsEnable_Perk_ChristmasGift(attacker) ) {
+			return;
+		}
+	}
 	
 	if (attacker != victim && IsValidClient(victim) && GetClientTeam(victim) == 3)
 	{
