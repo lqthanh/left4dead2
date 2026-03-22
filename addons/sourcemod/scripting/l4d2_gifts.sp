@@ -688,7 +688,12 @@ void OnWitchKilled(Event event, const char[] name, bool dontBroadcast)
 	if(g_bIsDoorOpen_LockDown|| g_bFinalHasStart)
 		return;	
 
-	//int attacker = GetClientOfUserId(event.GetInt("userid"));
+	int attacker = GetClientOfUserId(event.GetInt("userid"));
+	if ( g_bAvailable_perkmod2 ) {
+		if ( !perkmod2_IsEnable_Perk_ChristmasGift(attacker) ) {
+			return;
+		}
+	}
 	int witch = event.GetInt("witchid");
 	if (GetRandomInt(1, 100) <= g_iSpecialGiftChance)
 	{
