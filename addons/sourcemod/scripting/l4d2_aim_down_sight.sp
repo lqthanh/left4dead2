@@ -918,8 +918,9 @@ void ToggleAdsFix(int client, int weapon, bool enable)
 	}
 	else
 	{
-		SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", GetGameTime());
-		SetEntPropFloat(weapon, Prop_Send, "m_flNextSecondaryAttack", GetGameTime());
+		float currentTime = GetGameTime();
+		SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", currentTime);
+		SetEntPropFloat(weapon, Prop_Send, "m_flNextSecondaryAttack", currentTime);
 		player[client].cycleTime = 0.0;
 		UnHookWeaponAdsFix(weapon);
 	}
