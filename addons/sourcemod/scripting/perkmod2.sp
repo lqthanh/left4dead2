@@ -521,9 +521,11 @@ new Float:g_flPackCat_ammorefill;
 //one-size-fits-all
 new Handle:g_hPack_enable;
 new Handle:g_hPack_ammomult;
+new Handle:g_hPack_extraclip;
 //associated var
 new g_iPack_enable;
 new Float:g_flPack_ammomult;
+new g_iPack_extraclip;
 
 //chem reliant, bonus buffer
 //one-size-fits-all
@@ -960,6 +962,14 @@ CreateConvars()
 	HookConVarChange(g_hPack_ammomult, Convar_Pack);
 	g_flPack_ammomult = 0.25;
 
+	g_hPack_extraclip = CreateConVar(
+		"l4d_perkmod_packrat_extraclip" ,
+		"1" ,
+		"Pack Rat perk: Bonus extra clips (clamped between 1 < 5)" ,
+		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
+	HookConVarChange(g_hPack_extraclip, Convar_Pack_extraclip);
+	g_iPack_extraclip = 1;
+
 	g_hPack_enable = CreateConVar(
 		"l4d_perkmod_packrat_enable" ,
 		"1" ,
@@ -1367,6 +1377,16 @@ public Convar_Pack (Handle:convar, const String:oldValue[], const String:newValu
 	else if (flF>1.0)
 		flF=1.0;
 	g_flPack_ammomult = flF;
+}
+
+public Convar_Pack_extraclip (Handle:convar, const String:oldValue[], const String:newValue[])
+{
+	new iI=StringToInt(newValue);
+	if (iI<1)
+		iI=1;
+	else if (iI>5)
+		iI=5;
+	g_iPack_extraclip = iI;
 }
 
 public Convar_Pack_en (Handle:convar, const String:oldValue[], const String:newValue[])
@@ -2289,7 +2309,7 @@ public Event_ReceiveUpgrade (Handle:event, const String:name[], bool:dontBroadca
 	GetEventString(event,"upgrade",upgrade,128);
 
 	// == (INCENDIARY_AMMO or EXPLOSIVE_AMMO)
-	if (!StrEqual(upgrade,"LASER_SIGHT",false)) PR_GiveFullAmmo(iCid, true);
+	if (!StrEqual(upgrade,"LASER_SIGHT",false)) PR_GiveFullAmmo(iCid, g_iPack_extraclip);
 }
 
 //on drug use
@@ -4562,7 +4582,7 @@ PC_GiveFullAmmo(int client)
 //=============================
 
 //gives full ammo
-PR_GiveFullAmmo(int client, bool extraClip = false)
+PR_GiveFullAmmo(int client, int extraClip = 0)
 {
 	if (IsEnable_Perk_PackRat(client))
 	{
@@ -4573,7 +4593,13 @@ PR_GiveFullAmmo(int client, bool extraClip = false)
 			int maxAmmoCarry = AmmoDef.MaxCarry(ammoType);
 			if (maxAmmoCarry <= 0) return;
 
-			int refill = RoundToNearest(maxAmmoCarry * (1 + g_flPack_ammomult)) + (extraClip ? GetEntProp(weapon, Prop_Send, "m_iClip1") : 0);
+			char class[56];
+			GetEdictClassname(weapon, class, sizeof(class));
+			int clipSize = L4D2_GetIntWeaponAttribute(class, L4D2IWA_ClipSize);
+			int clipCurrent = GetEntProp(weapon, Prop_Send, "m_iClip1");
+			int clipMissing = clipSize - clipCurrent;
+
+			int refill = RoundToNearest(maxAmmoCarry * (1 + g_flPack_ammomult)) + (extraClip * clipSize) + clipMissing;
 			L4D_SetReserveAmmo(client, weapon, refill);
 		}
 	}
