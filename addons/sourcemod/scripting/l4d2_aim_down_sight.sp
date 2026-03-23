@@ -375,12 +375,13 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 	if (!IsClientInGame(client) || GetClientTeam(client) != 2 || IsFakeClient(client))
 		return Plugin_Continue;
 
+	int activeWeapon = GetPlayerWeapon(client);
+
 	if( player[client].pendingDisableAdsFix )
 	{
-		int active_weapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-		if( active_weapon > 0 && IsValidEntity(active_weapon) )
+		if( activeWeapon > 0 && IsValidEntity(activeWeapon) )
 		{
-			SetupZoom(client, active_weapon, false);
+			SetupZoom(client, activeWeapon, false);
 		}
 		player[client].pendingDisableAdsFix = false;
 	}
@@ -425,10 +426,11 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 	
 	if (buttons & adsButton)
 	{
+		if (buttons & (IN_ATTACK|IN_ATTACK2|IN_RELOAD)) return Plugin_Continue;
+		if (GetEntProp(activeWeapon, Prop_Send, "m_bInReload") != 0) return Plugin_Continue;
 		if (!(player[client].onbutton & adsButton))
 		{
 			player[client].onbutton |= adsButton;
-			int activeWeapon = GetPlayerWeapon(client);
 			// Allow ADS if: not a sniper
 			if (activeWeapon != -1 && !CanZoom(activeWeapon))
 			{
