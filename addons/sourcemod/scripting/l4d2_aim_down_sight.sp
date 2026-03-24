@@ -617,10 +617,13 @@ MRESReturn DhookCallback_ItemPostFrame(int weapon)
 	}
 
 	int reserverammo = L4D_GetReserveAmmo(client, weapon);
+	char weaponClassname[64];
+	GetEntityClassname(weapon, weaponClassname, sizeof(weaponClassname));
+	bool noReserveAmmoWeapon = (StrContains(weaponClassname, "pistol", false) != -1);
 	
 	// When player presses reload button or auto-reload triggers (empty clip), 
 	// set flag to disable AdsFix mode safely outside of this callback
-	if( (button & IN_RELOAD) || (clip == 0 && reserverammo > 0 && currenttime > player[client].secondaryattacktime) )
+	if( (button & IN_RELOAD) || (clip == 0 && (reserverammo > 0 || noReserveAmmoWeapon) && currenttime > player[client].secondaryattacktime) )
 	{
 		// Set flag to disable AdsFix mode (will be processed in OnPlayerRunCmd)
 		player[client].pendingDisableAdsFix = true;
