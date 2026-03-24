@@ -77,6 +77,7 @@ enum struct PlayerData
 	// Per-player weapon attributes
 	float cycleTime;
 	int weaponWorldModelIndex;
+	bool isPistol;
 }
 PlayerData
 	player[MAXPLAYERS + 1];
@@ -617,13 +618,10 @@ MRESReturn DhookCallback_ItemPostFrame(int weapon)
 	}
 
 	int reserverammo = L4D_GetReserveAmmo(client, weapon);
-	char weaponClassname[64];
-	GetEntityClassname(weapon, weaponClassname, sizeof(weaponClassname));
-	bool noReserveAmmoWeapon = (StrContains(weaponClassname, "pistol", false) != -1);
 	
 	// When player presses reload button or auto-reload triggers (empty clip), 
 	// set flag to disable AdsFix mode safely outside of this callback
-	if( (button & IN_RELOAD) || (clip == 0 && (reserverammo > 0 || noReserveAmmoWeapon) && currenttime > player[client].secondaryattacktime) )
+	if( (button & IN_RELOAD) || (clip == 0 && (reserverammo > 0 || player[client].isPistol) && currenttime > player[client].secondaryattacktime) )
 	{
 		// Set flag to disable AdsFix mode (will be processed in OnPlayerRunCmd)
 		player[client].pendingDisableAdsFix = true;
@@ -904,6 +902,7 @@ void LoadPlayerWeaponAttributes(int client, int weapon)
 	// Load attributes using Left4DHooks
 	player[client].cycleTime = L4D2_GetFloatWeaponAttribute(classname, L4D2FWA_CycleTime);
 	player[client].weaponWorldModelIndex = GetEntProp(weapon, Prop_Send, "m_iWorldModelIndex");
+	player[client].isPistol = StrContains(classname, "pistol", false) != -1;
 }
 
 void ToggleAdsFix(int client, int weapon, bool enable)
