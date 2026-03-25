@@ -75,9 +75,8 @@ enum struct PlayerData
 	float secondaryattacktime;
 
 	// Per-player weapon attributes
-	float cycleTime;
-	int weaponWorldModelIndex;
 	bool isPistol;
+	float cycleTime;
 }
 PlayerData
 	player[MAXPLAYERS + 1];
@@ -598,21 +597,7 @@ MRESReturn DhookCallback_ItemPostFrame(int weapon)
 			SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", currenttime);
 			SDKCall(g_SDKCall_PrimaryAttack, weapon);
 			SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", currenttime + 100.0);
-			
-			// Determine cycle time: SCAR uses cvar if > 0, others use weapon default
-			float nextAttackTime;
-			if(cvar.ads_scar_cycletime > 0.0 && player[client].weaponWorldModelIndex == g_scar_precache_index )
-			{
-				nextAttackTime = cvar.ads_scar_cycletime;
-				// PrintToServer("[ADS] Fire (SCAR): nextAttack in %.3fs", nextAttackTime);
-			}
-			else if(player[client].cycleTime > 0.0)
-			{
-				nextAttackTime = player[client].cycleTime;
-				// PrintToServer("[ADS] Fire (weapon): nextAttack in %.3fs (cycleTime: %.3f)", nextAttackTime, player[client].cycleTime);
-			}
-			
-			player[client].primaryattacktime = currenttime + nextAttackTime;
+			player[client].primaryattacktime = currenttime + player[client].cycleTime;
 		}
 		return MRES_Ignored; // ignore IN_RELOAD when pushing attack button.
 	}
@@ -900,9 +885,9 @@ void LoadPlayerWeaponAttributes(int client, int weapon)
 	GetEntityClassname(weapon, classname, sizeof(classname));
 	
 	// Load attributes using Left4DHooks
-	player[client].cycleTime = L4D2_GetFloatWeaponAttribute(classname, L4D2FWA_CycleTime);
-	player[client].weaponWorldModelIndex = GetEntProp(weapon, Prop_Send, "m_iWorldModelIndex");
 	player[client].isPistol = StrContains(classname, "pistol", false) != -1;
+	player[client].cycleTime = L4D2_GetFloatWeaponAttribute(classname, L4D2FWA_CycleTime);
+	if (cvar.ads_scar_cycletime > 0.0 && GetEntProp(weapon, Prop_Send, "m_iWorldModelIndex") == g_scar_precache_index) player[client].cycleTime = cvar.ads_scar_cycletime;
 }
 
 void ToggleAdsFix(int client, int weapon, bool enable)
