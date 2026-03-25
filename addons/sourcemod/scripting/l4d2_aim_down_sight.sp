@@ -313,24 +313,8 @@ public void OnConfigsExecuted()
 // Events
 void HookEvents()
 {
-	HookEvent("weapon_zoom", Event_WeaponZoom, EventHookMode_Post);
 	HookEvent("weapon_drop", Event_WeaponDrop, EventHookMode_Post);
 	HookEvent("round_start", Event_RoundStart, EventHookMode_PostNoCopy);
-}
-
-void Event_WeaponZoom(Event event, const char[] name, bool dontBroadcast)
-{
-	int client = GetClientOfUserId(event.GetInt("userid"));
-	if (client <= 0)
-		return;
-	
-	bool zoomed = GetEntProp(client, Prop_Send, "m_iFOV") != 0;
-	if (zoomed != player[client].bZoom)
-	{
-		int weapon = GetPlayerWeapon(client);
-		if (weapon != -1)
-			SetupZoom(client, weapon, zoomed);
-	}
 }
 
 void Event_WeaponDrop(Event event, const char[] name, bool dontBroadcast)
@@ -340,7 +324,7 @@ void Event_WeaponDrop(Event event, const char[] name, bool dontBroadcast)
 	int owner = GetClientOfUserId(event.GetInt("userid"));
 	if (owner > 0)
 	{
-		ToggleAdsFix(owner, propid, false);
+		SetupZoom(owner, propid, false);
 	}
 }
 
@@ -437,7 +421,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 		{
 			player[client].onbutton |= adsButton;
 			// Allow ADS if: not a sniper
-			if (activeWeapon != -1 && (!CanZoom(activeWeapon) || cvar.ads_key != 0))
+			if (activeWeapon != -1 && !CanZoom(activeWeapon))
 			{
 				SetupZoom(client, activeWeapon, !player[client].bZoom);
 			}
