@@ -437,7 +437,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 		{
 			player[client].onbutton |= adsButton;
 			// Allow ADS if: not a sniper
-			if (activeWeapon != -1 && !CanZoom(activeWeapon))
+			if (activeWeapon != -1 && (!CanZoom(activeWeapon) || cvar.ads_key != 0))
 			{
 				SetupZoom(client, activeWeapon, !player[client].bZoom);
 			}
