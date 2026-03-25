@@ -373,6 +373,7 @@ new g_iMAAttCount[MAXPLAYERS+1];
 new g_iPIncap[MAXPLAYERS+1];
 //used to keep track of whether cooldown is in effect
 new g_iSpiritCooldown[MAXPLAYERS+1];
+new Float:g_flSpiritCooldownEnd[MAXPLAYERS+1];
 //used to track the timers themselves
 new Handle:g_iSpiritTimer[MAXPLAYERS+1];
 
@@ -1738,6 +1739,7 @@ public Event_PConnect(Handle:event, const String:name[], bool:dontBroadcast)
 	g_iMyDisableTarget[iCid] = -1;
 	g_iPIncap[iCid]=0;
 	g_iSpiritCooldown[iCid]=0;
+	g_flSpiritCooldownEnd[iCid]=0.0;
 	g_iGren[iCid]=0;
 	g_iGrenThrow[iCid]=0;
 	g_iGrenType[iCid]=0;
@@ -1768,6 +1770,7 @@ public Event_PDisconnect(Handle:event, const String:name[], bool:dontBroadcast)
 	g_iMyDisableTarget[iCid] = -1;
 	g_iPIncap[iCid]=0;
 	g_iSpiritCooldown[iCid]=0;
+	g_flSpiritCooldownEnd[iCid]=0.0;
 
 	if (g_iSpiritTimer[iCid]!=INVALID_HANDLE)
 	{
@@ -1791,6 +1794,7 @@ public Event_PlayerDeath (Handle:event, const String:name[], bool:dontBroadcast)
 	g_iMyDisableTarget[iCid] = -1;
 	g_iPIncap[iCid]=0;
 	g_iSpiritCooldown[iCid]=0;
+	g_flSpiritCooldownEnd[iCid]=0.0;
 	//and also close the spirit cooldown timer
 	//and nullify the var pointing to it
 	if (g_iSpiritTimer[iCid]!=INVALID_HANDLE)
@@ -1848,6 +1852,7 @@ public Event_RoundStart (Handle:event, const String:name[], bool:dontBroadcast)
 		//reset vars related to spirit perk
 		g_iPIncap[iI]=0;
 		g_iSpiritCooldown[iI]=0;
+		g_flSpiritCooldownEnd[iI]=0.0;
 		//reset var related to pack rat perk
 		g_bPRalreadyApplying[iI] = false;
 		//reset var related to various hunter/smoker perks
@@ -2471,8 +2476,70 @@ public Action:TimerPerks (Handle:timer, any:data)
 
 	Spirit_Timer();
 	Pyro_Timer();
+	ShowPerkCooldownHint();
 
 	return Plugin_Continue;
+}
+
+ShowPerkCooldownHint()
+{
+	if (IsServerProcessing()==false)
+		return;
+
+	for (new iCid=1 ; iCid<=MaxClients ; iCid++)
+	{
+		if (IsClientInGame(iCid)==false
+			|| IsPlayerAlive(iCid)==false
+			|| GetClientTeam(iCid)!=2
+			|| IsFakeClient(iCid)==true
+			|| g_iConfirm[iCid]==0)
+		{
+			continue;
+		}
+
+		new iPyroRemain=0;
+		new iSpiritRemain=0;
+
+		if (g_iSur1_enable==1
+			&& g_iPyro_enable==1
+			&& g_iPyro_maxticks > 0
+			&& g_iSur1[iCid]==3)
+		{
+			new iAmmoO=FindDataMapInfo(iCid,"m_iAmmo");
+			new bool:bHasGrenade = false;
+			if (iAmmoO != -1
+				&& (GetEntData(iCid, iAmmoO + 48) > 0
+					|| GetEntData(iCid, iAmmoO + 52) > 0
+					|| GetEntData(iCid, iAmmoO + 56) > 0))
+			{
+				bHasGrenade = true;
+			}
+
+			if (bHasGrenade == false)
+			{
+				iPyroRemain = (g_iPyro_maxticks - g_iPyroTicks[iCid]) * 2;
+				if (iPyroRemain < 0)
+					iPyroRemain = 0;
+			}
+		}
+
+		if (g_iSur2_enable==1
+			&& g_iSpirit_enable==1
+			&& g_iSur2[iCid]==2
+			&& g_iSpiritCooldown[iCid]==1)
+		{
+			new Float:flRemain = g_flSpiritCooldownEnd[iCid] - GetGameTime();
+			if (flRemain > 0.0)
+				iSpiritRemain = RoundToCeil(flRemain);
+		}
+
+		if (iPyroRemain > 0 && iSpiritRemain > 0)
+			PrintHintText(iCid, "Pyrotechnician CD: %is | Spirit CD: %is", iPyroRemain, iSpiritRemain);
+		else if (iPyroRemain > 0)
+			PrintHintText(iCid, "Pyrotechnician CD: %is", iPyroRemain);
+		else if (iSpiritRemain > 0)
+			PrintHintText(iCid, "Spirit CD: %is", iSpiritRemain);
+	}
 }
 
 //on drying from slime, remove hud changes
@@ -4345,6 +4412,7 @@ public Action:Spirit_CooldownTimer (Handle:timer, any:iCid)
 {
 	KillTimer(timer);
 	g_iSpiritTimer[iCid]=INVALID_HANDLE;
+	g_flSpiritCooldownEnd[iCid]=0.0;
 	//if the cooldown's been turned off,
 	//that means a new round has started
 	//and we can skip everything here
@@ -4357,6 +4425,7 @@ public Action:Spirit_CooldownTimer (Handle:timer, any:iCid)
 		return Plugin_Stop;
 
 	g_iSpiritCooldown[iCid]=0;
+	g_flSpiritCooldownEnd[iCid]=0.0;
 
 	//and this sends the client a hint message
 	if (IsClientInGame(iCid)==true
@@ -4417,6 +4486,7 @@ public Action:Spirit_ChangeHP (Handle:timer, any:hPack)
 		g_iSpiritTimer[iCid]=CreateTimer(iTime*1.0,Spirit_CooldownTimer,iCid);
 		g_iPIncap[iCid]=0;
 		g_iSpiritCooldown[iCid]=1;
+		g_flSpiritCooldownEnd[iCid]=GetGameTime() + (iTime*1.0);
 
 		//show a message if it's not a bot
 		if (iRevCount_ret+1 >= 2)
