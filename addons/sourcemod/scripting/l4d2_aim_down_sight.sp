@@ -324,7 +324,7 @@ void Event_WeaponDrop(Event event, const char[] name, bool dontBroadcast)
 	int owner = GetClientOfUserId(event.GetInt("userid"));
 	if (owner > 0)
 	{
-		SetupZoom(owner, propid, false);
+		ToggleAdsFix(owner, propid, false);
 	}
 }
 
