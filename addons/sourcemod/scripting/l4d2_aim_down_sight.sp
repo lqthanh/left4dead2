@@ -56,6 +56,7 @@ int
 Handle
 	g_SDKCall_SecondaryAttack,
 	g_SDKCall_PrimaryAttack,
+	g_SDKCall_GetRateOfFire,
 	g_SDKCall_CanAttack;
 
 DynamicHook
@@ -217,6 +218,21 @@ void LoadGameData()
 	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
 	if( !(g_SDKCall_SecondaryAttack = EndPrepSDKCall()) )
 		SetFailState("failed to start sdkcall \"%s\"", func);
+
+	FormatEx(func, sizeof(func), "CTerrorGun::GetRateOfFire");
+	StartPrepSDKCall(SDKCall_Entity);
+	if (PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, func))
+	{
+		PrepSDKCall_SetReturnInfo(SDKType_Float, SDKPass_Plain);
+		g_SDKCall_GetRateOfFire = EndPrepSDKCall();
+		if (!g_SDKCall_GetRateOfFire)
+			PrintToServer("[ADS] WARNING: Failed to finalize sdkcall \"%s\", fallback to weapon CycleTime.", func);
+	}
+	else
+	{
+		g_SDKCall_GetRateOfFire = null;
+		PrintToServer("[ADS] WARNING: Missing gamedata entry for \"%s\", fallback to weapon CycleTime.", func);
+	}
 
 	FormatEx(func, sizeof(func), "CTerrorPlayer::CanAttack");
 	StartPrepSDKCall(SDKCall_Entity);
@@ -876,6 +892,13 @@ void LoadPlayerWeaponAttributes(int client, int weapon)
 	// Load attributes using Left4DHooks
 	player[client].isPistol = StrContains(classname, "pistol", false) != -1;
 	player[client].cycleTime = L4D2_GetFloatWeaponAttribute(classname, L4D2FWA_CycleTime);
+
+	if (StrContains(classname, "shotgun", false) != -1)
+	{
+		float fireRate = SDKCall(g_SDKCall_GetRateOfFire, weapon);
+		if (fireRate > 0.0) player[client].cycleTime = fireRate;
+	}
+
 	if (cvar.ads_cycletime_scar > 0.0 && GetEntProp(weapon, Prop_Send, "m_iWorldModelIndex") == g_scar_precache_index) player[client].cycleTime = cvar.ads_cycletime_scar;
 	if (cvar.ads_cycletime_mul > 1.0) player[client].cycleTime *= cvar.ads_cycletime_mul;
 }

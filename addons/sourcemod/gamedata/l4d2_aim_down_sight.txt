@@ -29,6 +29,11 @@
 				"linux" 	"284"
 				"windows"	"283"
 			}
+			"CTerrorGun::GetRateOfFire"
+			{
+				"linux"		"454"
+				"windows"	"452"
+			}
 			"CTerrorPlayer::CanAttack"
 			{
 				"linux" 	"528"
