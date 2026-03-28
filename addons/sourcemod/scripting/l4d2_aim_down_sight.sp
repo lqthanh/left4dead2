@@ -164,7 +164,8 @@ public void OnEntityCreated(int entity, const char[] classname)
 		|| StrContains(classname, "shotgun") != -1
 		|| StrContains(classname, "smg") != -1
 		|| StrContains(classname, "sniper") != -1
-		|| StrContains(classname, "rifle") != -1)
+		|| StrContains(classname, "rifle") != -1
+		|| StrContains(classname, "grenade_launcher") != -1)
 		&& StrContains(classname, "spawn") == -1
 	)
 	{
