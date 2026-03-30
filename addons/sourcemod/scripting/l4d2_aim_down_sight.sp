@@ -434,6 +434,9 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 	{
 		if (buttons & (IN_ATTACK|IN_ATTACK2|IN_RELOAD)) return Plugin_Continue;
 		if (GetEntProp(activeWeapon, Prop_Send, "m_bInReload") != 0) return Plugin_Continue;
+		float currentTime = GetGameTime();
+		if (currentTime < player[client].primaryattacktime || currentTime < player[client].secondaryattacktime) return Plugin_Continue;
+
 		if (!(player[client].onbutton & adsButton))
 		{
 			player[client].onbutton |= adsButton;
@@ -892,16 +895,20 @@ void LoadPlayerWeaponAttributes(int client, int weapon)
 	
 	// Load attributes using Left4DHooks
 	player[client].isPistol = StrContains(classname, "pistol", false) != -1;
-	player[client].cycleTime = L4D2_GetFloatWeaponAttribute(classname, L4D2FWA_CycleTime);
+	float cycleTime = L4D2_GetFloatWeaponAttribute(classname, L4D2FWA_CycleTime);
+	PrintToChatAll("[ADS] Weapon: %s, Base Cycle Time: %.2f", classname, cycleTime);
 
-	if (StrContains(classname, "shotgun", false) != -1)
-	{
-		float fireRate = SDKCall(g_SDKCall_GetRateOfFire, weapon);
-		if (fireRate > 0.0) player[client].cycleTime = fireRate;
-	}
+	float fireRate = SDKCall(g_SDKCall_GetRateOfFire, weapon);
+	if (fireRate > 0.0) cycleTime = fireRate;
+	PrintToChatAll("[ADS] Weapon: %s, Cycle Time from GetRateOfFire: %.2f", classname, cycleTime);
 
-	if (cvar.ads_cycletime_scar > 0.0 && GetEntProp(weapon, Prop_Send, "m_iWorldModelIndex") == g_scar_precache_index) player[client].cycleTime = cvar.ads_cycletime_scar;
-	if (cvar.ads_cycletime_mul > 1.0) player[client].cycleTime *= cvar.ads_cycletime_mul;
+	if (cvar.ads_cycletime_scar > 0.0 && GetEntProp(weapon, Prop_Send, "m_iWorldModelIndex") == g_scar_precache_index) cycleTime = cvar.ads_cycletime_scar;
+	if (cvar.ads_cycletime_mul > 1.0) cycleTime *= cvar.ads_cycletime_mul;
+
+	player[client].cycleTime = cycleTime;
+	float currentTime = GetGameTime();
+	player[client].primaryattacktime = currentTime + cycleTime;
+	player[client].secondaryattacktime = currentTime + DEFAULT_ATTACK2_TIME;
 }
 
 void ToggleAdsFix(int client, int weapon, bool enable)
