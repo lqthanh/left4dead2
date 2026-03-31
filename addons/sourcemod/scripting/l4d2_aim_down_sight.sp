@@ -222,18 +222,10 @@ void LoadGameData()
 
 	FormatEx(func, sizeof(func), "CTerrorGun::GetRateOfFire");
 	StartPrepSDKCall(SDKCall_Entity);
-	if (PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, func))
-	{
-		PrepSDKCall_SetReturnInfo(SDKType_Float, SDKPass_Plain);
-		g_SDKCall_GetRateOfFire = EndPrepSDKCall();
-		if (!g_SDKCall_GetRateOfFire)
-			PrintToServer("[ADS] WARNING: Failed to finalize sdkcall \"%s\", fallback to weapon CycleTime.", func);
-	}
-	else
-	{
-		g_SDKCall_GetRateOfFire = null;
-		PrintToServer("[ADS] WARNING: Missing gamedata entry for \"%s\", fallback to weapon CycleTime.", func);
-	}
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, func);
+	PrepSDKCall_SetReturnInfo(SDKType_Float, SDKPass_Plain);
+	if ( !(g_SDKCall_GetRateOfFire = EndPrepSDKCall()) )
+		SetFailState("failed to start sdkcall \"%s\"", func);
 
 	FormatEx(func, sizeof(func), "CTerrorPlayer::CanAttack");
 	StartPrepSDKCall(SDKCall_Entity);
