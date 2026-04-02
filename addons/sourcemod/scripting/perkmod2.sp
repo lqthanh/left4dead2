@@ -754,7 +754,7 @@ public OnPluginStart()
 	HookEvent("player_incapacitated", Event_Incap);
 
 	RegConsoleCmd("sm_perks", MenuOpen_OnSay);
-	RegConsoleCmd("sm_setperks", SS_SetPerks);
+	RegConsoleCmd("sm_p", MenuOpen_OnSay);
 
 	//debug
 	//RegConsoleCmd("say", Debug_OnSay);
@@ -4920,7 +4920,7 @@ public Action:MenuOpen_OnSay(iCid, args)
 	if ((g_iSurAll_enable == 0 && iT == 2) || (iT == 3))
 	{
 		g_iConfirm[iCid] = 0;
-		return Plugin_Continue;
+		return Plugin_Handled;
 	}
 
 	if (g_iConfirm[iCid]==0)
@@ -4929,13 +4929,13 @@ public Action:MenuOpen_OnSay(iCid, args)
 			SendPanelToClient(Menu_Initial(iCid),iCid,Menu_ChooseInit,MENU_TIME_FOREVER);
 		else if (iT==3)
 			g_iConfirm[iCid] = 1;
-		return Plugin_Continue;
+		return Plugin_Handled;
 	}
 
 	if (iT==2)
 		SendPanelToClient(Menu_ShowChoices(iCid),iCid,Menu_DoNothing,15);
 
-	return Plugin_Continue;
+	return Plugin_Handled;
 }
 
 //build initial menu
@@ -5665,28 +5665,6 @@ public Menu_ChooseSur3Perk (Handle:menu, MenuAction:action, param1, param2)
 //=============================
 //	DEBUG
 //=============================
-
-public Action:SS_SetPerks(iCid, args)
-{
-	new iT = GetClientTeam(iCid);
-
-	//don't show the menu if all perks are disabled
-	if ((g_iSurAll_enable == 0 && iT == 2) || (iT == 3))
-	{
-		g_iConfirm[iCid] = 0;
-		return Plugin_Continue;
-	}
-	
-	g_iSur1[iCid] = 1;
-	g_iSur2[iCid] = 2;
-	g_iSur3[iCid] = 3;
-	g_iConfirm[iCid] = 1;
-
-	if (iT==2)
-		SendPanelToClient(Menu_ShowChoices(iCid),iCid,Menu_DoNothing,15);
-
-	return Plugin_Continue;
-}
 
 /*
 public Action:Debug_OnSay(iCid, args)
