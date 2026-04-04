@@ -785,12 +785,8 @@ void SetupZoom(int client, int weapon, bool zoom)
 	player[client].bZoom = zoom;
 	ToggleAdsFix(client, weapon, zoom);
 	
-	float nextAttack = GetEntDataFloat(weapon, FindSendPropInfo("CBaseCombatWeapon", "m_flNextPrimaryAttack"));
-	if (GetGameTime() > nextAttack)
-	{
-		int transitionActivity = zoom ? 1879 : 1881; // ACT_PRIMARY_VM_IDLE_TO_LOWERED : ACT_PRIMARY_VM_LOWERED_TO_IDLE
-		SendWeaponAnim(weapon, transitionActivity);
-	}
+	int transitionActivity = zoom ? 1879 : 1881; // ACT_PRIMARY_VM_IDLE_TO_LOWERED : ACT_PRIMARY_VM_LOWERED_TO_IDLE
+	SendWeaponAnim(weapon, transitionActivity);
 	
 	int viewModel = GetEntPropEnt(client, Prop_Send, "m_hViewModel");
 	SetEntProp(viewModel, Prop_Send, "m_nSequence", sequence);
