@@ -97,7 +97,7 @@ enum struct GlobalConVar
 GlobalConVar
 	cvar;
 
-int currentActivity[MAXPLAYERS + 1];
+// int currentActivity[MAXPLAYERS + 1];
 
 // #endregion
 // ============================================================================
@@ -405,21 +405,21 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 		player[client].pendingDisableAdsFix = false;
 	}
 
-	if (cvar.ads_debug)
-	{
-		int viewModel = GetEntPropEnt(client, Prop_Send, "m_hViewModel");
-		if (viewModel > 0)
-		{
-			int layerSequence = GetEntProp(viewModel, Prop_Send, "m_nLayerSequence");
-			char activityName[128];
+	// if (cvar.ads_debug)
+	// {
+	// 	int viewModel = GetEntPropEnt(client, Prop_Send, "m_hViewModel");
+	// 	if (viewModel > 0)
+	// 	{
+	// 		int layerSequence = GetEntProp(viewModel, Prop_Send, "m_nLayerSequence");
+	// 		char activityName[128];
 			
-			// Get real activity name from activity ID
-			GetActivityName(currentActivity[client], activityName, sizeof(activityName));
+	// 		// Get real activity name from activity ID
+	// 		GetActivityName(currentActivity[client], activityName, sizeof(activityName));
 			
-			PrintToServer("[ADS DEBUG] Client %N - Activity: %s (%d), m_nLayerSequence: %d, ADS: %s", 
-				client, activityName, currentActivity[client], layerSequence, player[client].bZoom ? "ON" : "OFF");
-		}
-	}
+	// 		PrintToServer("[ADS DEBUG] Client %N - Activity: %s (%d), m_nLayerSequence: %d, ADS: %s", 
+	// 			client, activityName, currentActivity[client], layerSequence, player[client].bZoom ? "ON" : "OFF");
+	// 	}
+	// }
 	
 	// Determine which button to check based on ads_key
 	int adsButton;
@@ -544,12 +544,12 @@ public MRESReturn DH_OnSelectWeightedSequence(int weapon, Handle hReturn, Handle
 		}
 	}
 	
-	if (cvar.ads_debug)
-	{
-		// Track activity for owner
-		if (owner > 0 && owner <= MaxClients)
-			currentActivity[owner] = activity;
-	}
+	// if (cvar.ads_debug)
+	// {
+	// 	// Track activity for owner
+	// 	if (owner > 0 && owner <= MaxClients)
+	// 		currentActivity[owner] = activity;
+	// }
 	
 	// Try custom animation first
 	sequence = GetCustomWeaponAnim(weapon, activity);
@@ -844,33 +844,6 @@ void SetWeaponHelpingHandState(int weapon, int state)
 	SetEntProp(weapon, Prop_Send, "m_helpingHandState", state);
 }
 
-void GetActivityName(int activity, char[] buffer, int maxlen)
-{
-	if (hActivityList == null)
-	{
-		Format(buffer, maxlen, "UNKNOWN");
-		return;
-	}
-	
-	hActivityList.Rewind();
-	if (hActivityList.GotoFirstSubKey(false))
-	{
-		do
-		{
-			if (activity == hActivityList.GetNum(NULL_STRING, 0))
-			{
-				hActivityList.GetSectionName(buffer, maxlen);
-				hActivityList.Rewind();
-				return;
-			}
-		}
-		while (hActivityList.GotoNextKey(false));
-	}
-	
-	hActivityList.Rewind();
-	Format(buffer, maxlen, "UNKNOWN_%d", activity);
-}
-
 // #endregion
 // ============================================================================
 
@@ -905,11 +878,9 @@ void LoadPlayerWeaponAttributes(int client, int weapon)
 	// Load attributes using Left4DHooks
 	player[client].isPistol = StrContains(classname, "pistol", false) != -1;
 	float cycleTime = L4D2_GetFloatWeaponAttribute(classname, L4D2FWA_CycleTime);
-	PrintToChatAll("[ADS] Weapon: %s, Base Cycle Time: %.2f", classname, cycleTime);
 
 	float fireRate = SDKCall(g_SDKCall_GetRateOfFire, weapon);
 	if (fireRate > 0.0) cycleTime = fireRate;
-	PrintToChatAll("[ADS] Weapon: %s, Cycle Time from GetRateOfFire: %.2f", classname, cycleTime);
 
 	if (cvar.ads_cycletime_scar > 0.0 && GetEntProp(weapon, Prop_Send, "m_iWorldModelIndex") == g_scar_precache_index) cycleTime = cvar.ads_cycletime_scar;
 	if (cvar.ads_cycletime_mul > 1.0) cycleTime *= cvar.ads_cycletime_mul;
@@ -990,6 +961,39 @@ bool IsValidEntityIndex(int entity)
 {
     return (MaxClients+1 <= entity <= GetMaxEntities());
 }
+
+// #endregion
+// ============================================================================
+
+// ============================================================================
+// #region Debug
+
+// void GetActivityName(int activity, char[] buffer, int maxlen)
+// {
+// 	if (hActivityList == null)
+// 	{
+// 		Format(buffer, maxlen, "UNKNOWN");
+// 		return;
+// 	}
+	
+// 	hActivityList.Rewind();
+// 	if (hActivityList.GotoFirstSubKey(false))
+// 	{
+// 		do
+// 		{
+// 			if (activity == hActivityList.GetNum(NULL_STRING, 0))
+// 			{
+// 				hActivityList.GetSectionName(buffer, maxlen);
+// 				hActivityList.Rewind();
+// 				return;
+// 			}
+// 		}
+// 		while (hActivityList.GotoNextKey(false));
+// 	}
+	
+// 	hActivityList.Rewind();
+// 	Format(buffer, maxlen, "UNKNOWN_%d", activity);
+// }
 
 // #endregion
 // ============================================================================
