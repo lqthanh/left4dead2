@@ -323,6 +323,7 @@ public void OnConfigsExecuted()
 void HookEvents()
 {
 	HookEvent("weapon_drop", Event_WeaponDrop, EventHookMode_Post);
+	HookEvent("player_use", Event_PlayerUse, EventHookMode_Post);
 	HookEvent("round_start", Event_RoundStart, EventHookMode_PostNoCopy);
 }
 
@@ -334,6 +335,26 @@ void Event_WeaponDrop(Event event, const char[] name, bool dontBroadcast)
 	if (owner > 0)
 	{
 		ToggleAdsFix(owner, propid, false);
+	}
+}
+
+void Event_PlayerUse(Event event, const char[] name, bool dontBroadcast)
+{
+	int client = GetClientOfUserId(event.GetInt("userid"));
+	if (client <= 0 || client > MaxClients || !IsClientInGame(client) || IsFakeClient(client))
+		return;
+	
+	int targetid = event.GetInt("targetid");
+	char targetClassname[64];
+	GetEntityClassname(targetid, targetClassname, sizeof(targetClassname));
+	if (StrContains(targetClassname, "weapon_pistol") == 0)
+	{
+		int activeWeapon = GetPlayerWeapon(client);
+		if (GetEntProp(activeWeapon, Prop_Send, "m_isDualWielding") > 0)
+		{
+			player[client].bZoom = false;
+			ToggleAdsFix(client, activeWeapon, false);
+		}
 	}
 }
 
