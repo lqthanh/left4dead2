@@ -174,6 +174,56 @@ public void OnEntityCreated(int entity, const char[] classname)
 		SDKHook(entity, SDKHook_ReloadPost, OnCustomWeaponReload);
 		EntStore[entity] = 0;
 	}
+
+	switch (classname[0])
+    {
+        case 'w':
+        {
+            if (strncmp(classname, "weapon_spawn", 12, false) == 0)
+                RequestFrame(OnWeaponNextFrame_weapon_spawn, EntIndexToEntRef(entity));
+            if (strncmp(classname, "weapon_pistol", 13, false) == 0) //weapon_pistol, weapon_pistol_spawn
+                RequestFrame(OnWeaponNextFrame_weapon_pistol, EntIndexToEntRef(entity));
+        }
+    }
+}
+
+void OnWeaponNextFrame_weapon_spawn(int weapon)
+{
+    weapon = EntRefToEntIndex(weapon);
+    if( weapon == INVALID_ENT_REFERENCE ) return;
+
+    int m_weaponID = GetEntProp(weapon, Prop_Send, "m_weaponID");
+
+    if (m_weaponID == 1 ) //1=pistol
+    {
+        SDKHook(weapon, SDKHook_Use, OnPistolUse); // don't use SDKHook_UsePost
+    }
+}
+
+void OnWeaponNextFrame_weapon_pistol(int weapon)
+{
+    weapon = EntRefToEntIndex(weapon);
+    if( weapon == INVALID_ENT_REFERENCE ) return;
+
+    SDKHook(weapon, SDKHook_Use, OnPistolUse); // don't use  SDKHook_UsePost
+}
+
+Action OnPistolUse(int weapon, int activator, int client, UseType type, float value) 
+{
+    if (client <= 0 || client > MaxClients || !IsClientInGame(client)) return Plugin_Continue;
+
+    int secondary_weapon = GetPlayerWeaponSlot(client, L4D_WEAPON_SLOT_SECONDARY);
+    if(secondary_weapon <= MaxClients) return Plugin_Continue;
+
+    static char classname[32];
+    GetEntityClassname(secondary_weapon, classname, sizeof(classname));
+    if (strcmp(classname, "weapon_pistol") != 0) return Plugin_Continue;
+    if (GetEntProp(secondary_weapon, Prop_Send, "m_isDualWielding") > 0) return Plugin_Continue;
+
+	player[client].bZoom = false;
+	ToggleAdsFix(client, secondary_weapon, false);
+
+    return Plugin_Continue;
 }
 
 // #endregion
@@ -323,7 +373,6 @@ public void OnConfigsExecuted()
 void HookEvents()
 {
 	HookEvent("weapon_drop", Event_WeaponDrop, EventHookMode_Post);
-	HookEvent("player_use", Event_PlayerUse, EventHookMode_Post);
 	HookEvent("round_start", Event_RoundStart, EventHookMode_PostNoCopy);
 }
 
@@ -335,26 +384,6 @@ void Event_WeaponDrop(Event event, const char[] name, bool dontBroadcast)
 	if (owner > 0)
 	{
 		ToggleAdsFix(owner, propid, false);
-	}
-}
-
-void Event_PlayerUse(Event event, const char[] name, bool dontBroadcast)
-{
-	int client = GetClientOfUserId(event.GetInt("userid"));
-	if (client <= 0 || client > MaxClients || !IsClientInGame(client) || IsFakeClient(client))
-		return;
-	
-	int targetid = event.GetInt("targetid");
-	char targetClassname[64];
-	GetEntityClassname(targetid, targetClassname, sizeof(targetClassname));
-	if (StrContains(targetClassname, "weapon_pistol") == 0)
-	{
-		int activeWeapon = GetPlayerWeapon(client);
-		if (GetEntProp(activeWeapon, Prop_Send, "m_isDualWielding") > 0)
-		{
-			player[client].bZoom = false;
-			ToggleAdsFix(client, activeWeapon, false);
-		}
 	}
 }
 
