@@ -877,17 +877,15 @@ void LoadPlayerWeaponAttributes(int client, int weapon)
 	
 	// Load attributes using Left4DHooks
 	player[client].isPistol = StrContains(classname, "pistol", false) != -1;
-	float cycleTime = L4D2_GetFloatWeaponAttribute(classname, L4D2FWA_CycleTime);
 
 	float fireRate = SDKCall(g_SDKCall_GetRateOfFire, weapon);
-	if (fireRate > 0.0) cycleTime = fireRate;
 
-	if (cvar.ads_cycletime_scar > 0.0 && GetEntProp(weapon, Prop_Send, "m_iWorldModelIndex") == g_scar_precache_index) cycleTime = cvar.ads_cycletime_scar;
-	if (cvar.ads_cycletime_mul > 1.0) cycleTime *= cvar.ads_cycletime_mul;
+	if (cvar.ads_cycletime_scar > 0.0 && GetEntProp(weapon, Prop_Send, "m_iWorldModelIndex") == g_scar_precache_index) fireRate = cvar.ads_cycletime_scar;
+	if (cvar.ads_cycletime_mul > 1.0) fireRate *= cvar.ads_cycletime_mul;
 
-	player[client].cycleTime = cycleTime;
+	player[client].cycleTime = fireRate;
 	float currentTime = GetGameTime();
-	player[client].primaryattacktime = currentTime + cycleTime;
+	player[client].primaryattacktime = currentTime + fireRate;
 	player[client].secondaryattacktime = currentTime + DEFAULT_ATTACK2_TIME;
 }
 
