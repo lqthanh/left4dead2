@@ -17,14 +17,6 @@
 !/cfg/
 !/cfg/**
 
-!/materials/
-
-!/materials/overlays/
 
 !/materials/overlays/belialg/
 !/materials/overlays/belialg/**
-
-!/sound/
-
-!/sound/belialg/
-!/sound/belialg/**
