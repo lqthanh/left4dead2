@@ -54,7 +54,6 @@ int
 	g_Offset_BrustAttackTime;
 
 Handle
-	g_SDKCall_SecondaryAttack,
 	g_SDKCall_PrimaryAttack,
 	g_SDKCall_GetRateOfFire,
 	g_SDKCall_CanAttack;
@@ -70,12 +69,8 @@ enum struct PlayerData
 	bool bZoom;
 	int onbutton;
 	bool pendingDisableAdsFix;
-
-	// ADS Fix attributes
 	float primaryattacktime;
-	float secondaryattacktime;
 
-	// Per-player weapon attributes
 	bool isPistol;
 	float cycleTime;
 }
@@ -142,7 +137,6 @@ public void OnClientConnected(int client)
 	player[client].pendingDisableAdsFix	= false;
 
 	player[client].primaryattacktime	= 0.0;
-	player[client].secondaryattacktime	= 0.0;
 
 	player[client].cycleTime			= 0.0;
 }
@@ -261,13 +255,6 @@ void LoadGameData()
 	StartPrepSDKCall(SDKCall_Entity);
 	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, func);
 	if( !(g_SDKCall_PrimaryAttack = EndPrepSDKCall()) )
-		SetFailState("failed to start sdkcall \"%s\"", func);
-	
-	FormatEx(func, sizeof(func), "CTerrorWeapon::SecondaryAttack");
-	StartPrepSDKCall(SDKCall_Entity);
-	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, func);
-	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
-	if( !(g_SDKCall_SecondaryAttack = EndPrepSDKCall()) )
 		SetFailState("failed to start sdkcall \"%s\"", func);
 
 	FormatEx(func, sizeof(func), "CTerrorGun::GetRateOfFire");
@@ -392,7 +379,6 @@ void Event_RoundStart(Event event, const char[] name, bool dontBroadcast)
 	for(int i = 0; i <= MaxClients; i++)
 	{
 		player[i].primaryattacktime		= 0.0;
-		player[i].secondaryattacktime	= 0.0;
 	}
 }
 
@@ -477,7 +463,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 		if (buttons & (IN_ATTACK|IN_ATTACK2|IN_RELOAD)) return Plugin_Continue;
 		if (GetEntProp(activeWeapon, Prop_Send, "m_bInReload") != 0) return Plugin_Continue;
 		float currentTime = GetGameTime();
-		if (currentTime < player[client].primaryattacktime || currentTime < player[client].secondaryattacktime) return Plugin_Continue;
+		if (currentTime < player[client].primaryattacktime) return Plugin_Continue;
 
 		if (!(player[client].onbutton & adsButton))
 		{
@@ -623,27 +609,20 @@ MRESReturn DhookCallback_ItemPostFrame(int weapon)
 	float currenttime    = GetGameTime();
 
 	SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", currenttime + 100);
-	SetEntPropFloat(weapon, Prop_Send, "m_flNextSecondaryAttack", currenttime + 100);
 
 	static int button;
 	button = GetClientButtons(client);
 	// seondary first
 	if( (button & IN_ATTACK2) && CanAttack(client) )
 	{
-		if( currenttime > player[client].secondaryattacktime )
-		{
-			// PrintToChat(client, "attacking, time %f", currenttime);
-			SetEntPropFloat(weapon, Prop_Send, "m_flNextSecondaryAttack", currenttime);
-			SDKCall(g_SDKCall_SecondaryAttack, weapon);
-			player[client].secondaryattacktime = currenttime + DEFAULT_ATTACK2_TIME;
-		}
+		player[client].pendingDisableAdsFix = true;
+		SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", currenttime);
 		return MRES_Ignored; // ignore in_attack and in_reload when pushing.
 	}
 
 	if( (button & IN_ATTACK) && CanAttack(client, clip) )
 	{
-		if( currenttime > player[client].primaryattacktime
-			&& currenttime > player[client].secondaryattacktime ) // not allow in attack2
+		if(currenttime > player[client].primaryattacktime)
 		{
 			SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", currenttime);
 			SDKCall(g_SDKCall_PrimaryAttack, weapon);
@@ -655,15 +634,10 @@ MRESReturn DhookCallback_ItemPostFrame(int weapon)
 
 	int reserverammo = L4D_GetReserveAmmo(client, weapon);
 	
-	// When player presses reload button or auto-reload triggers (empty clip), 
-	// set flag to disable AdsFix mode safely outside of this callback
-	if( (button & IN_RELOAD) || (clip == 0 && (reserverammo > 0 || player[client].isPistol) && currenttime > player[client].secondaryattacktime) )
+	if((button & IN_RELOAD) || (clip == 0 && (reserverammo > 0 || player[client].isPistol)))
 	{
-		// Set flag to disable AdsFix mode (will be processed in OnPlayerRunCmd)
 		player[client].pendingDisableAdsFix = true;
-		// Reset attack timings to allow normal game reload behavior
 		SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", currenttime);
-		SetEntPropFloat(weapon, Prop_Send, "m_flNextSecondaryAttack", currenttime);
 		return MRES_Ignored;
 	}
 
@@ -907,15 +881,14 @@ void LoadPlayerWeaponAttributes(int client, int weapon)
 	// Load attributes using Left4DHooks
 	player[client].isPistol = StrContains(classname, "pistol", false) != -1;
 
-	float fireRate = SDKCall(g_SDKCall_GetRateOfFire, weapon);
+	float cycleTime = SDKCall(g_SDKCall_GetRateOfFire, weapon);
 
-	if (cvar.ads_cycletime_scar > 0.0 && GetEntProp(weapon, Prop_Send, "m_iWorldModelIndex") == g_scar_precache_index) fireRate = cvar.ads_cycletime_scar;
-	if (cvar.ads_cycletime_mul > 1.0) fireRate *= cvar.ads_cycletime_mul;
+	if (cvar.ads_cycletime_scar > 0.0 && GetEntProp(weapon, Prop_Send, "m_iWorldModelIndex") == g_scar_precache_index) cycleTime = cvar.ads_cycletime_scar;
+	if (cvar.ads_cycletime_mul > 1.0) cycleTime *= cvar.ads_cycletime_mul;
 
-	player[client].cycleTime = fireRate;
+	player[client].cycleTime = cycleTime;
 	float currentTime = GetGameTime();
-	player[client].primaryattacktime = currentTime + fireRate;
-	player[client].secondaryattacktime = currentTime + DEFAULT_ATTACK2_TIME;
+	player[client].primaryattacktime = currentTime + cycleTime;
 }
 
 void ToggleAdsFix(int client, int weapon, bool enable)
@@ -937,7 +910,6 @@ void ToggleAdsFix(int client, int weapon, bool enable)
 	{
 		float currentTime = GetGameTime();
 		SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", currentTime);
-		SetEntPropFloat(weapon, Prop_Send, "m_flNextSecondaryAttack", currentTime);
 		player[client].cycleTime = 0.0;
 		UnHookWeaponAdsFix(weapon);
 	}

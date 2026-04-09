@@ -24,11 +24,6 @@
 				"linux" 	"283"
 				"windows"	"282"
 			}
-			"CTerrorWeapon::SecondaryAttack"
-			{
-				"linux" 	"284"
-				"windows"	"283"
-			}
 			"CTerrorGun::GetRateOfFire"
 			{
 				"linux"		"454"
