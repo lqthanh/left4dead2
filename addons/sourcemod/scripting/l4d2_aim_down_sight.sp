@@ -26,7 +26,7 @@ public Plugin myinfo =
 #include <dhooks>
 #include <left4dhooks>
 
-#define DEFAULT_ATTACK2_TIME 	0.4
+#define DEFAULT_ATTACK2_TIME 	0.7
 #define SCAR_WORLD_MODEL 		"models/w_models/weapons/w_desert_rifle.mdl"
 
 // #endregion
@@ -69,6 +69,7 @@ enum struct PlayerData
 	bool bZoom;
 	int onbutton;
 	bool pendingDisableAdsFix;
+	bool pendingDisableAdsBySecondary;
 	float primaryattacktime;
 
 	bool isPistol;
@@ -133,12 +134,13 @@ public void OnClientConnected(int client)
 	if( IsFakeClient(client) )
 		return;
 
-	player[client].bZoom				= false;
-	player[client].pendingDisableAdsFix	= false;
+	player[client].bZoom						= false;
+	player[client].pendingDisableAdsFix			= false;
+	player[client].pendingDisableAdsBySecondary = false;
+	player[client].primaryattacktime			= 0.0;
 
-	player[client].primaryattacktime	= 0.0;
-
-	player[client].cycleTime			= 0.0;
+	player[client].isPistol						= false;
+	player[client].cycleTime					= 0.0;
 }
 
 public void OnClientPutInServer(int client)
@@ -616,7 +618,7 @@ MRESReturn DhookCallback_ItemPostFrame(int weapon)
 	if( (button & IN_ATTACK2) && CanAttack(client) )
 	{
 		player[client].pendingDisableAdsFix = true;
-		SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", currenttime);
+		player[client].pendingDisableAdsBySecondary = true;
 		return MRES_Ignored; // ignore in_attack and in_reload when pushing.
 	}
 
@@ -637,7 +639,6 @@ MRESReturn DhookCallback_ItemPostFrame(int weapon)
 	if((button & IN_RELOAD) || (clip == 0 && (reserverammo > 0 || player[client].isPistol)))
 	{
 		player[client].pendingDisableAdsFix = true;
-		SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", currenttime);
 		return MRES_Ignored;
 	}
 
@@ -909,7 +910,15 @@ void ToggleAdsFix(int client, int weapon, bool enable)
 	else
 	{
 		float currentTime = GetGameTime();
-		SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", currentTime);
+		if (player[client].pendingDisableAdsBySecondary)
+		{
+			player[client].pendingDisableAdsBySecondary = false;
+			SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", currentTime + DEFAULT_ATTACK2_TIME);
+		}
+		else
+		{
+			SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", currentTime);
+		}
 		player[client].cycleTime = 0.0;
 		UnHookWeaponAdsFix(weapon);
 	}
