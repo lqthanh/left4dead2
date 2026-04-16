@@ -1,10 +1,19 @@
-// "Weapon"
-// {
-	// "weapon_smg"
-	// {
-		// "Animation"
-		// {
-			// "ACT_VM_PRIMARYATTACK_LAYER" "6"
-		// }
-	// }
-// }
+"Weapon"
+{
+	"weapon_pistol"
+	{
+		"Animation"
+		{
+			"ACT_VM_FIDGET" "0"
+		}
+	}
+
+	"weapon_pistol_magnum"
+	{
+		"Animation"
+		{
+			"ACT_VM_FIDGET" "32"
+		}
+	}
+
+}

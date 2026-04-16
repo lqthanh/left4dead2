@@ -715,7 +715,7 @@ int SelectWeightedSequence(int entity, int activity)
 	return SDKCall(hCall, entity, activity);
 }
 
-bool SendWeaponAnim(int weapon, int sequence)
+bool SendWeaponAnim(int weapon, int activity)
 {
 	static Handle hCall = null;
 	if (hCall == null)
@@ -726,7 +726,7 @@ bool SendWeaponAnim(int weapon, int sequence)
 		PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
 		hCall = EndPrepSDKCall();
 	}
-	return SDKCall(hCall, weapon, sequence);
+	return SDKCall(hCall, weapon, activity);
 }
 
 int GetWeaponGunClipSize(int weapon)
