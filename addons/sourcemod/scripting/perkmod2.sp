@@ -755,6 +755,8 @@ public OnPluginStart()
 
 	RegConsoleCmd("sm_perks", MenuOpen_OnSay);
 	RegConsoleCmd("sm_p", MenuOpen_OnSay);
+	RegConsoleCmd("sm_perks_team", MenuTeam_OnSay);
+	RegConsoleCmd("sm_o", MenuTeam_OnSay);
 
 	//debug
 	//RegConsoleCmd("say", Debug_OnSay);
@@ -5177,6 +5179,97 @@ public Menu_ChooseConfirm (Handle:topmenu, MenuAction:action, param1, param2)
 //for displaying perk choices after confirming
 public Menu_DoNothing (Handle:topmenu, MenuAction:action, param1, param2)
 {}
+
+public Action:MenuTeam_OnSay(iCid, args)
+{
+	new iT = GetClientTeam(iCid);
+	if (iT != 2)
+	{
+		PrintToChat(iCid, "\x03[SM] This team command is only available for survivors.");
+		return Plugin_Handled;
+	}
+
+	SendPanelToClient(Menu_Team(iCid), iCid, Menu_DoNothing, 30);
+	return Plugin_Handled;
+}
+
+public Handle:Menu_Team(iCid)
+{
+	new Handle:menu = CreatePanel();
+	new String:line[256];
+	new String:name[64];
+	new String:primary[32];
+	new String:secondary[32];
+	new String:tertiary[32];
+	new String:mark[8];
+
+	SetPanelTitle(menu, "Team Perk Status:");
+
+	for (new i = 1; i <= MaxClients; i++)
+	{
+		if (!IsClientInGame(i) || GetClientTeam(i) != 2 || i == iCid)
+			continue;
+
+		GetClientName(i, name, sizeof(name));
+		if (g_iConfirm[i] == 1)
+			Format(mark, sizeof(mark), "■");
+		else
+			Format(mark, sizeof(mark), "□");
+
+		GetSur1Name(i, primary, sizeof(primary));
+		GetSur2Name(i, secondary, sizeof(secondary));
+		GetSur3Name(i, tertiary, sizeof(tertiary));
+
+		Format(line, sizeof(line), "%s | %s | %s | %s | %s", name, mark, primary, secondary, tertiary);
+		DrawPanelItem(menu, line);
+	}
+
+	return menu;
+}
+
+stock void GetSur1Name(int iCid, char[] buffer, int maxlength)
+{
+	if (g_iSur1[iCid] == 1 && g_iStopping_enable == 1)
+		strcopy(buffer, maxlength, "Stopping Power");
+	else if (g_iSur1[iCid] == 2 && g_iSoH_enable == 1)
+		strcopy(buffer, maxlength, "Sleight of Hand");
+	else if (g_iSur1[iCid] == 3 && g_iPyro_enable == 1)
+		strcopy(buffer, maxlength, "Pyrotechnician");
+	else if (g_iSur1[iCid] == 4 && g_iMA_enable == 1)
+		strcopy(buffer, maxlength, "Martial Artist");
+	else if (g_iSur1[iCid] == 5 && g_iChristmas_enable == 1)
+		strcopy(buffer, maxlength, "Christmas Gift");
+	else
+		strcopy(buffer, maxlength, "Not set");
+}
+
+stock void GetSur2Name(int iCid, char[] buffer, int maxlength)
+{
+	if (g_iSur2[iCid] == 1 && g_iUnbreak_enable == 1)
+		strcopy(buffer, maxlength, "Unbreakable");
+	else if (g_iSur2[iCid] == 2 && g_iSpirit_enable == 1)
+		strcopy(buffer, maxlength, "Spirit");
+	else if (g_iSur2[iCid] == 3 && g_iHelpHand_enable == 1)
+		strcopy(buffer, maxlength, "Helping Hand");
+	else if (g_iSur2[iCid] == 4 && g_iPackCat_enable == 1)
+		strcopy(buffer, maxlength, "Pack Cat");
+	else
+		strcopy(buffer, maxlength, "Not set");
+}
+
+stock void GetSur3Name(int iCid, char[] buffer, int maxlength)
+{
+	if (g_iSur3[iCid] == 1 && g_iPack_enable == 1)
+		strcopy(buffer, maxlength, "Pack Rat");
+	else if (g_iSur3[iCid] == 2 && g_iChem_enable == 1)
+		strcopy(buffer, maxlength, "Chem Reliant");
+	else if (g_iSur3[iCid] == 3 && g_iHard_enable == 1)
+		strcopy(buffer, maxlength, "Hard to Kill");
+	else if (g_iSur3[iCid] == 4 && g_iExtreme_enable == 1)
+		strcopy(buffer, maxlength, "Extreme Conditioning");
+	else
+		strcopy(buffer, maxlength, "Not set");
+}
 
 //shows perk choices
 public Handle:Menu_ShowChoices (iCid)
