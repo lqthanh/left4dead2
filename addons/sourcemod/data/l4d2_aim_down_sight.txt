@@ -24,20 +24,4 @@
 		}
 	}
 
-	"weapon_sniper_awp"
-	{
-		"Animation"
-		{
-			"ACT_VM_FIDGET" "20"
-		}
-	}
-
-	"weapon_sniper_scout"
-	{
-		"Animation"
-		{
-			"ACT_VM_FIDGET" "20"
-		}
-	}
-
 }
