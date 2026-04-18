@@ -1,6 +1,6 @@
 /*
 *	Prototype Grenades
-*	Copyright (C) 2025 Silvers
+*	Copyright (C) 2026 Silvers
 *
 *	This program is free software: you can redistribute it and/or modify
 *	it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 
 
 
-#define PLUGIN_VERSION 		"1.55"
+#define PLUGIN_VERSION 		"1.57"
 
 /*======================================================================================
 	Plugin Info:
@@ -31,6 +31,16 @@
 
 ========================================================================================
 	Change Log:
+
+1.57 (25-Jan-2026)
+	- Various changes to the "Bullets" type. Thanks to "staaandup" for reporting.
+	- Changed "damage_tick" to set the minimum amount of time before someone can be hit by another bullet.
+	- Changed "effect_range" to limit the range at which damage can occur.
+	- Clarified "effect_tick" is how often the bullets shoot.
+	- Updated the "l4d_grenades.cfg" data file to reflect these changes.
+
+1.56 (04-Jan-2026)
+	- Fixed the "Glow" type not causing damage. Thanks to "swiftswing1" for reporting.
 
 1.55 (04-Jan-2025)
 	- Fixed the grenade type not keeping when using "Gear Transfer" plugin to give/grab/swap grenades. Thanks to "chungocanh12" for reporting.
@@ -572,42 +582,43 @@ static char g_sWeaponModels2[MAX_WEAPONS2][] =
 #define SHAKE_RANGE			150.0									// How far to increase the shake from the effect range.
 
 float	g_fLastTesla[MAX_ENTS];										// Last time damage taken, used by Tesla mode.
+float	g_fLastBullet[MAX_ENTS];									// Last a player was hit by the "bullets" type
 float	g_fLastEquip[MAXPLAYERS+1];									// Last time a weapon was equipped, prevent duplicate messages
 float	g_fLastFreeze[MAXPLAYERS+1];								// Last time in the freezer area.
 float	g_fLastShield[MAXPLAYERS+1];								// Last time in the shield, for damage hook.
 float	g_fLastUse[MAXPLAYERS+1];									// Clients last time pressing +USE.
 bool	g_bChangingTypesMenu[MAXPLAYERS+1];							// Store when clients are changing type, to close menu when ended.
-int		g_iClientGrenadeType[MAXPLAYERS+1] = { -1, ... };			// The current mode a player has selected
-int		g_iClientGrenadePref[MAXPLAYERS+1][3];						// Client cookie preferences - mode client last used for all grenades
+int g_iClientGrenadeType[MAXPLAYERS+1] = { -1, ... };			// The current mode a player has selected
+int g_iClientGrenadePref[MAXPLAYERS+1][3];						// Client cookie preferences - mode client last used for all grenades
 
 float	g_GrenadeData[MAX_TYPES][MAX_DATA];							// Config data for all grenade modes.
-int		g_GrenadeSlot[MAX_TYPES][2];								// [0]=L4D2, [1]=L4D1. Which grenade slot the grenade mode uses.
-int		g_GrenadeTarg[MAX_TYPES];									// Who the grenade affects.
-int		g_GrenadeType[2048];										// The type of grenade selected.
-int		g_BeamSprite, g_HaloSprite;									// Beam Rings
-int		g_fConfigExtEffect;											// Extinguisher - Effect modes
+int g_GrenadeSlot[MAX_TYPES][2];									// [0]=L4D2, [1]=L4D1. Which grenade slot the grenade mode uses.
+int g_GrenadeTarg[MAX_TYPES];									// Who the grenade affects.
+int g_GrenadeType[2048];											// The type of grenade selected.
+int g_BeamSprite, g_HaloSprite;									// Beam Rings
+int g_fConfigExtEffect;											// Extinguisher - Effect modes
 float	g_fConfigAcidComm;											// Chemical Mode - Acid damage - Common
 float	g_fConfigAcidSelf;											// Chemical Mode - Acid damage - Self
 float	g_fConfigAcidSpec;											// Chemical Mode - Acid damage - Special Infected
 float	g_fConfigAcidSurv;											// Chemical Mode - Acid damage - Survivors
 float	g_fConfigGlowBonus;											// Glow mode - damage bonus
 float	g_fConfigFreezeTime;										// Freeze mode - freeze time
-int		g_iConfigDmgType;											// Damage type. Only used for Flak type.
-int		g_iConfigBots;												// Can bots use Prototype Grenades
-int		g_iConfigStock;												// Which grenades have their default feature.
-int		g_iConfigTypes;												// Which grenade modes are allowed.
-int		g_iConfigBinds;												// Menu or Pressing keys to change mode.
-int		g_iConfigMsgs;												// Display chat messages?
-int		g_iConfigPrefs;												// Client preferences save/load mode or give random mode.
+int g_iConfigDmgType;											// Damage type. Only used for Flak type.
+int g_iConfigBots;												// Can bots use Prototype Grenades
+int g_iConfigStock;												// Which grenades have their default feature.
+int g_iConfigTypes;												// Which grenade modes are allowed.
+int g_iConfigBinds;												// Menu or Pressing keys to change mode.
+int g_iConfigMsgs;												// Display chat messages?
+int g_iConfigPrefs;												// Client preferences save/load mode or give random mode.
 float	g_fConfigSurvivors;											// Survivors damage multiplier.
 float	g_fConfigSpecial;											// Special Infected damage multiplier.
 float	g_fConfigTank;												// Tank damage multiplier.
 float	g_fConfigWitch;												// Witch damage multiplier.
 float	g_fConfigPhysics;											// Physics props damage multiplier.
-int		g_iEntityHurt;												// Hurt entity.
-int		g_iParticleTracer;											// Particle index for TE.
-int		g_iParticleTracer50;
-int		g_iParticleBashed;
+int g_iEntityHurt;												// Hurt entity.
+int g_iParticleTracer;											// Particle index for TE.
+int g_iParticleTracer50;
+int g_iParticleBashed;
 UserMsg	g_FadeUserMsgId;
 
 int g_iWeaponType = -1;												// Used for Gear Transfer switching weapons to keep type when "preferences" set to "3"
@@ -1841,6 +1852,9 @@ void LoadDataConfig()
 	LoadDataEntry(INDEX_AIRSTRIKE,		hFile,		"Mod_Airstrike");
 	LoadDataEntry(INDEX_WEAPON,			hFile,		"Mod_Weapon");
 
+	// Default was unused as "1.0" now setting a value, so default to "1000.0"
+	if( g_GrenadeData[INDEX_BULLETS][CONFIG_RANGE] == 1.0 ) g_GrenadeData[INDEX_BULLETS][CONFIG_RANGE] = 1000.0;
+
 	delete hFile;
 }
 
@@ -2201,6 +2215,7 @@ void ResetPlugin(bool all = false)
 	for( int i = 1; i <= MaxClients; i++ )
 	{
 		g_bChangingTypesMenu[i] = false;
+		g_fLastBullet[i] = 0.0;
 		g_fLastEquip[i] = 0.0;
 		g_fLastFreeze[i] = 0.0;
 		g_fLastShield[i] = 0.0;
@@ -3212,6 +3227,7 @@ void Explode_Cluster(int client, int entity, int index, bool fromTimer)
 
 	// Projectiles
 	static float vVel[3];
+	float range = g_GrenadeData[index - 1][CONFIG_RANGE];
 	int max = 3;
 	int particle;
 	vPos[2] += 10.0;
@@ -3236,13 +3252,13 @@ void Explode_Cluster(int client, int entity, int index, bool fromTimer)
 			// Set origin and velocity
 			if( index - 1 == INDEX_FIRECLUSTER )
 			{
-				vVel[0] = GetRandomFloat(-g_GrenadeData[index - 1][CONFIG_RANGE], g_GrenadeData[index - 1][CONFIG_RANGE] / 2);
-				vVel[1] = GetRandomFloat(-g_GrenadeData[index - 1][CONFIG_RANGE], g_GrenadeData[index - 1][CONFIG_RANGE] / 2);
-				vVel[2] = GetRandomFloat(270.0, g_GrenadeData[index - 1][CONFIG_RANGE]);
+				vVel[0] = GetRandomFloat(-range, range / 2);
+				vVel[1] = GetRandomFloat(-range, range / 2);
+				vVel[2] = GetRandomFloat(270.0, range);
 			} else {
-				vVel[0] = GetRandomFloat(-g_GrenadeData[index - 1][CONFIG_RANGE], g_GrenadeData[index - 1][CONFIG_RANGE]);
-				vVel[1] = GetRandomFloat(-g_GrenadeData[index - 1][CONFIG_RANGE], g_GrenadeData[index - 1][CONFIG_RANGE]);
-				vVel[2] = GetRandomFloat(270.0, g_GrenadeData[index - 1][CONFIG_RANGE] / 2);
+				vVel[0] = GetRandomFloat(-range, range);
+				vVel[1] = GetRandomFloat(-range, range);
+				vVel[2] = GetRandomFloat(270.0, range / 2);
 			}
 
 			TeleportEntity(entity, vPos, NULL_VECTOR, vVel);
@@ -3366,6 +3382,7 @@ Action OnPlayerDamage(int victim, int &attacker, int &inflictor, float &damage, 
 	{
 		damage *= g_fConfigGlowBonus;
 		if( damage < 0.0 ) damage = 0.0;
+		return Plugin_Changed;
 	}
 
 
@@ -4015,7 +4032,7 @@ void Explode_Medic(int entity, int index)
 					} else {
 						iHealth = GetClientHealth(i);
 						iMax = GetClientMaxHealth(i);
-	
+
 						if( iHealth < iMax )
 						{
 							iHealth += iHeal;
@@ -4126,7 +4143,7 @@ int GetMaxReviveCount()
 			return -1;
 		}
 	}
-	
+
 	return GetConVarInt(hMaxReviveCount);
 }
 
@@ -4417,6 +4434,7 @@ void Explode_Bullets(int client, int entity, int index, bool fromTimer)
 	Handle trace;
 	static float vEnd[3], vAng[3];
 	float fDamage;
+	float distance;
 	int particle;
 	int target;
 	int targ;
@@ -4461,6 +4479,13 @@ void Explode_Bullets(int client, int entity, int index, bool fromTimer)
 			// Valid target. Scale damage
 			if( target > 0 && target <= MaxClients && (targ & (1<<TARGET_SURVIVOR) || targ & (1<<TARGET_SPECIAL)) )
 			{
+				if( GetGameTime() - g_fLastBullet[target] < g_GrenadeData[index - 1][CONFIG_DMG_TICK] ) continue;
+				g_fLastBullet[target] = GetGameTime();
+
+				GetClientAbsOrigin(target, vAng);
+				distance = GetVectorDistance(vPos, vAng);
+				if( distance > g_GrenadeData[index - 1][CONFIG_RANGE] ) continue;
+
 				int team = GetClientTeam(target);
 				if( team == 2 && targ & (1<<TARGET_SURVIVOR) )
 				{
@@ -4481,6 +4506,13 @@ void Explode_Bullets(int client, int entity, int index, bool fromTimer)
 
 			if( target > MaxClients && (targ & (1<<TARGET_WITCH) || targ & (1<<TARGET_COMMON) || targ & (1<<TARGET_PHYSICS)) )
 			{
+				if( GetGameTime() - g_fLastBullet[target] < g_GrenadeData[index - 1][CONFIG_DMG_TICK] ) continue;
+				g_fLastBullet[target] = GetGameTime();
+
+				GetEntPropVector(target, Prop_Data, "m_vecAbsOrigin", vAng);
+				distance = GetVectorDistance(vPos, vAng);
+				if( distance > g_GrenadeData[index - 1][CONFIG_RANGE] ) continue;
+
 				// Check classname
 				static char classname[16];
 				GetEdictClassname(target, classname, sizeof(classname));
@@ -4511,7 +4543,7 @@ void Explode_Bullets(int client, int entity, int index, bool fromTimer)
 
 			if( pass )
 			{
-				SDKHooks_TakeDamage(target, client, client, fDamage, DMG_BULLET);
+				SDKHooks_TakeDamage(target, client, client, fDamage, DMG_BULLET, _, _, _, false);
 			}
 		}
 
@@ -4940,7 +4972,7 @@ void CreateExplosion(int client, int entity, int index, float range = 0.0, float
 				if( team == 2 ? targ & (1<<TARGET_SURVIVOR) : targ & (1<<TARGET_SPECIAL) )
 				{
 					if( team == 3 && GetEntProp(i, Prop_Send, "m_isGhost") == 1 ) continue; // Ignore ghosts
-	
+
 					GetEntPropVector(i, Prop_Data, "m_vecOrigin", vEnd);
 					fDistance = GetVectorDistance(vPos, vEnd);
 
