@@ -6278,6 +6278,12 @@ bool IsPrimaryWeapon(char[] classname)
 			|| StrContains(classname, "grenade_launcher") != -1);
 }
 
+// Check method
+bool CheckClient (int client)
+{
+	return (!client || client > MaxClients || !IsClientInGame(client));
+}
+
 // #endregion
 // =======================================================================
 
