@@ -10,7 +10,11 @@
 #tryinclude <perkmod2>
 
 #if !defined _perkmod2_included_
-	native int perkmod2_IsEnable_Perk_ChristmasGift(int client, char[] weapon);
+	native int perkmod2_IsEnable_SurvivorPrimary();
+	native int perkmod2_IsEnable_SurvivorPrimary_ChristmasGift();
+	native int perkmod2_IsClientConfirm(int client);
+	native int perkmod2_IsClientSelect_SurvivorPrimary_ChristmasGift(int client);
+	native int perkmod2_IsExist_SurvivorPrimary_ChristmasGift();
 #endif
 
 #define PLUGIN_VERSION		"3.5-2024/5/5"
@@ -36,7 +40,11 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 		return APLRes_SilentFailure;
 	}
 
-	MarkNativeAsOptional("perkmod2_IsEnable_Perk_ChristmasGift");
+	MarkNativeAsOptional("perkmod2_IsEnable_SurvivorPrimary");
+	MarkNativeAsOptional("perkmod2_IsEnable_SurvivorPrimary_ChristmasGift");
+	MarkNativeAsOptional("perkmod2_IsClientConfirm");
+	MarkNativeAsOptional("perkmod2_IsClientSelect_SurvivorPrimary_ChristmasGift");
+	MarkNativeAsOptional("perkmod2_IsExist_SurvivorPrimary_ChristmasGift");
 	
 	ZC_TANK = 8;
 	bLate = late;
@@ -654,17 +662,11 @@ void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast)
 	
 	int victim = GetClientOfUserId(event.GetInt("userid"));
 	int attacker = GetClientOfUserId(event.GetInt("attacker"));
-
-	if ( g_bAvailable_perkmod2 ) {
-		if ( !perkmod2_IsEnable_Perk_ChristmasGift(attacker) ) {
-			return;
-		}
-	}
-	
 	if (attacker != victim && IsValidClient(victim) && GetClientTeam(victim) == 3)
 	{
 		if(GetZombieClass(victim) == 8)
 		{
+			if (g_bAvailable_perkmod2) if (!perkmod2_IsExist_SurvivorPrimary_ChristmasGift()) return;
 			if (GetRandomInt(1, 100) <= g_iSpecialGiftChance)
 			{
 				DropGift(victim, TYPE_SPECIAL);
@@ -672,6 +674,11 @@ void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast)
 		}
 		else
 		{
+			if (g_bAvailable_perkmod2) if (
+				!perkmod2_IsEnable_SurvivorPrimary() ||
+				!perkmod2_IsEnable_SurvivorPrimary_ChristmasGift() ||
+				!perkmod2_IsClientConfirm(attacker) ||
+				!perkmod2_IsClientSelect_SurvivorPrimary_ChristmasGift(attacker)) return;
 			if (GetRandomInt(1, 100) <= g_iGiftChance)
 			{
 				DropGift(victim, TYPE_STANDARD);
@@ -688,12 +695,7 @@ void OnWitchKilled(Event event, const char[] name, bool dontBroadcast)
 	if(g_bIsDoorOpen_LockDown|| g_bFinalHasStart)
 		return;	
 
-	int attacker = GetClientOfUserId(event.GetInt("userid"));
-	if ( g_bAvailable_perkmod2 ) {
-		if ( !perkmod2_IsEnable_Perk_ChristmasGift(attacker) ) {
-			return;
-		}
-	}
+	if (g_bAvailable_perkmod2) if (!perkmod2_IsExist_SurvivorPrimary_ChristmasGift()) return;
 	int witch = event.GetInt("witchid");
 	if (GetRandomInt(1, 100) <= g_iSpecialGiftChance)
 	{

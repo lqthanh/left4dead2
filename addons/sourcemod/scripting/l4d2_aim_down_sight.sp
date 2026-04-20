@@ -26,7 +26,7 @@ public Plugin myinfo =
 #include <dhooks>
 #include <left4dhooks>
 
-#define DEFAULT_ATTACK2_TIME 	0.4
+#define DEFAULT_ATTACK2_TIME 	0.7
 #define SCAR_WORLD_MODEL 		"models/w_models/weapons/w_desert_rifle.mdl"
 
 // #endregion
@@ -54,8 +54,8 @@ int
 	g_Offset_BrustAttackTime;
 
 Handle
-	g_SDKCall_SecondaryAttack,
 	g_SDKCall_PrimaryAttack,
+	g_SDKCall_GetRateOfFire,
 	g_SDKCall_CanAttack;
 
 DynamicHook
@@ -69,14 +69,11 @@ enum struct PlayerData
 	bool bZoom;
 	int onbutton;
 	bool pendingDisableAdsFix;
-
-	// ADS Fix attributes
+	bool pendingDisableAdsBySecondary;
 	float primaryattacktime;
-	float secondaryattacktime;
 
-	// Per-player weapon attributes
+	bool isPistol;
 	float cycleTime;
-	int weaponWorldModelIndex;
 }
 PlayerData
 	player[MAXPLAYERS + 1];
@@ -84,17 +81,19 @@ PlayerData
 ConVar
 	cvar_ads_debug,
 	cvar_ads_key,
-	cvar_ads_scar_cycletime;
+	cvar_ads_cycletime_mul,
+	cvar_ads_cycletime_scar;
 enum struct GlobalConVar
 {
 	bool ads_debug;
 	int ads_key;
-	float ads_scar_cycletime;
+	float ads_cycletime_mul;
+	float ads_cycletime_scar;
 }
 GlobalConVar
 	cvar;
 
-int currentActivity[MAXPLAYERS + 1];
+// int currentActivity[MAXPLAYERS + 1];
 
 // #endregion
 // ============================================================================
@@ -135,13 +134,13 @@ public void OnClientConnected(int client)
 	if( IsFakeClient(client) )
 		return;
 
-	player[client].bZoom				= false;
-	player[client].pendingDisableAdsFix	= false;
+	player[client].bZoom						= false;
+	player[client].pendingDisableAdsFix			= false;
+	player[client].pendingDisableAdsBySecondary = false;
+	player[client].primaryattacktime			= 0.0;
 
-	player[client].primaryattacktime	= 0.0;
-	player[client].secondaryattacktime	= 0.0;
-
-	player[client].cycleTime			= 0.0;
+	player[client].isPistol						= false;
+	player[client].cycleTime					= 0.0;
 }
 
 public void OnClientPutInServer(int client)
@@ -161,7 +160,8 @@ public void OnEntityCreated(int entity, const char[] classname)
 		|| StrContains(classname, "shotgun") != -1
 		|| StrContains(classname, "smg") != -1
 		|| StrContains(classname, "sniper") != -1
-		|| StrContains(classname, "rifle") != -1)
+		|| StrContains(classname, "rifle") != -1
+		|| StrContains(classname, "grenade_launcher") != -1)
 		&& StrContains(classname, "spawn") == -1
 	)
 	{
@@ -170,6 +170,56 @@ public void OnEntityCreated(int entity, const char[] classname)
 		SDKHook(entity, SDKHook_ReloadPost, OnCustomWeaponReload);
 		EntStore[entity] = 0;
 	}
+
+	switch (classname[0])
+    {
+        case 'w':
+        {
+            if (strncmp(classname, "weapon_spawn", 12, false) == 0)
+                RequestFrame(OnWeaponNextFrame_weapon_spawn, EntIndexToEntRef(entity));
+            if (strncmp(classname, "weapon_pistol", 13, false) == 0) //weapon_pistol, weapon_pistol_spawn
+                RequestFrame(OnWeaponNextFrame_weapon_pistol, EntIndexToEntRef(entity));
+        }
+    }
+}
+
+void OnWeaponNextFrame_weapon_spawn(int weapon)
+{
+    weapon = EntRefToEntIndex(weapon);
+    if( weapon == INVALID_ENT_REFERENCE ) return;
+
+    int m_weaponID = GetEntProp(weapon, Prop_Send, "m_weaponID");
+
+    if (m_weaponID == 1 ) //1=pistol
+    {
+        SDKHook(weapon, SDKHook_Use, OnPistolUse); // don't use SDKHook_UsePost
+    }
+}
+
+void OnWeaponNextFrame_weapon_pistol(int weapon)
+{
+    weapon = EntRefToEntIndex(weapon);
+    if( weapon == INVALID_ENT_REFERENCE ) return;
+
+    SDKHook(weapon, SDKHook_Use, OnPistolUse); // don't use  SDKHook_UsePost
+}
+
+Action OnPistolUse(int weapon, int activator, int client, UseType type, float value) 
+{
+    if (client <= 0 || client > MaxClients || !IsClientInGame(client)) return Plugin_Continue;
+
+    int secondary_weapon = GetPlayerWeaponSlot(client, L4D_WEAPON_SLOT_SECONDARY);
+    if(secondary_weapon <= MaxClients) return Plugin_Continue;
+
+    static char classname[32];
+    GetEntityClassname(secondary_weapon, classname, sizeof(classname));
+    if (strcmp(classname, "weapon_pistol") != 0) return Plugin_Continue;
+    if (GetEntProp(secondary_weapon, Prop_Send, "m_isDualWielding") > 0) return Plugin_Continue;
+
+	player[client].bZoom = false;
+	ToggleAdsFix(client, secondary_weapon, false);
+
+    return Plugin_Continue;
 }
 
 // #endregion
@@ -208,12 +258,12 @@ void LoadGameData()
 	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, func);
 	if( !(g_SDKCall_PrimaryAttack = EndPrepSDKCall()) )
 		SetFailState("failed to start sdkcall \"%s\"", func);
-	
-	FormatEx(func, sizeof(func), "CTerrorWeapon::SecondaryAttack");
+
+	FormatEx(func, sizeof(func), "CTerrorGun::GetRateOfFire");
 	StartPrepSDKCall(SDKCall_Entity);
 	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, func);
-	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
-	if( !(g_SDKCall_SecondaryAttack = EndPrepSDKCall()) )
+	PrepSDKCall_SetReturnInfo(SDKType_Float, SDKPass_Plain);
+	if ( !(g_SDKCall_GetRateOfFire = EndPrepSDKCall()) )
 		SetFailState("failed to start sdkcall \"%s\"", func);
 
 	FormatEx(func, sizeof(func), "CTerrorPlayer::CanAttack");
@@ -280,10 +330,12 @@ void LoadConVars()
 	// Create ConVars
 	cvar_ads_debug = 			CreateConVar("ads_debug", "0", "Enable debug messages for ADS plugin");
 	cvar_ads_key = 				CreateConVar("ads_key", "0", "Key to activate ADS. 0 = Zoom key (MOUSE 3), 1 = Walk key (SHIFT), 2 = Duck key (CTRL)");
-	cvar_ads_scar_cycletime = 	CreateConVar("ads_scar_cycletime", "0.12", "Override cycle time for SCAR");
+	cvar_ads_cycletime_mul = 	CreateConVar("ads_cycletime_mul", "1.1", "ADS cycle-time multiplier. > 1.0 makes ADS slower, 1.0 keeps default.", FCVAR_NONE, true, 1.0);
+	cvar_ads_cycletime_scar = 	CreateConVar("ads_cycletime_scar", "0.12", "Override cycle time for SCAR");
 	cvar_ads_debug.AddChangeHook(OnConVarChanged);
 	cvar_ads_key.AddChangeHook(OnConVarChanged);
-	cvar_ads_scar_cycletime.AddChangeHook(OnConVarChanged);
+	cvar_ads_cycletime_mul.AddChangeHook(OnConVarChanged);
+	cvar_ads_cycletime_scar.AddChangeHook(OnConVarChanged);
 	GetConVars();
 	AutoExecConfig(true, "l4d2_aim_down_sight");
 }
@@ -292,7 +344,8 @@ void GetConVars()
 {
 	cvar.ads_debug = cvar_ads_debug.BoolValue;
 	cvar.ads_key = cvar_ads_key.IntValue;
-	cvar.ads_scar_cycletime = cvar_ads_scar_cycletime.FloatValue;
+	cvar.ads_cycletime_mul = cvar_ads_cycletime_mul.FloatValue;
+	cvar.ads_cycletime_scar = cvar_ads_cycletime_scar.FloatValue;
 }
 
 public void OnConVarChanged(ConVar convar, const char[] oldValue, const char[] newValue)
@@ -308,24 +361,8 @@ public void OnConfigsExecuted()
 // Events
 void HookEvents()
 {
-	HookEvent("weapon_zoom", Event_WeaponZoom, EventHookMode_Post);
 	HookEvent("weapon_drop", Event_WeaponDrop, EventHookMode_Post);
 	HookEvent("round_start", Event_RoundStart, EventHookMode_PostNoCopy);
-}
-
-void Event_WeaponZoom(Event event, const char[] name, bool dontBroadcast)
-{
-	int client = GetClientOfUserId(event.GetInt("userid"));
-	if (client <= 0)
-		return;
-	
-	bool zoomed = GetEntProp(client, Prop_Send, "m_iFOV") != 0;
-	if (zoomed != player[client].bZoom)
-	{
-		int weapon = GetPlayerWeapon(client);
-		if (weapon != -1)
-			SetupZoom(client, weapon, zoomed);
-	}
 }
 
 void Event_WeaponDrop(Event event, const char[] name, bool dontBroadcast)
@@ -344,7 +381,6 @@ void Event_RoundStart(Event event, const char[] name, bool dontBroadcast)
 	for(int i = 0; i <= MaxClients; i++)
 	{
 		player[i].primaryattacktime		= 0.0;
-		player[i].secondaryattacktime	= 0.0;
 	}
 }
 
@@ -375,31 +411,32 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 	if (!IsClientInGame(client) || GetClientTeam(client) != 2 || IsFakeClient(client))
 		return Plugin_Continue;
 
+	int activeWeapon = GetPlayerWeapon(client);
+
 	if( player[client].pendingDisableAdsFix )
 	{
-		int active_weapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-		if( active_weapon > 0 && IsValidEntity(active_weapon) )
+		if( activeWeapon > 0 && IsValidEntity(activeWeapon) )
 		{
-			SetupZoom(client, active_weapon, false);
+			SetupZoom(client, activeWeapon, false);
 		}
 		player[client].pendingDisableAdsFix = false;
 	}
 
-	if (cvar.ads_debug)
-	{
-		int viewModel = GetEntPropEnt(client, Prop_Send, "m_hViewModel");
-		if (viewModel > 0)
-		{
-			int layerSequence = GetEntProp(viewModel, Prop_Send, "m_nLayerSequence");
-			char activityName[128];
+	// if (cvar.ads_debug)
+	// {
+	// 	int viewModel = GetEntPropEnt(client, Prop_Send, "m_hViewModel");
+	// 	if (viewModel > 0)
+	// 	{
+	// 		int layerSequence = GetEntProp(viewModel, Prop_Send, "m_nLayerSequence");
+	// 		char activityName[128];
 			
-			// Get real activity name from activity ID
-			GetActivityName(currentActivity[client], activityName, sizeof(activityName));
+	// 		// Get real activity name from activity ID
+	// 		GetActivityName(currentActivity[client], activityName, sizeof(activityName));
 			
-			PrintToServer("[ADS DEBUG] Client %N - Activity: %s (%d), m_nLayerSequence: %d, ADS: %s", 
-				client, activityName, currentActivity[client], layerSequence, player[client].bZoom ? "ON" : "OFF");
-		}
-	}
+	// 		PrintToServer("[ADS DEBUG] Client %N - Activity: %s (%d), m_nLayerSequence: %d, ADS: %s", 
+	// 			client, activityName, currentActivity[client], layerSequence, player[client].bZoom ? "ON" : "OFF");
+	// 	}
+	// }
 	
 	// Determine which button to check based on ads_key
 	int adsButton;
@@ -425,10 +462,14 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 	
 	if (buttons & adsButton)
 	{
+		if (buttons & (IN_ATTACK|IN_ATTACK2|IN_RELOAD)) return Plugin_Continue;
+		if (GetEntProp(activeWeapon, Prop_Send, "m_bInReload") != 0) return Plugin_Continue;
+		float currentTime = GetGameTime();
+		if (currentTime < player[client].primaryattacktime) return Plugin_Continue;
+
 		if (!(player[client].onbutton & adsButton))
 		{
 			player[client].onbutton |= adsButton;
-			int activeWeapon = GetPlayerWeapon(client);
 			// Allow ADS if: not a sniper
 			if (activeWeapon != -1 && !CanZoom(activeWeapon))
 			{
@@ -520,12 +561,12 @@ public MRESReturn DH_OnSelectWeightedSequence(int weapon, Handle hReturn, Handle
 		}
 	}
 	
-	if (cvar.ads_debug)
-	{
-		// Track activity for owner
-		if (owner > 0 && owner <= MaxClients)
-			currentActivity[owner] = activity;
-	}
+	// if (cvar.ads_debug)
+	// {
+	// 	// Track activity for owner
+	// 	if (owner > 0 && owner <= MaxClients)
+	// 		currentActivity[owner] = activity;
+	// }
 	
 	// Try custom animation first
 	sequence = GetCustomWeaponAnim(weapon, activity);
@@ -570,61 +611,34 @@ MRESReturn DhookCallback_ItemPostFrame(int weapon)
 	float currenttime    = GetGameTime();
 
 	SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", currenttime + 100);
-	SetEntPropFloat(weapon, Prop_Send, "m_flNextSecondaryAttack", currenttime + 100);
 
 	static int button;
 	button = GetClientButtons(client);
 	// seondary first
 	if( (button & IN_ATTACK2) && CanAttack(client) )
 	{
-		if( currenttime > player[client].secondaryattacktime )
-		{
-			// PrintToChat(client, "attacking, time %f", currenttime);
-			SetEntPropFloat(weapon, Prop_Send, "m_flNextSecondaryAttack", currenttime);
-			SDKCall(g_SDKCall_SecondaryAttack, weapon);
-			player[client].secondaryattacktime = currenttime + DEFAULT_ATTACK2_TIME;
-		}
+		player[client].pendingDisableAdsFix = true;
+		player[client].pendingDisableAdsBySecondary = true;
 		return MRES_Ignored; // ignore in_attack and in_reload when pushing.
 	}
 
 	if( (button & IN_ATTACK) && CanAttack(client, clip) )
 	{
-		if( currenttime > player[client].primaryattacktime
-			&& currenttime > player[client].secondaryattacktime ) // not allow in attack2
+		if(currenttime > player[client].primaryattacktime)
 		{
 			SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", currenttime);
 			SDKCall(g_SDKCall_PrimaryAttack, weapon);
 			SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", currenttime + 100.0);
-			
-			// Determine cycle time: SCAR uses cvar if > 0, others use weapon default
-			float nextAttackTime;
-			if(cvar.ads_scar_cycletime > 0.0 && player[client].weaponWorldModelIndex == g_scar_precache_index )
-			{
-				nextAttackTime = cvar.ads_scar_cycletime;
-				// PrintToServer("[ADS] Fire (SCAR): nextAttack in %.3fs", nextAttackTime);
-			}
-			else if(player[client].cycleTime > 0.0)
-			{
-				nextAttackTime = player[client].cycleTime;
-				// PrintToServer("[ADS] Fire (weapon): nextAttack in %.3fs (cycleTime: %.3f)", nextAttackTime, player[client].cycleTime);
-			}
-			
-			player[client].primaryattacktime = currenttime + nextAttackTime;
+			player[client].primaryattacktime = currenttime + player[client].cycleTime;
 		}
 		return MRES_Ignored; // ignore IN_RELOAD when pushing attack button.
 	}
 
 	int reserverammo = L4D_GetReserveAmmo(client, weapon);
 	
-	// When player presses reload button or auto-reload triggers (empty clip), 
-	// set flag to disable AdsFix mode safely outside of this callback
-	if( (button & IN_RELOAD) || (clip == 0 && reserverammo > 0 && currenttime > player[client].secondaryattacktime) )
+	if((button & IN_RELOAD) || (clip == 0 && (reserverammo > 0 || player[client].isPistol)))
 	{
-		// Set flag to disable AdsFix mode (will be processed in OnPlayerRunCmd)
 		player[client].pendingDisableAdsFix = true;
-		// Reset attack timings to allow normal game reload behavior
-		SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", currenttime);
-		SetEntPropFloat(weapon, Prop_Send, "m_flNextSecondaryAttack", currenttime);
 		return MRES_Ignored;
 	}
 
@@ -701,7 +715,7 @@ int SelectWeightedSequence(int entity, int activity)
 	return SDKCall(hCall, entity, activity);
 }
 
-bool SendWeaponAnim(int weapon, int sequence)
+bool SendWeaponAnim(int weapon, int activity)
 {
 	static Handle hCall = null;
 	if (hCall == null)
@@ -712,7 +726,7 @@ bool SendWeaponAnim(int weapon, int sequence)
 		PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
 		hCall = EndPrepSDKCall();
 	}
-	return SDKCall(hCall, weapon, sequence);
+	return SDKCall(hCall, weapon, activity);
 }
 
 int GetWeaponGunClipSize(int weapon)
@@ -796,12 +810,8 @@ void SetupZoom(int client, int weapon, bool zoom)
 	player[client].bZoom = zoom;
 	ToggleAdsFix(client, weapon, zoom);
 	
-	float nextAttack = GetEntDataFloat(weapon, FindSendPropInfo("CBaseCombatWeapon", "m_flNextPrimaryAttack"));
-	if (GetGameTime() > nextAttack)
-	{
-		int transitionActivity = zoom ? 1879 : 1881; // ACT_PRIMARY_VM_IDLE_TO_LOWERED : ACT_PRIMARY_VM_LOWERED_TO_IDLE
-		SendWeaponAnim(weapon, transitionActivity);
-	}
+	int transitionActivity = zoom ? 1879 : 1881; // ACT_PRIMARY_VM_IDLE_TO_LOWERED : ACT_PRIMARY_VM_LOWERED_TO_IDLE
+	SendWeaponAnim(weapon, transitionActivity);
 	
 	int viewModel = GetEntPropEnt(client, Prop_Send, "m_hViewModel");
 	SetEntProp(viewModel, Prop_Send, "m_nSequence", sequence);
@@ -838,33 +848,6 @@ void SetWeaponHelpingHandState(int weapon, int state)
 	SetEntProp(weapon, Prop_Send, "m_helpingHandState", state);
 }
 
-void GetActivityName(int activity, char[] buffer, int maxlen)
-{
-	if (hActivityList == null)
-	{
-		Format(buffer, maxlen, "UNKNOWN");
-		return;
-	}
-	
-	hActivityList.Rewind();
-	if (hActivityList.GotoFirstSubKey(false))
-	{
-		do
-		{
-			if (activity == hActivityList.GetNum(NULL_STRING, 0))
-			{
-				hActivityList.GetSectionName(buffer, maxlen);
-				hActivityList.Rewind();
-				return;
-			}
-		}
-		while (hActivityList.GotoNextKey(false));
-	}
-	
-	hActivityList.Rewind();
-	Format(buffer, maxlen, "UNKNOWN_%d", activity);
-}
-
 // #endregion
 // ============================================================================
 
@@ -897,8 +880,16 @@ void LoadPlayerWeaponAttributes(int client, int weapon)
 	GetEntityClassname(weapon, classname, sizeof(classname));
 	
 	// Load attributes using Left4DHooks
-	player[client].cycleTime = L4D2_GetFloatWeaponAttribute(classname, L4D2FWA_CycleTime);
-	player[client].weaponWorldModelIndex = GetEntProp(weapon, Prop_Send, "m_iWorldModelIndex");
+	player[client].isPistol = StrContains(classname, "pistol", false) != -1;
+
+	float cycleTime = SDKCall(g_SDKCall_GetRateOfFire, weapon);
+
+	if (cvar.ads_cycletime_scar > 0.0 && GetEntProp(weapon, Prop_Send, "m_iWorldModelIndex") == g_scar_precache_index) cycleTime = cvar.ads_cycletime_scar;
+	if (cvar.ads_cycletime_mul > 1.0) cycleTime *= cvar.ads_cycletime_mul;
+
+	player[client].cycleTime = cycleTime;
+	float currentTime = GetGameTime();
+	player[client].primaryattacktime = currentTime + cycleTime;
 }
 
 void ToggleAdsFix(int client, int weapon, bool enable)
@@ -918,8 +909,16 @@ void ToggleAdsFix(int client, int weapon, bool enable)
 	}
 	else
 	{
-		SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", GetGameTime());
-		SetEntPropFloat(weapon, Prop_Send, "m_flNextSecondaryAttack", GetGameTime());
+		float currentTime = GetGameTime();
+		if (player[client].pendingDisableAdsBySecondary)
+		{
+			player[client].pendingDisableAdsBySecondary = false;
+			SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", currentTime + DEFAULT_ATTACK2_TIME);
+		}
+		else
+		{
+			SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", currentTime);
+		}
 		player[client].cycleTime = 0.0;
 		UnHookWeaponAdsFix(weapon);
 	}
@@ -970,6 +969,39 @@ bool IsValidEntityIndex(int entity)
 {
     return (MaxClients+1 <= entity <= GetMaxEntities());
 }
+
+// #endregion
+// ============================================================================
+
+// ============================================================================
+// #region Debug
+
+// void GetActivityName(int activity, char[] buffer, int maxlen)
+// {
+// 	if (hActivityList == null)
+// 	{
+// 		Format(buffer, maxlen, "UNKNOWN");
+// 		return;
+// 	}
+	
+// 	hActivityList.Rewind();
+// 	if (hActivityList.GotoFirstSubKey(false))
+// 	{
+// 		do
+// 		{
+// 			if (activity == hActivityList.GetNum(NULL_STRING, 0))
+// 			{
+// 				hActivityList.GetSectionName(buffer, maxlen);
+// 				hActivityList.Rewind();
+// 				return;
+// 			}
+// 		}
+// 		while (hActivityList.GotoNextKey(false));
+// 	}
+	
+// 	hActivityList.Rewind();
+// 	Format(buffer, maxlen, "UNKNOWN_%d", activity);
+// }
 
 // #endregion
 // ============================================================================
