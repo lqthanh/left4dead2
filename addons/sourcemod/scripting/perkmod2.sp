@@ -6268,18 +6268,25 @@ bool IsExist_SurvivorTertiary_ExtremeConditioning()
 	return false;
 }
 
+// Check method
 bool IsPrimaryWeapon(char[] classname)
 {
 	return StrContains(classname, "spawn") == -1
 		&& (StrContains(classname, "shotgun") != -1
-			|| StrContains(classname, "smg") != -1
-			|| StrContains(classname, "sniper") != -1
-			|| StrContains(classname, "rifle") != -1
-			|| StrContains(classname, "grenade_launcher") != -1);
+		|| StrContains(classname, "smg") != -1
+		|| StrContains(classname, "sniper") != -1
+		|| StrContains(classname, "rifle") != -1
+		|| StrContains(classname, "grenade_launcher") != -1);
 }
 
-// Check method
-bool CheckClient (int client)
+bool IsSecondaryWeapon(char[] classname)
+{
+	return StrContains(classname, "spawn") == -1
+		&& (StrContains(classname, "pistol") != -1
+		|| StrContains(classname, "melee") != -1);
+}
+
+bool IsClient (int client)
 {
 	return (!client || client > MaxClients || !IsClientInGame(client));
 }
