@@ -6286,7 +6286,7 @@ bool IsSecondaryWeapon(char[] classname)
 		|| StrContains(classname, "melee") != -1);
 }
 
-bool IsClient (int client)
+bool IsInvalidClient (int client)
 {
 	return (!client || client > MaxClients || !IsClientInGame(client));
 }
