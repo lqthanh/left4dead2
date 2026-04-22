@@ -1957,7 +1957,7 @@ public Action:Event_PlayerHurtPre (Handle:event, const String:name[], bool:dontB
 		{
 			char weapon[32];
 			GetEventString(event,"weapon",weapon,sizeof(weapon));
-			if (!IsPrimaryWeapon(weapon) && !IsSecondaryWeapon(weapon)) return Plugin_Continue;
+			if (!IsPrimaryWeapon(weapon) && !IsSecondaryWeapon(weapon) && !IsMinigun(weapon)) return Plugin_Continue;
 
 			int dmg_health=GetEventInt(event,"dmg_health");
 			int damage_add = RoundToNearest(dmg_health * g_flStopping_dmgmult);
@@ -6209,6 +6209,12 @@ bool IsSecondaryWeapon(char[] classname)
 	return StrContains(classname, "spawn") == -1
 		&& (StrContains(classname, "pistol") != -1
 		|| StrContains(classname, "melee") != -1);
+}
+
+bool IsMinigun (char[] classname)
+{
+	return StrContains(classname, "spawn") == -1
+		&& StrContains(classname, "prop_minigun") == 0;
 }
 
 bool IsInvalidClient (int client)
