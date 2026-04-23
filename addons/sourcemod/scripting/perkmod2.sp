@@ -1802,14 +1802,6 @@ public Event_PlayerDeath (Handle:event, const String:name[], bool:dontBroadcast)
 		g_iSpiritTimer[iCid]=INVALID_HANDLE;
 	}
 
-	if (IsClientInGame(iCid)==true
-		&& IsFakeClient(iCid)==false)
-	{
-		//reset var related to blind luck perk
-		//SendConVarValue(iCid,FindConVar("sv_cheats"),"0");
-		SetEntProp(iCid, Prop_Send, "m_iHideHUD", 0);
-	}
-
 	//rebuild registries for martial artist
 	RebuildAll();
 
@@ -2082,10 +2074,6 @@ public Event_PlayerTeam (Handle:event, const String:name[], bool:dontBroadcast)
 
 	//reset runspeed
 	SetEntDataFloat(iCid,g_iLaggedMovementO, 1.0 ,true);
-
-	//reset blind perk sendprop
-	if (IsFakeClient(iCid)==false)
-		SetEntProp(iCid, Prop_Send, "m_iHideHUD", 0);
 
 	//rebuild MA and DT registries
 	CreateTimer(0.3,Delayed_Rebuild,0);
