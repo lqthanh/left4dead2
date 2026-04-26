@@ -4,6 +4,7 @@
 	{
 		"Animation"
 		{
+			"ACT_PRIMARY_VM_IDLE_TO_LOWERED" "0"
 			"ACT_VM_FIDGET" "0"
 		}
 	}
@@ -21,6 +22,55 @@
 		"Animation"
 		{
 			"ACT_VM_FIDGET" "28"
+		}
+	}
+
+	"weapon_smg"
+	{
+		"Animation"
+		{
+			"ACT_PRIMARY_VM_IDLE_TO_LOWERED" "0"
+			"ACT_VM_FIDGET" "40"
+		}
+	}
+
+	"weapon_smg_silenced"
+	{
+		"Animation"
+		{
+			"ACT_PRIMARY_VM_IDLE_TO_LOWERED" "0"
+		}
+	}
+
+	"weapon_smg_mp5"
+	{
+		"Animation"
+		{
+			"ACT_PRIMARY_VM_IDLE_TO_LOWERED" "0"
+		}
+	}
+
+	"weapon_rifle"
+	{
+		"Animation"
+		{
+			"ACT_PRIMARY_VM_IDLE_TO_LOWERED" "0"
+		}
+	}
+
+	"weapon_rifle_desert"
+	{
+		"Animation"
+		{
+			"ACT_PRIMARY_VM_IDLE_TO_LOWERED" "0"
+		}
+	}
+
+	"weapon_grenade_launcher"
+	{
+		"Animation"
+		{
+			"ACT_PRIMARY_VM_IDLE_TO_LOWERED" "0"
 		}
 	}
 
