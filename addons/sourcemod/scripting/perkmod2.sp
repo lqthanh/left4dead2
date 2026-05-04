@@ -612,7 +612,6 @@ new g_iSurAll_enable;
 //have to do the checks every game frame, or
 //every time someone gets hurt
 
-new g_iStopping_meta_enable = 1;
 new g_iMA_meta_enable = 1;
 
 //controls whether menu automatically shows
@@ -1198,8 +1197,6 @@ public Convar_Stopping_en (Handle:convar, const String:oldValue[], const String:
 	else
 		iI=1;
 	g_iStopping_enable = iI;
-
-	Stopping_RunChecks();
 }
 
 //sleight of hand
@@ -1805,14 +1802,6 @@ public Event_PlayerDeath (Handle:event, const String:name[], bool:dontBroadcast)
 		g_iSpiritTimer[iCid]=INVALID_HANDLE;
 	}
 
-	if (IsClientInGame(iCid)==true
-		&& IsFakeClient(iCid)==false)
-	{
-		//reset var related to blind luck perk
-		//SendConVarValue(iCid,FindConVar("sv_cheats"),"0");
-		SetEntProp(iCid, Prop_Send, "m_iHideHUD", 0);
-	}
-
 	//rebuild registries for martial artist
 	RebuildAll();
 
@@ -1945,32 +1934,25 @@ public Event_RoundEnd (Handle:event, const String:name[], bool:dontBroadcast)
 //this trigger only runs on players, not common infected
 public Action:Event_PlayerHurtPre (Handle:event, const String:name[], bool:dontBroadcast)
 {
-	new iAtt=GetClientOfUserId(GetEventInt(event,"attacker"));
-	new iVic=GetClientOfUserId(GetEventInt(event,"userid"));
+	int iAttacker=GetClientOfUserId(GetEventInt(event,"attacker"));
+	int iVictim=GetClientOfUserId(GetEventInt(event,"userid"));
 
-	if (iVic==0) return Plugin_Continue;
+	if (IsInvalidClient(iAttacker)) return Plugin_Continue;
+	if (IsInvalidClient(iVictim)) return Plugin_Continue;
 
-	new iDmgOrig=GetEventInt(event,"dmg_health");
-
-	//----DEBUG----
-	//new String:sWeapon[128];
-	//GetEventString(event,"weapon",sWeapon,128);
-	//PrintToChatAll("\x03attacker:\x01%i\x03 weapon:\x01%s\x03 type:\x01%i\x03 amount: \x01%i",iAtt,sWeapon,iType,iDmgOrig);
-
-
-	if (iAtt==0) return Plugin_Continue;
-
-	new iTA=GetClientTeam(iAtt);
-	decl String:stWpn[16];
-	GetEventString(event,"weapon",stWpn,16);
-
-	//----DEBUG----
-	//if (iTA==2) PrintToChatAll("\x03weapon:\x01%s\x03 type:\x01%i",stWpn,iType);
-
-	//if damage is from survivors to a non-survivor,
-	//check for damage add (stopping power)
-	if (Stopping_DamageAdd(iAtt,iVic,iTA,iDmgOrig,stWpn)==1)
-		return Plugin_Continue;
+	if (IsEnable_SurvivorPrimary()
+		&& IsEnable_SurvivorPrimary_StoppingPower()
+		&& IsClientConfirm(iAttacker)
+		&& IsClientSelect_SurvivorPrimary_StoppingPower(iAttacker))
+	{
+		if (GetClientTeam(iAttacker)==2)
+		{
+			int dmg_health=GetEventInt(event,"dmg_health");
+			int damage_add = RoundToNearest(dmg_health * g_flStopping_dmgmult);
+			int hp = GetEntProp(iVictim,Prop_Data,"m_iHealth");
+			SetEntProp(iVictim,Prop_Data,"m_iHealth", hp - damage_add);
+		}
+	}
 
 	return Plugin_Continue;
 }
@@ -1978,33 +1960,26 @@ public Action:Event_PlayerHurtPre (Handle:event, const String:name[], bool:dontB
 //against common infected
 public Event_InfectedHurtPre (Handle:event, const String:name[], bool:dontBroadcast)
 {
-	new iCid=GetClientOfUserId(GetEventInt(event,"attacker"));
+	int iAttacker=GetClientOfUserId(GetEventInt(event,"attacker"));
+	if (IsInvalidClient(iAttacker)) return;
 
-	if (iCid==0 || g_iConfirm[iCid]==0)
-		return;
-
-	//check if perk is disabled
-	if (g_iStopping_meta_enable==0)
-		return;
-
-	//----DEBUG----
-	//PrintToChatAll("\x03infected hurt, iAtt: %i, iEntid: %i, i_odmg: %i, iHP: %i",iAtt,iEntid,i_odmg,GetEntProp(iEntid,Prop_Data,"m_iHealth"));
-
-	if (g_iSur1[iCid]==1
-		&& GetClientTeam(iCid)==2)
+	if (IsEnable_SurvivorPrimary()
+		&& IsEnable_SurvivorPrimary_StoppingPower()
+		&& IsClientConfirm(iAttacker)
+		&& IsClientSelect_SurvivorPrimary_StoppingPower(iAttacker))
 	{
-		new iEntid=GetEventInt(event,"entityid");
-		new i_odmg=GetEventInt(event,"amount");
-		new i_dmga=RoundToNearest(i_odmg * g_flStopping_dmgmult);
+		if (GetClientTeam(iAttacker)==2)
+		{
+			int target=GetEventInt(event,"entityid");
+			char target_classname[32];
+			GetEntityClassname(target, target_classname, sizeof(target_classname));
+			if (strcmp(target_classname, "infected") != 0 && strcmp(target_classname, "witch") != 0) return;
 
-		//----DEBUG----
-		//PrintToChatAll("\x03Pre-mod damage: \x01%i, \x03pre-mod health: \x01%i", GetEventInt(event,"amount"),GetEntProp(iEntid,Prop_Data,"m_iHealth"));
-
-		SetEntProp(iEntid,Prop_Data,"m_iHealth", GetEntProp(iEntid,Prop_Data,"m_iHealth")-i_dmga );
-		//******SetEventInt(event,"dmg_health", i_odmg+i_dmga );
-
-		//----DEBUG----
-		//PrintToChatAll("\x03Post-mod damage: \x01%i, \x03post-mod health: \x01%i",GetEventInt(event,"amount"),GetEntProp(iEntid,Prop_Data,"m_iHealth"));
+			int damage=GetEventInt(event,"amount");
+			int damage_add = RoundToNearest(damage * g_flStopping_dmgmult);
+			int hp = GetEntProp(target,Prop_Data,"m_iHealth");
+			SetEntProp(target,Prop_Data,"m_iHealth", hp - damage_add);
+		}
 	}
 }
 
@@ -2095,10 +2070,6 @@ public Event_PlayerTeam (Handle:event, const String:name[], bool:dontBroadcast)
 
 	//reset runspeed
 	SetEntDataFloat(iCid,g_iLaggedMovementO, 1.0 ,true);
-
-	//reset blind perk sendprop
-	if (IsFakeClient(iCid)==false)
-		SetEntProp(iCid, Prop_Send, "m_iHideHUD", 0);
 
 	//rebuild MA and DT registries
 	CreateTimer(0.3,Delayed_Rebuild,0);
@@ -2551,7 +2522,6 @@ RunChecksAll ()
 		|| g_bIsRoundStart == true)
 		return;
 
-	Stopping_RunChecks();
 	MA_RunChecks();
 }
 
@@ -2929,67 +2899,6 @@ Bot_Sur3_PickRandom ()
 //=============================
 // Sur1: Stopping Power
 //=============================
-
-//pre-calculates whether stopping power should
-//run, since damage events can occur pretty often
-Stopping_RunChecks ()
-{
-	if (g_iSur1_enable==1 && g_iStopping_enable==1)
-		g_iStopping_meta_enable=1;
-	else
-		g_iStopping_meta_enable=0;
-}
-
-//main damage add function
-Stopping_DamageAdd (iAtt, iVic, iTA, iDmgOrig, String:stWpn[])
-{
-	//check if perk is disabled
-	if (g_iStopping_meta_enable==0)
-		return 1;
-
-	if (iTA==2
-		&& g_iSur1[iAtt]==1
-		&& g_iConfirm[iAtt]==1
-		&& GetClientTeam(iVic)!=2)
-	{
-		if (StrEqual(stWpn,"melee",false)==true)
-		{
-			//----DEBUG----
-			//PrintToChatAll("\x03melee weapon detected, not firing");
-
-			return 1;
-		}
-
-		//----DEBUG----
-		//PrintToChatAll("\x03Pre-mod bullet damage: \x01%i", GetEventInt(event,"dmg_health"));
-
-		new iDmgAdd= RoundToNearest(iDmgOrig * g_flStopping_dmgmult);
-		new iHP=GetEntProp(iVic,Prop_Data,"m_iHealth");
-		//to prevent strange death behaviour,
-		//only deal the full damage add if health > damage add
-		if (iHP>iDmgAdd)
-		{
-			SetEntProp(iVic,Prop_Data,"m_iHealth", iHP-iDmgAdd );
-		}
-		//if health < damage add, only deal health-1 damage
-		else
-		{
-			iDmgAdd=iHP-1;
-			//don't bother if the modified damage add
-			//ends up being an insignificant amount
-			if (iDmgAdd<0)
-				return 1;
-			SetEntProp(iVic,Prop_Data,"m_iHealth", iHP-iDmgAdd );
-		}
-
-		//----DEBUG----
-		//PrintToChatAll("\x03Post-mod bullet damage: \x01%i",GetEventInt(event,"dmg_health"));
-
-		return 1;
-	}
-
-	return 0;
-}
 
 //==================================
 // Sur1: Sleight of Hand
@@ -6277,13 +6186,6 @@ bool IsPrimaryWeapon(char[] classname)
 		|| StrContains(classname, "sniper") != -1
 		|| StrContains(classname, "rifle") != -1
 		|| StrContains(classname, "grenade_launcher") != -1);
-}
-
-bool IsSecondaryWeapon(char[] classname)
-{
-	return StrContains(classname, "spawn") == -1
-		&& (StrContains(classname, "pistol") != -1
-		|| StrContains(classname, "melee") != -1);
 }
 
 bool IsInvalidClient (int client)
