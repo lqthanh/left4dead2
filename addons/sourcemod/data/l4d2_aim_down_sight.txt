@@ -66,12 +66,4 @@
 		}
 	}
 
-	"weapon_grenade_launcher"
-	{
-		"Animation"
-		{
-			"ACT_PRIMARY_VM_IDLE_TO_LOWERED" "0"
-		}
-	}
-
 }
