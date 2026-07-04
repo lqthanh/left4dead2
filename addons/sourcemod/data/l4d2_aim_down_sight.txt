@@ -25,6 +25,14 @@
 		}
 	}
 
+	"weapon_autoshotgun"
+	{
+		"Animation"
+		{
+			"ACT_VM_FIDGET" "24"
+		}
+	}
+
 	"weapon_smg"
 	{
 		"Animation"
@@ -70,7 +78,7 @@
 	{
 		"Animation"
 		{
-			"ACT_PRIMARY_VM_IDLE_TO_LOWERED" "0"
+			"ACT_VM_FIDGET" "20"
 		}
 	}
 
