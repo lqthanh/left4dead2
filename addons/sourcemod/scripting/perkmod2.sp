@@ -576,37 +576,6 @@ new g_iSur2_default;
 new Handle:g_hSur3_default;
 new g_iSur3_default;
 
-//FORCE RANDOM PERKS
-//tracks server setting for
-//whether to force random perks
-
-new Handle:g_hForceRandom;
-new g_iForceRandom;
-
-//ENABLE RANDOM PERKS BY PLAYER CHOICE
-//tracks whether player can
-//randomize their perks
-
-new Handle:g_hRandomEnable;
-new g_iRandomEnable;
-
-//PERK TREES AVAILABILITY
-//option for servers to completely
-//disable entire perk trees
-
-new Handle:g_hSur1_enable;
-new Handle:g_hSur2_enable;
-new Handle:g_hSur3_enable;
-new g_iSur1_enable;
-new g_iSur2_enable;
-new g_iSur3_enable;
-
-//PERK HIERARCHY AVAILABILITY
-//option for servers to completely
-//disable perks for infected or survivors
-new Handle:g_hSurAll_enable;
-new g_iSurAll_enable;
-
 //this var keeps track of whether
 //to enable Stopping or not, so we don't
 //have to do the checks every game frame, or
@@ -1106,62 +1075,6 @@ CreateConvars()
 	HookConVarChange(g_hSur3_default, Convar_Def_Sur3);
 	g_iSur3_default = 1;
 
-	//enable perk trees
-	//-----------------
-	g_hSur1_enable = CreateConVar(
-		"l4d_perkmod_perktree_survivor1_enable" ,
-		"1" ,
-		"If set to 1, players will be allowed to select perks from the primary Survivor tree." ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hSur1_enable, Convar_Sur1_en);
-	g_iSur1_enable = 1;
-
-	g_hSur2_enable = CreateConVar(
-		"l4d_perkmod_perktree_survivor2_enable" ,
-		"1" ,
-		"If set to 1, players will be allowed to select perks from the secondary Survivor tree." ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hSur2_enable, Convar_Sur2_en);
-	g_iSur2_enable = 1;
-
-	g_hSur3_enable = CreateConVar(
-		"l4d_perkmod_perktree_survivor3_enable" ,
-		"1" ,
-		"If set to 1, players will be allowed to select perks from the tertiary Survivor tree." ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hSur3_enable, Convar_Sur3_en);
-	g_iSur3_enable = 1;
-
-	//perk hierarchy
-	//--------------
-	g_hSurAll_enable = CreateConVar(
-		"l4d_perkmod_perktree_survivor_enable" ,
-		"1" ,
-		"If set to 1, players will be allowed to select perks as Survivors (affects ALL perks for Survivors)." ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hSurAll_enable, Convar_SurAll);
-	g_iSurAll_enable = 1;
-
-
-
-	//force random perks
-	g_hForceRandom = CreateConVar(
-		"l4d_perkmod_forcerandomperks" ,
-		"0" ,
-		"If set to 1, players will be assigned random perks at roundstart, and they cannot edit their perks." ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hForceRandom, Convar_ForceRandom);
-	g_iForceRandom = 0;
-
-	//enable random perk choice
-	g_hRandomEnable = CreateConVar(
-		"l4d_perkmod_randomperks_enable" ,
-		"1" ,
-		"If set to 1, players will be allowed to randomize their perks at roundstart. Otherwise, they can only customize their perks or use default perks." ,
-		FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_NOTIFY );
-	HookConVarChange(g_hRandomEnable, Convar_Random_en);
-	g_iRandomEnable = 1;
-
 	//misc game convars
 	g_hMenuAutoShow_enable = CreateConVar(
 		"l4d_perkmod_autoshowmenu" ,
@@ -1527,80 +1440,6 @@ public Convar_Def_Sur3 (Handle:convar, const String:oldValue[], const String:new
 	g_iSur3_default=iI;
 }
 
-//force random perks
-public Convar_ForceRandom (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-
-	g_iForceRandom=iI;
-}
-
-//enable random perk choice
-public Convar_Random_en (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-
-	g_iRandomEnable=iI;
-}
-
-//perk trees
-public Convar_Sur1_en (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-
-	g_iSur1_enable=iI;
-
-	RunChecksAll();
-}
-
-public Convar_Sur2_en (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-
-	g_iSur2_enable=iI;
-	RunChecksAll();
-}
-
-public Convar_Sur3_en (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-
-	g_iSur3_enable=iI;
-	RunChecksAll();
-}
-
-public Convar_SurAll (Handle:convar, const String:oldValue[], const String:newValue[])
-{
-	new iI=StringToInt(newValue);
-	if (iI==0)
-		iI=0;
-	else
-		iI=1;
-
-	g_iSurAll_enable=iI;
-	RunChecksAll();
-}
-
 // #endregion
 // =======================================================================
 
@@ -1646,12 +1485,6 @@ public Event_PlayerSpawn (Handle:event, const String:name[], bool:dontBroadcast)
 	//since they just spawned, so set max to 100
 	if (iTeam == 2)
 	{
-		if (g_iSurAll_enable == 0)
-		{
-			g_iConfirm[iCid] = 0;
-			return;
-		}
-
 		if ( GetEntProp(iCid,Prop_Data,"m_iHealth") > 100 )
 			SetEntProp(iCid,Prop_Data,"m_iHealth", 100 );
 
@@ -1940,8 +1773,7 @@ public Action:Event_PlayerHurtPre (Handle:event, const String:name[], bool:dontB
 	if (IsInvalidClient(iAttacker)) return Plugin_Continue;
 	if (IsInvalidClient(iVictim)) return Plugin_Continue;
 
-	if (IsEnable_SurvivorPrimary()
-		&& IsEnable_SurvivorPrimary_StoppingPower()
+	if (IsEnable_SurvivorPrimary_StoppingPower()
 		&& IsClientConfirm(iAttacker)
 		&& IsClientSelect_SurvivorPrimary_StoppingPower(iAttacker))
 	{
@@ -1963,8 +1795,7 @@ public Event_InfectedHurtPre (Handle:event, const String:name[], bool:dontBroadc
 	int iAttacker=GetClientOfUserId(GetEventInt(event,"attacker"));
 	if (IsInvalidClient(iAttacker)) return;
 
-	if (IsEnable_SurvivorPrimary()
-		&& IsEnable_SurvivorPrimary_StoppingPower()
+	if (IsEnable_SurvivorPrimary_StoppingPower()
 		&& IsClientConfirm(iAttacker)
 		&& IsClientSelect_SurvivorPrimary_StoppingPower(iAttacker))
 	{
@@ -2473,8 +2304,7 @@ ShowPerkCooldownHint()
 		new iPyroRemain=0;
 		new iSpiritRemain=0;
 
-		if (g_iSur1_enable==1
-			&& g_iPyro_enable==1
+		if (g_iPyro_enable==1
 			&& g_iPyro_maxticks > 0
 			&& g_iSur1[iCid]==3)
 		{
@@ -2496,8 +2326,7 @@ ShowPerkCooldownHint()
 			}
 		}
 
-		if (g_iSur2_enable==1
-			&& g_iSpirit_enable==1
+		if (g_iSpirit_enable==1
 			&& g_iSur2[iCid]==2
 			&& g_iSpiritCooldown[iCid]==1)
 		{
@@ -2592,23 +2421,15 @@ public Action:Timer_ShowTopMenu (Handle:timer, any:iCid)
 
 	new iT = GetClientTeam(iCid);
 
-	//don't show menu if perks are disabled
-	if ((g_iSurAll_enable == 0 && iT == 2) || (iT == 3))
+	//don't show the menu to infected
+	if (iT == 3)
 	{
 		g_iConfirm[iCid] = 0;
 		return Plugin_Stop;
 	}
 
-	if (g_iForceRandom==0)
-	{
-		//default case
-		if (iT==2)
-			SendPanelToClient(Menu_Initial(iCid),iCid,Menu_ChooseInit,MENU_TIME_FOREVER);
-		else if (iT==3)
-			g_iConfirm[iCid] = 1;
-	}
-	else
-		AssignRandomPerks(iCid);
+	if (iT==2)
+		SendPanelToClient(Menu_Initial(iCid),iCid,Menu_ChooseInit,MENU_TIME_FOREVER);
 
 	return Plugin_Stop;
 }
@@ -2770,10 +2591,6 @@ AssignRandomPerks (iCid)
 //picks a random perk for bots
 Bot_Sur1_PickRandom ()
 {
-	//stop if sur1 perks are disabled
-	if (g_iSur1_enable==0)
-		return 0;
-
 	new iPerkType[12];
 	new iPerkCount=0;
 
@@ -2808,10 +2625,6 @@ Bot_Sur1_PickRandom ()
 
 Bot_Sur2_PickRandom ()
 {
-	//stop if sur2 perks are disabled
-	if (g_iSur2_enable==0)
-		return 0;
-
 	new iPerkType[12];
 	new iPerkCount=0;
 
@@ -2854,10 +2667,6 @@ Bot_Sur2_PickRandom ()
 
 Bot_Sur3_PickRandom ()
 {
-	//stop if sur3 perks are disabled
-	if (g_iSur3_enable==0)
-		return 0;
-
 	new iPerkType[12];
 	new iPerkCount=0;
 
@@ -2908,7 +2717,7 @@ Bot_Sur3_PickRandom ()
 SoH_OnReload (iCid)
 {
 	//check if perk is disabled
-	if (g_iSur1_enable==0 || g_iSoH_enable==0)
+	if (g_iSoH_enable==0)
 		return;
 
 	new iSur1 = g_iSur1[iCid];
@@ -3366,8 +3175,7 @@ public Action:SoH_ShotgunEndCock (Handle:timer, any:hPack)
 //on pickup
 Pyro_Pickup(iCid, String:stWpn[])
 {
-	if (IsEnable_SurvivorPrimary()
-		&& IsEnable_SurvivorPrimary_Pyrotechnician()
+	if (IsEnable_SurvivorPrimary_Pyrotechnician()
 		&& IsClientConfirm(iCid)
 		&& IsClientSelect_SurvivorPrimary_Pyrotechnician(iCid))
 	{
@@ -3414,7 +3222,7 @@ Pyro_Pickup(iCid, String:stWpn[])
 Pyro_OnWeaponFire(iCid, String:stWpn[])
 {
 	//check if perk is enabled
-	if (g_iSur1_enable==0 || g_iPyro_enable==0)
+	if (g_iPyro_enable==0)
 		return;
 
 	if (g_iConfirm[iCid]==0
@@ -3500,7 +3308,7 @@ Event_Confirm_Grenadier (iCid)
 		return;
 
 	//check if perk is enabled
-	if (g_iSur1_enable==0 || g_iPyro_enable==0)
+	if (g_iPyro_enable==0)
 		return;
 
 	//reset grenade count on player
@@ -3538,7 +3346,7 @@ Pyro_Timer()
 	decl iTicks;
 
 	//check if perk is enabled
-	if (g_iSur1_enable==0 || g_iPyro_maxticks == 0 || g_iPyro_enable==0)
+	if (g_iPyro_maxticks == 0 || g_iPyro_enable==0)
 		return;
 
 	//or if no one has DT, don't bother either
@@ -3664,7 +3472,7 @@ Pyro_Clear (bool:bRoundStart)
 
 MA_RunChecks ()
 {
-	if (g_iSur1_enable==1 || g_iMA_enable==1)
+	if (g_iMA_enable==1)
 		g_iMA_meta_enable=1;
 	else
 		g_iMA_meta_enable=0;
@@ -3679,7 +3487,7 @@ Event_Confirm_MA (iCid)
 		g_iMARegisterCount=0;
 
 	//check if perk is enabled
-	if (g_iSur1_enable==0 || g_iMA_enable==0)
+	if (g_iMA_enable==0)
 		return;
 
 	if (IsClientInGame(iCid)==true
@@ -3712,7 +3520,7 @@ MA_Rebuild ()
 		return;
 
 	//check if perk is enabled
-	if (g_iSur1_enable==0 || g_iMA_enable==0)
+	if (g_iMA_enable==0)
 		return;
 
 	//----DEBUG----
@@ -3983,7 +3791,7 @@ MA_OnGameFrame()
 Unbreakable_OnHeal (iCid)
 {
 	//check if perk is enabled
-	if (g_iSur2_enable==0 || g_iUnbreak_enable==0)
+	if (g_iUnbreak_enable==0)
 		return;
 
 	if (g_iSur2[iCid]==1)
@@ -4009,7 +3817,7 @@ Event_Confirm_Unbreakable (iCid)
 	new TC=GetClientTeam(iCid);
 
 	//check if perk is enabled
-	if (g_iSur2_enable==0 || g_iUnbreak_enable==0)
+	if (g_iUnbreak_enable==0)
 	{
 		//if not, check if hp is higher than it should be
 		if (iHP>100
@@ -4060,7 +3868,7 @@ Unbreakable_OnRescue (iCid)
 	if (g_iSur2[iCid]==1)
 	{
 		//check if perk is enabled
-		if (g_iSur2_enable==0 || g_iUnbreak_enable==0)
+		if (g_iUnbreak_enable==0)
 			return;
 
 		CreateTimer(0.5,Unbreakable_Delayed_Rescue,iCid);
@@ -4084,7 +3892,7 @@ Unbreakable_OnRevive (iSub, iLedge)
 		&& iLedge == 0)
 	{
 		//check if perk is enabled
-		if (g_iSur1_enable==1 && g_iUnbreak_enable==1)
+		if (g_iUnbreak_enable==1)
 		{
 			SetEntDataFloat(iSub,g_iHPBuffO, GetEntDataFloat(iSub,g_iHPBuffO)+(g_iUnbreak_hp/2) ,true);
 		}
@@ -4187,7 +3995,7 @@ public Action:Unbreakable_Delayed_SetLow (Handle:timer, any:iCid)
 Spirit_Timer ()
 {
 	//check if perk is enabled
-	if (g_iSur2_enable==0 || g_iSpirit_enable==0)
+	if (g_iSpirit_enable==0)
 		return;
 
 	//this var counts how many people are incapped
@@ -4434,7 +4242,7 @@ HelpHand_OnReviveBegin (iCid)
 		return 0;
 
 	//check if perk is enabled
-	if (g_iSur2_enable==0 || g_iHelpHand_enable==0)
+	if (g_iHelpHand_enable==0)
 		return 0;
 
 	//----DEBUG----
@@ -4468,7 +4276,7 @@ HelpHand_OnReviveSuccess (iCid, iSub, iLedge)
 	//PrintToChatAll("\x05helphand\x03 reviver: \x01%i\x03, subject: \x01%i",iCid,iSub);
 
 	//then check for helping hand
-	if (g_iSur2[iCid]==3 && g_iConfirm[iCid]==1 && g_iSur2_enable==1 && g_iHelpHand_enable==1)
+	if (g_iSur2[iCid]==3 && g_iConfirm[iCid]==1 && g_iHelpHand_enable==1)
 	{
 		switch (iLedge)
 		{
@@ -4510,13 +4318,13 @@ HelpHand_OnReviveSuccess (iCid, iSub, iLedge)
 	//only adjust the convar if
 	//convar changes are allowed
 	//for this perk
-	if (g_iHelpHand_convar==1 && g_iSur2_enable==1 && g_iHelpHand_enable==1)
+	if (g_iHelpHand_convar==1 && g_iHelpHand_enable==1)
 		SetConVarFloat(FindConVar("survivor_revive_duration"),g_flReviveTime,false,false);
 
 	//and then check if we need to continue allowing crawling
 	//by running checks through everyone...
 	//...but first, check if spirit convar changes are allowed
-	/*if (g_iSur1_enable==1 && g_iSpirit_crawling==1 && g_iSpirit_enable==1)
+	/*if (g_iSpirit_crawling==1 && g_iSpirit_enable==1)
 	{
 		new iCrawlClient=-1;
 		for (new iI2=1 ; iI2<=MaxClients ; iI2++)
@@ -4574,8 +4382,7 @@ public Action:HelpHand_Delayed (Handle:timer, any:iCid)
 //gives full ammo
 PC_GiveFullAmmo(int client)
 {
-	if (IsEnable_SurvivorSecondary()
-		&& IsEnable_SurvivorSecondary_PackCat()
+	if (IsEnable_SurvivorSecondary_PackCat()
 		&& IsClientConfirm(client)
 		&& IsClientSelect_SurvivorSecondary_PackCat(client))
 	{
@@ -4587,8 +4394,7 @@ PC_GiveFullAmmo(int client)
 			if (maxAmmoCarry <= 0) return;
 
 			int refill = RoundToNearest(maxAmmoCarry * g_flPackCat_ammorefill);
-			if (IsEnable_SurvivorTertiary()
-				&& IsEnable_SurvivorTertiary_PackRat()
+			if (IsEnable_SurvivorTertiary_PackRat()
 				&& IsClientConfirm(client)
 				&& IsClientSelect_SurvivorTertiary_PackRat(client))
 				refill = RoundToNearest(refill * (1 + g_flPack_ammomult));
@@ -4605,8 +4411,7 @@ PC_GiveFullAmmo(int client)
 //gives full ammo
 PR_GiveFullAmmo(int client, int extraClip = 0)
 {
-	if (IsEnable_SurvivorTertiary()
-		&& IsEnable_SurvivorTertiary_PackRat()
+	if (IsEnable_SurvivorTertiary_PackRat()
 		&& IsClientConfirm(client)
 		&& IsClientSelect_SurvivorTertiary_PackRat(client))
 	{
@@ -4637,7 +4442,7 @@ PR_GiveFullAmmo(int client, int extraClip = 0)
 Chem_OnDrugUsed (iCid)
 {
 	//check if perk is enabled
-	if (g_iSur3_enable==0 || g_iChem_enable==0)
+	if (g_iChem_enable==0)
 		return 0;
 
 	//----DEBUG----
@@ -4655,7 +4460,7 @@ Chem_OnDrugUsed (iCid)
 		//they have unbreakable or not
 
 		//CASE 1: HAS UNBREAKABLE
-		if (g_iSur2[iCid]==1 && g_iSur3_enable==1 && g_iUnbreak_enable==1)
+		if (g_iSur2[iCid]==1 && g_iUnbreak_enable==1)
 		{
 			//CASE 1A:
 			//combined health + chem reliant < max health possible
@@ -4702,7 +4507,7 @@ Event_Confirm_ChemReliant (iCid)
 		return;
 
 	//check if perk is enabled
-	if (g_iSur3_enable==0 || g_iChem_enable==0)
+	if (g_iChem_enable==0)
 		return;
 
 	new iflags=GetCommandFlags("give");
@@ -4729,7 +4534,7 @@ HardToKill_OnIncap (iCid)
 		|| GetClientTeam(iCid)!=2)
 		return;
 
-	if (g_iSur3_enable==0 || g_iHard_enable==0)
+	if (g_iHard_enable==0)
 		return;
 
 	if (g_iSur3[iCid]==3)
@@ -4780,7 +4585,7 @@ Extreme_Rebuild ()
 		return;
 
 	//check if perk is enabled
-	if (g_iSur3_enable==0 || g_iExtreme_enable==0)
+	if (g_iExtreme_enable==0)
 		return;
 
 	//----DEBUG----
@@ -4827,8 +4632,8 @@ public Action:MenuOpen_OnSay(iCid, args)
 {
 	new iT = GetClientTeam(iCid);
 
-	//don't show the menu if all perks are disabled
-	if ((g_iSurAll_enable == 0 && iT == 2) || (iT == 3))
+	//don't show the menu to infected
+	if (iT == 3)
 	{
 		g_iConfirm[iCid] = 0;
 		return Plugin_Handled;
@@ -4867,18 +4672,11 @@ public Handle:Menu_Initial (iCid)
 	Format(stPanel, 128, "%t", "MenuInitialPanelCustom");
 	DrawPanelItem(menu, stPanel);
 
-	//random perks, enable only if cvar is set
-	if (g_iRandomEnable==0)
-	{
-		DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
-	}
-	else
-	{
-		Format(stPanel, 128, "%t", "MenuInitialDescriptionRandom");
-		DrawPanelText(menu, stPanel);
-		Format(stPanel, 128, "%t", "MenuInitialPanelRandom");
-		DrawPanelItem(menu, stPanel);
-	}
+	//random perks
+	Format(stPanel, 128, "%t", "MenuInitialDescriptionRandom");
+	DrawPanelText(menu, stPanel);
+	Format(stPanel, 128, "%t", "MenuInitialPanelRandom");
+	DrawPanelItem(menu, stPanel);
 
 	Format(stPanel, 128, "%t", "MenuInitialDescriptionAuto");
 	DrawPanelText(menu, stPanel);
@@ -4951,10 +4749,7 @@ public Handle:Menu_Top (iCid)
 		st_perk="Not set";
 
 	Format(st_display,64,"Survivor - Primary (%s)",st_perk);
-	if (g_iSur1_enable==1)
-		DrawPanelItem(menu,st_display);
-	else
-		DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
+	DrawPanelItem(menu,st_display);
 
 
 	//set name for sur2 perk
@@ -4970,10 +4765,7 @@ public Handle:Menu_Top (iCid)
 		st_perk="Not set";
 
 	Format(st_display,64,"Survivor - Secondary (%s)", st_perk);
-	if (g_iSur2_enable==1)
-		DrawPanelItem(menu,st_display);
-	else
-		DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
+	DrawPanelItem(menu,st_display);
 
 	//set name for sur3 perk
 	if (g_iSur3[iCid]==1 && g_iPack_enable==1)
@@ -4988,10 +4780,7 @@ public Handle:Menu_Top (iCid)
 		st_perk="Not set";
 
 	Format(st_display,64,"Survivor - Tertiary (%s)", st_perk);
-	if (g_iSur3_enable==1)
-		DrawPanelItem(menu,st_display);
-	else
-		DrawPanelItem(menu,"disabled", ITEMDRAW_NOTEXT);
+	DrawPanelItem(menu,st_display);
 
 	DrawPanelItem(menu,st_display, ITEMDRAW_NOTEXT);
 	DrawPanelItem(menu,st_display, ITEMDRAW_NOTEXT);
@@ -5208,11 +4997,8 @@ public Handle:Menu_ShowChoices (iCid)
 	else
 		Format(st_perk,128,"%t", "NotSet");
 
-	if (g_iSur1_enable==1)
-	{
-		DrawPanelItem(menu,"Survivor, primary:");
-		DrawPanelText(menu,st_perk);
-	}
+	DrawPanelItem(menu,"Survivor, primary:");
+	DrawPanelText(menu,st_perk);
 
 	//show sur2 perk
 	iPerk = g_iSur2[iCid];
@@ -5238,11 +5024,8 @@ public Handle:Menu_ShowChoices (iCid)
 	else
 		Format(st_perk,128,"%t", "NotSet");
 
-	if (g_iSur2_enable==1)
-	{
-		DrawPanelItem(menu,"Survivor, secondary:");
-		DrawPanelText(menu,st_perk);
-	}
+	DrawPanelItem(menu,"Survivor, secondary:");
+	DrawPanelText(menu,st_perk);
 
 	//show sur3 perk
 	iPerk = g_iSur3[iCid];
@@ -5257,11 +5040,8 @@ public Handle:Menu_ShowChoices (iCid)
 	else
 		Format(st_perk,128,"%t", "NotSet");
 
-	if (g_iSur3_enable==1)
-	{
-		DrawPanelItem(menu,"Survivor, tertiary:");
-		DrawPanelText(menu,st_perk);
-	}
+	DrawPanelItem(menu,"Survivor, tertiary:");
+	DrawPanelText(menu,st_perk);
 
 	return menu;
 }
@@ -5819,9 +5599,10 @@ public Action:Debug_StaminaTimer (Handle:timer, any:iCid)
 // =======================================================================
 // #region Helpers
 
+//kept for the exported native; the primary tree is always available
 bool IsEnable_SurvivorPrimary()
 {
-	return g_iSur1_enable==1;
+	return true;
 }
 
 bool IsEnable_SurvivorPrimary_StoppingPower()
@@ -5849,9 +5630,10 @@ bool IsEnable_SurvivorPrimary_ChristmasGift()
 	return g_iChristmas_enable==1;
 }
 
+//kept for the exported native; the secondary tree is always available
 bool IsEnable_SurvivorSecondary()
 {
-	return g_iSur2_enable==1;
+	return true;
 }
 
 bool IsEnable_SurvivorSecondary_Unbreakable()
@@ -5874,9 +5656,10 @@ bool IsEnable_SurvivorSecondary_PackCat()
 	return g_iPackCat_enable==1;
 }
 
+//kept for the exported native; the tertiary tree is always available
 bool IsEnable_SurvivorTertiary()
 {
-	return g_iSur3_enable==1;
+	return true;
 }
 
 bool IsEnable_SurvivorTertiary_PackRat()
@@ -5971,8 +5754,7 @@ bool IsClientSelect_SurvivorTertiary_ExtremeConditioning(int client)
 
 bool IsExist_SurvivorPrimary_StoppingPower()
 {
-	if (!IsEnable_SurvivorPrimary()
-		|| !IsEnable_SurvivorPrimary_StoppingPower()) return false;
+	if (!IsEnable_SurvivorPrimary_StoppingPower()) return false;
 
 	for (int i = 1; i <= MaxClients; i++)
 	{
@@ -5987,8 +5769,7 @@ bool IsExist_SurvivorPrimary_StoppingPower()
 
 bool IsExist_SurvivorPrimary_SleightOfHand()
 {
-	if (!IsEnable_SurvivorPrimary()
-		|| !IsEnable_SurvivorPrimary_SleightOfHand()) return false;
+	if (!IsEnable_SurvivorPrimary_SleightOfHand()) return false;
 
 	for (int i = 1; i <= MaxClients; i++)
 	{
@@ -6003,8 +5784,7 @@ bool IsExist_SurvivorPrimary_SleightOfHand()
 
 bool IsExist_SurvivorPrimary_Pyrotechnician()
 {
-	if (!IsEnable_SurvivorPrimary()
-		|| !IsEnable_SurvivorPrimary_Pyrotechnician()) return false;
+	if (!IsEnable_SurvivorPrimary_Pyrotechnician()) return false;
 
 	for (int i = 1; i <= MaxClients; i++)
 	{
@@ -6019,8 +5799,7 @@ bool IsExist_SurvivorPrimary_Pyrotechnician()
 
 bool IsExist_SurvivorPrimary_MartialArtist()
 {
-	if (!IsEnable_SurvivorPrimary()
-		|| !IsEnable_SurvivorPrimary_MartialArtist()) return false;
+	if (!IsEnable_SurvivorPrimary_MartialArtist()) return false;
 
 	for (int i = 1; i <= MaxClients; i++)
 	{
@@ -6035,8 +5814,7 @@ bool IsExist_SurvivorPrimary_MartialArtist()
 
 bool IsExist_SurvivorPrimary_ChristmasGift()
 {
-	if (!IsEnable_SurvivorPrimary()
-		|| !IsEnable_SurvivorPrimary_ChristmasGift()) return false;
+	if (!IsEnable_SurvivorPrimary_ChristmasGift()) return false;
 
 	for (int i = 1; i <= MaxClients; i++)
 	{
@@ -6051,8 +5829,7 @@ bool IsExist_SurvivorPrimary_ChristmasGift()
 
 bool IsExist_SurvivorSecondary_Unbreakable()
 {
-	if (!IsEnable_SurvivorSecondary()
-		|| !IsEnable_SurvivorSecondary_Unbreakable()) return false;
+	if (!IsEnable_SurvivorSecondary_Unbreakable()) return false;
 
 	for (int i = 1; i <= MaxClients; i++)
 	{
@@ -6067,8 +5844,7 @@ bool IsExist_SurvivorSecondary_Unbreakable()
 
 bool IsExist_SurvivorSecondary_Spirit()
 {
-	if (!IsEnable_SurvivorSecondary()
-		|| !IsEnable_SurvivorSecondary_Spirit()) return false;
+	if (!IsEnable_SurvivorSecondary_Spirit()) return false;
 
 	for (int i = 1; i <= MaxClients; i++)
 	{
@@ -6083,8 +5859,7 @@ bool IsExist_SurvivorSecondary_Spirit()
 
 bool IsExist_SurvivorSecondary_HelpingHand()
 {
-	if (!IsEnable_SurvivorSecondary()
-		|| !IsEnable_SurvivorSecondary_HelpingHand()) return false;
+	if (!IsEnable_SurvivorSecondary_HelpingHand()) return false;
 
 	for (int i = 1; i <= MaxClients; i++)
 	{
@@ -6099,8 +5874,7 @@ bool IsExist_SurvivorSecondary_HelpingHand()
 
 bool IsExist_SurvivorSecondary_PackCat()
 {
-	if (!IsEnable_SurvivorSecondary()
-		|| !IsEnable_SurvivorSecondary_PackCat()) return false;
+	if (!IsEnable_SurvivorSecondary_PackCat()) return false;
 
 	for (int i = 1; i <= MaxClients; i++)
 	{
@@ -6115,8 +5889,7 @@ bool IsExist_SurvivorSecondary_PackCat()
 
 bool IsExist_SurvivorTertiary_PackRat()
 {
-	if (!IsEnable_SurvivorTertiary()
-		|| !IsEnable_SurvivorTertiary_PackRat()) return false;
+	if (!IsEnable_SurvivorTertiary_PackRat()) return false;
 
 	for (int i = 1; i <= MaxClients; i++)
 	{
@@ -6131,8 +5904,7 @@ bool IsExist_SurvivorTertiary_PackRat()
 
 bool IsExist_SurvivorTertiary_ChemReliant()
 {
-	if (!IsEnable_SurvivorTertiary()
-		|| !IsEnable_SurvivorTertiary_ChemReliant()) return false;
+	if (!IsEnable_SurvivorTertiary_ChemReliant()) return false;
 
 	for (int i = 1; i <= MaxClients; i++)
 	{
@@ -6147,8 +5919,7 @@ bool IsExist_SurvivorTertiary_ChemReliant()
 
 bool IsExist_SurvivorTertiary_HardToKill()
 {
-	if (!IsEnable_SurvivorTertiary()
-		|| !IsEnable_SurvivorTertiary_HardToKill()) return false;
+	if (!IsEnable_SurvivorTertiary_HardToKill()) return false;
 
 	for (int i = 1; i <= MaxClients; i++)
 	{
@@ -6163,8 +5934,7 @@ bool IsExist_SurvivorTertiary_HardToKill()
 
 bool IsExist_SurvivorTertiary_ExtremeConditioning()
 {
-	if (!IsEnable_SurvivorTertiary()
-		|| !IsEnable_SurvivorTertiary_ExtremeConditioning()) return false;
+	if (!IsEnable_SurvivorTertiary_ExtremeConditioning()) return false;
 
 	for (int i = 1; i <= MaxClients; i++)
 	{
