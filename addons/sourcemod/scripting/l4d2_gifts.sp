@@ -39,6 +39,9 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
 	MarkNativeAsOptional("L4D_RemoveWeaponOnGround");
 	
+	CreateNative("L4D2_Gifts_DropGift", Native_DropGift);
+	RegPluginLibrary("l4d2_gifts");
+
 	ZC_TANK = 8;
 	bLate = late;
 	return APLRes_Success; 
@@ -973,22 +976,32 @@ void DropGift(int client, int type = TYPE_STANDARD)
 	}
 }
 
+// native bool L4D2_Gifts_DropGift(int entity, int type = 1);
+// Spawn a gift at the position of "entity" (a client, or any entity such as a witch).
+// "type": 1 = standard gift, 2 = special gift.
+any Native_DropGift(Handle plugin, int numParams)
+{
+	int entity = GetNativeCell(1);
+	int type = (numParams >= 2) ? GetNativeCell(2) : TYPE_STANDARD;
+
+	if( type != TYPE_STANDARD && type != TYPE_SPECIAL )
+		return ThrowNativeError(SP_ERROR_NATIVE, "Invalid gift type %d (1 = standard, 2 = special)", type);
+
+	DropGift(entity, type);
+
+	return true;
+}
+
 Action ColdDown( Handle timer, any ref)
 {
 	int gift;
 	if (ref && (gift = EntRefToEntIndex(ref)) != INVALID_ENT_REFERENCE)
 	{
-		SDKHook(gift, SDKHook_TouchPost, OnTouchPost);
 		SDKHook(gift, SDKHook_UsePost, OnUsePost);
 	}
 
 	return Plugin_Continue;
 }
-
-void OnTouchPost(int gift, int client)
-{
-	TryOpenGift(gift, client);
-} 
 
 void OnUsePost(int gift, int client, int caller, UseType type, float value)
 {
