@@ -300,6 +300,16 @@ public Plugin:myinfo=
 #include <dhooks>
 #include <left4dhooks>
 
+#undef REQUIRE_PLUGIN
+#tryinclude <l4d2_gifts>
+#define REQUIRE_PLUGIN
+
+#if !defined _l4d2_gifts_included_
+	#define L4D2_GIFT_STANDARD	1
+	#define L4D2_GIFT_SPECIAL	2
+	native bool L4D2_Gifts_DropGift(int entity, int type = L4D2_GIFT_STANDARD);
+#endif
+
 // #endregion
 // =======================================================================
 
@@ -476,6 +486,8 @@ new g_iMA_maxpenalty;
 new Handle:g_hChristmas_enable;
 //associated var
 new g_iChristmas_enable;
+//is the l4d2_gifts plugin loaded (it provides L4D2_Gifts_DropGift)
+bool g_bAvailable_l4d2_gifts;
 
 //SUR2 PERKS
 //unbreakable, bonus hp
@@ -606,52 +618,26 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	}
 
 	RegPluginLibrary("perkmod2");
-	CreateNative("perkmod2_IsEnable_SurvivorPrimary", Native_IsEnable_SurvivorPrimary);
-	CreateNative("perkmod2_IsEnable_SurvivorPrimary_StoppingPower", Native_IsEnable_SurvivorPrimary_StoppingPower);
-	CreateNative("perkmod2_IsEnable_SurvivorPrimary_SleightOfHand", Native_IsEnable_SurvivorPrimary_SleightOfHand);
-	CreateNative("perkmod2_IsEnable_SurvivorPrimary_Pyrotechnician", Native_IsEnable_SurvivorPrimary_Pyrotechnician);
-	CreateNative("perkmod2_IsEnable_SurvivorPrimary_MartialArtist", Native_IsEnable_SurvivorPrimary_MartialArtist);
-	CreateNative("perkmod2_IsEnable_SurvivorPrimary_ChristmasGift", Native_IsEnable_SurvivorPrimary_ChristmasGift);
-	CreateNative("perkmod2_IsEnable_SurvivorSecondary", Native_IsEnable_SurvivorSecondary);
-	CreateNative("perkmod2_IsEnable_SurvivorSecondary_Unbreakable", Native_IsEnable_SurvivorSecondary_Unbreakable);
-	CreateNative("perkmod2_IsEnable_SurvivorSecondary_Spirit", Native_IsEnable_SurvivorSecondary_Spirit);
-	CreateNative("perkmod2_IsEnable_SurvivorSecondary_HelpingHand", Native_IsEnable_SurvivorSecondary_HelpingHand);
-	CreateNative("perkmod2_IsEnable_SurvivorSecondary_PackCat", Native_IsEnable_SurvivorSecondary_PackCat);
-	CreateNative("perkmod2_IsEnable_SurvivorTertiary", Native_IsEnable_SurvivorTertiary);
-	CreateNative("perkmod2_IsEnable_SurvivorTertiary_PackRat", Native_IsEnable_SurvivorTertiary_PackRat);
-	CreateNative("perkmod2_IsEnable_SurvivorTertiary_ChemReliant", Native_IsEnable_SurvivorTertiary_ChemReliant);
-	CreateNative("perkmod2_IsEnable_SurvivorTertiary_HardToKill", Native_IsEnable_SurvivorTertiary_HardToKill);
-	CreateNative("perkmod2_IsEnable_SurvivorTertiary_ExtremeConditioning", Native_IsEnable_SurvivorTertiary_ExtremeConditioning);
-	CreateNative("perkmod2_IsClientConfirm", Native_IsClientConfirm);
-	CreateNative("perkmod2_IsClientSelect_SurvivorPrimary_StoppingPower", Native_IsClientSelect_SurvivorPrimary_StoppingPower);
-	CreateNative("perkmod2_IsClientSelect_SurvivorPrimary_SleightOfHand", Native_IsClientSelect_SurvivorPrimary_SleightOfHand);
-	CreateNative("perkmod2_IsClientSelect_SurvivorPrimary_Pyrotechnician", Native_IsClientSelect_SurvivorPrimary_Pyrotechnician);
-	CreateNative("perkmod2_IsClientSelect_SurvivorPrimary_MartialArtist", Native_IsClientSelect_SurvivorPrimary_MartialArtist);
-	CreateNative("perkmod2_IsClientSelect_SurvivorPrimary_ChristmasGift", Native_IsClientSelect_SurvivorPrimary_ChristmasGift);
-	CreateNative("perkmod2_IsClientSelect_SurvivorSecondary_Unbreakable", Native_IsClientSelect_SurvivorSecondary_Unbreakable);
-	CreateNative("perkmod2_IsClientSelect_SurvivorSecondary_Spirit", Native_IsClientSelect_SurvivorSecondary_Spirit);
-	CreateNative("perkmod2_IsClientSelect_SurvivorSecondary_HelpingHand", Native_IsClientSelect_SurvivorSecondary_HelpingHand);
-	CreateNative("perkmod2_IsClientSelect_SurvivorSecondary_PackCat", Native_IsClientSelect_SurvivorSecondary_PackCat);
-	CreateNative("perkmod2_IsClientSelect_SurvivorTertiary_PackRat", Native_IsClientSelect_SurvivorTertiary_PackRat);
-	CreateNative("perkmod2_IsClientSelect_SurvivorTertiary_ChemReliant", Native_IsClientSelect_SurvivorTertiary_ChemReliant);
-	CreateNative("perkmod2_IsClientSelect_SurvivorTertiary_HardToKill", Native_IsClientSelect_SurvivorTertiary_HardToKill);
-	CreateNative("perkmod2_IsClientSelect_SurvivorTertiary_ExtremeConditioning", Native_IsClientSelect_SurvivorTertiary_ExtremeConditioning);
-	CreateNative("perkmod2_IsExist_SurvivorPrimary_StoppingPower", Native_IsExist_SurvivorPrimary_StoppingPower);
-	CreateNative("perkmod2_IsExist_SurvivorPrimary_SleightOfHand", Native_IsExist_SurvivorPrimary_SleightOfHand);
-	CreateNative("perkmod2_IsExist_SurvivorPrimary_Pyrotechnician", Native_IsExist_SurvivorPrimary_Pyrotechnician);
-	CreateNative("perkmod2_IsExist_SurvivorPrimary_MartialArtist", Native_IsExist_SurvivorPrimary_MartialArtist);
-	CreateNative("perkmod2_IsExist_SurvivorPrimary_ChristmasGift", Native_IsExist_SurvivorPrimary_ChristmasGift);
-	CreateNative("perkmod2_IsExist_SurvivorSecondary_Unbreakable", Native_IsExist_SurvivorSecondary_Unbreakable);
-	CreateNative("perkmod2_IsExist_SurvivorSecondary_Spirit", Native_IsExist_SurvivorSecondary_Spirit);
-	CreateNative("perkmod2_IsExist_SurvivorSecondary_HelpingHand", Native_IsExist_SurvivorSecondary_HelpingHand);
-	CreateNative("perkmod2_IsExist_SurvivorSecondary_PackCat", Native_IsExist_SurvivorSecondary_PackCat);
-	CreateNative("perkmod2_IsExist_SurvivorTertiary_PackRat", Native_IsExist_SurvivorTertiary_PackRat);
-	CreateNative("perkmod2_IsExist_SurvivorTertiary_ChemReliant", Native_IsExist_SurvivorTertiary_ChemReliant);
-	CreateNative("perkmod2_IsExist_SurvivorTertiary_HardToKill", Native_IsExist_SurvivorTertiary_HardToKill);
-	CreateNative("perkmod2_IsExist_SurvivorTertiary_ExtremeConditioning", Native_IsExist_SurvivorTertiary_ExtremeConditioning);
 	CreateNative("perkmod2_Pyro_OnWeaponFire", Native_Pyro_OnWeaponFire);
 
+	MarkNativeAsOptional("L4D2_Gifts_DropGift");
+
 	return APLRes_Success;
+}
+
+public void OnAllPluginsLoaded()
+{
+	g_bAvailable_l4d2_gifts = LibraryExists("l4d2_gifts");
+}
+
+public void OnLibraryAdded(const char[] name)
+{
+	g_bAvailable_l4d2_gifts = LibraryExists("l4d2_gifts");
+}
+
+public void OnLibraryRemoved(const char[] name)
+{
+	g_bAvailable_l4d2_gifts = LibraryExists("l4d2_gifts");
 }
 
 public OnPluginStart()
@@ -1652,6 +1638,7 @@ public Event_PlayerDeath (Handle:event, const String:name[], bool:dontBroadcast)
 	if (attacker == 0) return;
 	if (attacker != iCid && GetClientTeam(iCid) == 3)
 	{
+		ChristmasGift_OnInfectedKilled(iCid, attacker);
 		PC_GiveFullAmmo(attacker);
 	}
 }
@@ -2111,6 +2098,7 @@ public Event_WitchKilled (Handle:event, const String:name[], bool:dontBroadcast)
 	new iCid=GetClientOfUserId(GetEventInt(event,"userid"));
 	if (iCid==0) return;
 
+	ChristmasGift_OnWitchKilled(GetEventInt(event,"witchid"));
 	PC_GiveFullAmmo(iCid);
 }
 
@@ -4611,6 +4599,45 @@ Extreme_Rebuild ()
 	}
 }
 
+//===========================
+// CHRISTMAS GIFT
+//===========================
+
+void ChristmasGift_OnInfectedKilled(int victim, int attacker)
+{
+	if (!g_bAvailable_l4d2_gifts) return;
+
+	if (victim == attacker) return;
+	if (!IsClientInGame(victim) || GetClientTeam(victim) != 3) return;
+
+	if (GetEntProp(victim, Prop_Send, "m_zombieClass") == 8)
+	{
+		if (!IsExist_SurvivorPrimary_ChristmasGift()) return;
+
+		L4D2_Gifts_DropGift(victim, L4D2_GIFT_SPECIAL);
+	}
+	else
+	{
+		if (IsInvalidClient(attacker)) return;
+		if (GetClientTeam(attacker) != 2) return;
+		if (!IsEnable_SurvivorPrimary_ChristmasGift()) return;
+		if (!IsClientConfirm(attacker)) return;
+		if (!IsClientSelect_SurvivorPrimary_ChristmasGift(attacker)) return;
+
+		L4D2_Gifts_DropGift(victim, L4D2_GIFT_STANDARD);
+	}
+}
+
+void ChristmasGift_OnWitchKilled(int witch)
+{
+	if (!g_bAvailable_l4d2_gifts) return;
+
+	if (witch <= 0 || !IsValidEntity(witch)) return;
+	if (!IsExist_SurvivorPrimary_ChristmasGift()) return;
+
+	L4D2_Gifts_DropGift(witch, L4D2_GIFT_SPECIAL);
+}
+
 // #endregion
 // =======================================================================
 
@@ -5599,20 +5626,9 @@ public Action:Debug_StaminaTimer (Handle:timer, any:iCid)
 // =======================================================================
 // #region Helpers
 
-//kept for the exported native; the primary tree is always available
-bool IsEnable_SurvivorPrimary()
-{
-	return true;
-}
-
 bool IsEnable_SurvivorPrimary_StoppingPower()
 {
 	return g_iStopping_enable==1;
-}
-
-bool IsEnable_SurvivorPrimary_SleightOfHand()
-{
-	return g_iSoH_enable==1;
 }
 
 bool IsEnable_SurvivorPrimary_Pyrotechnician()
@@ -5620,35 +5636,9 @@ bool IsEnable_SurvivorPrimary_Pyrotechnician()
 	return g_iPyro_enable==1;
 }
 
-bool IsEnable_SurvivorPrimary_MartialArtist()
-{
-	return g_iMA_enable==1;
-}
-
 bool IsEnable_SurvivorPrimary_ChristmasGift()
 {
 	return g_iChristmas_enable==1;
-}
-
-//kept for the exported native; the secondary tree is always available
-bool IsEnable_SurvivorSecondary()
-{
-	return true;
-}
-
-bool IsEnable_SurvivorSecondary_Unbreakable()
-{
-	return g_iUnbreak_enable==1;
-}
-
-bool IsEnable_SurvivorSecondary_Spirit()
-{
-	return g_iSpirit_enable==1;
-}
-
-bool IsEnable_SurvivorSecondary_HelpingHand()
-{
-	return g_iHelpHand_enable==1;
 }
 
 bool IsEnable_SurvivorSecondary_PackCat()
@@ -5656,30 +5646,9 @@ bool IsEnable_SurvivorSecondary_PackCat()
 	return g_iPackCat_enable==1;
 }
 
-//kept for the exported native; the tertiary tree is always available
-bool IsEnable_SurvivorTertiary()
-{
-	return true;
-}
-
 bool IsEnable_SurvivorTertiary_PackRat()
 {
 	return g_iPack_enable==1;
-}
-
-bool IsEnable_SurvivorTertiary_ChemReliant()
-{
-	return g_iChem_enable==1;
-}
-
-bool IsEnable_SurvivorTertiary_HardToKill()
-{
-	return g_iHard_enable==1;
-}
-
-bool IsEnable_SurvivorTertiary_ExtremeConditioning()
-{
-	return g_iExtreme_enable==1;
 }
 
 bool IsClientConfirm(int client)
@@ -5692,39 +5661,14 @@ bool IsClientSelect_SurvivorPrimary_StoppingPower(int client)
 	return g_iSur1[client]==1;
 }
 
-bool IsClientSelect_SurvivorPrimary_SleightOfHand(int client)
-{
-	return g_iSur1[client]==2;
-}
-
 bool IsClientSelect_SurvivorPrimary_Pyrotechnician(int client)
 {
 	return g_iSur1[client]==3;
 }
 
-bool IsClientSelect_SurvivorPrimary_MartialArtist(int client)
-{
-	return g_iSur1[client]==4;
-}
-
 bool IsClientSelect_SurvivorPrimary_ChristmasGift(int client)
 {
 	return g_iSur1[client]==5;
-}
-
-bool IsClientSelect_SurvivorSecondary_Unbreakable(int client)
-{
-	return g_iSur2[client]==1;
-}
-
-bool IsClientSelect_SurvivorSecondary_Spirit(int client)
-{
-	return g_iSur2[client]==2;
-}
-
-bool IsClientSelect_SurvivorSecondary_HelpingHand(int client)
-{
-	return g_iSur2[client]==3;
 }
 
 bool IsClientSelect_SurvivorSecondary_PackCat(int client)
@@ -5737,81 +5681,6 @@ bool IsClientSelect_SurvivorTertiary_PackRat(int client)
 	return g_iSur3[client]==1;
 }
 
-bool IsClientSelect_SurvivorTertiary_ChemReliant(int client)
-{
-	return g_iSur3[client]==2;
-}
-
-bool IsClientSelect_SurvivorTertiary_HardToKill(int client)
-{
-	return g_iSur3[client]==3;
-}
-
-bool IsClientSelect_SurvivorTertiary_ExtremeConditioning(int client)
-{
-	return g_iSur3[client]==4;
-}
-
-bool IsExist_SurvivorPrimary_StoppingPower()
-{
-	if (!IsEnable_SurvivorPrimary_StoppingPower()) return false;
-
-	for (int i = 1; i <= MaxClients; i++)
-	{
-		if (IsClientInGame(i)
-			&& GetClientTeam(i)==2
-			&& IsClientConfirm(i)
-			&& IsClientSelect_SurvivorPrimary_StoppingPower(i)) return true;
-	}
-
-	return false;
-}
-
-bool IsExist_SurvivorPrimary_SleightOfHand()
-{
-	if (!IsEnable_SurvivorPrimary_SleightOfHand()) return false;
-
-	for (int i = 1; i <= MaxClients; i++)
-	{
-		if (IsClientInGame(i)
-			&& GetClientTeam(i)==2
-			&& IsClientConfirm(i)
-			&& IsClientSelect_SurvivorPrimary_SleightOfHand(i)) return true;
-	}
-
-	return false;
-}
-
-bool IsExist_SurvivorPrimary_Pyrotechnician()
-{
-	if (!IsEnable_SurvivorPrimary_Pyrotechnician()) return false;
-
-	for (int i = 1; i <= MaxClients; i++)
-	{
-		if (IsClientInGame(i)
-			&& GetClientTeam(i)==2
-			&& IsClientConfirm(i)
-			&& IsClientSelect_SurvivorPrimary_Pyrotechnician(i)) return true;
-	}
-
-	return false;
-}
-
-bool IsExist_SurvivorPrimary_MartialArtist()
-{
-	if (!IsEnable_SurvivorPrimary_MartialArtist()) return false;
-
-	for (int i = 1; i <= MaxClients; i++)
-	{
-		if (IsClientInGame(i)
-			&& GetClientTeam(i)==2
-			&& IsClientConfirm(i)
-			&& IsClientSelect_SurvivorPrimary_MartialArtist(i)) return true;
-	}
-
-	return false;
-}
-
 bool IsExist_SurvivorPrimary_ChristmasGift()
 {
 	if (!IsEnable_SurvivorPrimary_ChristmasGift()) return false;
@@ -5822,126 +5691,6 @@ bool IsExist_SurvivorPrimary_ChristmasGift()
 			&& GetClientTeam(i)==2
 			&& IsClientConfirm(i)
 			&& IsClientSelect_SurvivorPrimary_ChristmasGift(i)) return true;
-	}
-
-	return false;
-}
-
-bool IsExist_SurvivorSecondary_Unbreakable()
-{
-	if (!IsEnable_SurvivorSecondary_Unbreakable()) return false;
-
-	for (int i = 1; i <= MaxClients; i++)
-	{
-		if (IsClientInGame(i)
-			&& GetClientTeam(i)==2
-			&& IsClientConfirm(i)
-			&& IsClientSelect_SurvivorSecondary_Unbreakable(i)) return true;
-	}
-
-	return false;
-}
-
-bool IsExist_SurvivorSecondary_Spirit()
-{
-	if (!IsEnable_SurvivorSecondary_Spirit()) return false;
-
-	for (int i = 1; i <= MaxClients; i++)
-	{
-		if (IsClientInGame(i)
-			&& GetClientTeam(i)==2
-			&& IsClientConfirm(i)
-			&& IsClientSelect_SurvivorSecondary_Spirit(i)) return true;
-	}
-
-	return false;
-}
-
-bool IsExist_SurvivorSecondary_HelpingHand()
-{
-	if (!IsEnable_SurvivorSecondary_HelpingHand()) return false;
-
-	for (int i = 1; i <= MaxClients; i++)
-	{
-		if (IsClientInGame(i)
-			&& GetClientTeam(i)==2
-			&& IsClientConfirm(i)
-			&& IsClientSelect_SurvivorSecondary_HelpingHand(i)) return true;
-	}
-
-	return false;
-}
-
-bool IsExist_SurvivorSecondary_PackCat()
-{
-	if (!IsEnable_SurvivorSecondary_PackCat()) return false;
-
-	for (int i = 1; i <= MaxClients; i++)
-	{
-		if (IsClientInGame(i)
-			&& GetClientTeam(i)==2
-			&& IsClientConfirm(i)
-			&& IsClientSelect_SurvivorSecondary_PackCat(i)) return true;
-	}
-
-	return false;
-}
-
-bool IsExist_SurvivorTertiary_PackRat()
-{
-	if (!IsEnable_SurvivorTertiary_PackRat()) return false;
-
-	for (int i = 1; i <= MaxClients; i++)
-	{
-		if (IsClientInGame(i)
-			&& GetClientTeam(i)==2
-			&& IsClientConfirm(i)
-			&& IsClientSelect_SurvivorTertiary_PackRat(i)) return true;
-	}
-
-	return false;
-}
-
-bool IsExist_SurvivorTertiary_ChemReliant()
-{
-	if (!IsEnable_SurvivorTertiary_ChemReliant()) return false;
-
-	for (int i = 1; i <= MaxClients; i++)
-	{
-		if (IsClientInGame(i)
-			&& GetClientTeam(i)==2
-			&& IsClientConfirm(i)
-			&& IsClientSelect_SurvivorTertiary_ChemReliant(i)) return true;
-	}
-
-	return false;
-}
-
-bool IsExist_SurvivorTertiary_HardToKill()
-{
-	if (!IsEnable_SurvivorTertiary_HardToKill()) return false;
-
-	for (int i = 1; i <= MaxClients; i++)
-	{
-		if (IsClientInGame(i)
-			&& GetClientTeam(i)==2
-			&& IsClientConfirm(i)
-			&& IsClientSelect_SurvivorTertiary_HardToKill(i)) return true;
-	}
-
-	return false;
-}
-
-bool IsExist_SurvivorTertiary_ExtremeConditioning()
-{
-	if (!IsEnable_SurvivorTertiary_ExtremeConditioning()) return false;
-
-	for (int i = 1; i <= MaxClients; i++)
-	{
-		if (IsClientInGame(i)
-			&& GetClientTeam(i)==2
-			&& IsClientConfirm(i)
-			&& IsClientSelect_SurvivorTertiary_ExtremeConditioning(i)) return true;
 	}
 
 	return false;
@@ -5968,235 +5717,6 @@ bool IsInvalidClient (int client)
 
 // =======================================================================
 // #region Native
-
-any Native_IsEnable_SurvivorPrimary(Handle plugin, int numParams)
-{
-	return IsEnable_SurvivorPrimary();
-}
-
-any Native_IsEnable_SurvivorPrimary_StoppingPower(Handle plugin, int numParams)
-{
-	return IsEnable_SurvivorPrimary_StoppingPower();
-}
-
-any Native_IsEnable_SurvivorPrimary_SleightOfHand(Handle plugin, int numParams)
-{
-	return IsEnable_SurvivorPrimary_SleightOfHand();
-}
-
-any Native_IsEnable_SurvivorPrimary_Pyrotechnician(Handle plugin, int numParams)
-{
-	return IsEnable_SurvivorPrimary_Pyrotechnician();
-}
-
-any Native_IsEnable_SurvivorPrimary_MartialArtist(Handle plugin, int numParams)
-{
-	return IsEnable_SurvivorPrimary_MartialArtist();
-}
-
-any Native_IsEnable_SurvivorPrimary_ChristmasGift(Handle plugin, int numParams)
-{
-	return IsEnable_SurvivorPrimary_ChristmasGift();
-}
-
-any Native_IsEnable_SurvivorSecondary(Handle plugin, int numParams)
-{
-	return IsEnable_SurvivorSecondary();
-}
-
-any Native_IsEnable_SurvivorSecondary_Unbreakable(Handle plugin, int numParams)
-{
-	return IsEnable_SurvivorSecondary_Unbreakable();
-}
-
-any Native_IsEnable_SurvivorSecondary_Spirit(Handle plugin, int numParams)
-{
-	return IsEnable_SurvivorSecondary_Spirit();
-}
-
-any Native_IsEnable_SurvivorSecondary_HelpingHand(Handle plugin, int numParams)
-{
-	return IsEnable_SurvivorSecondary_HelpingHand();
-}
-
-any Native_IsEnable_SurvivorSecondary_PackCat(Handle plugin, int numParams)
-{
-	return IsEnable_SurvivorSecondary_PackCat();
-}
-
-any Native_IsEnable_SurvivorTertiary(Handle plugin, int numParams)
-{
-	return IsEnable_SurvivorTertiary();
-}
-
-any Native_IsEnable_SurvivorTertiary_PackRat(Handle plugin, int numParams)
-{
-	return IsEnable_SurvivorTertiary_PackRat();
-}
-
-any Native_IsEnable_SurvivorTertiary_ChemReliant(Handle plugin, int numParams)
-{
-	return IsEnable_SurvivorTertiary_ChemReliant();
-}
-
-any Native_IsEnable_SurvivorTertiary_HardToKill(Handle plugin, int numParams)
-{
-	return IsEnable_SurvivorTertiary_HardToKill();
-}
-
-any Native_IsEnable_SurvivorTertiary_ExtremeConditioning(Handle plugin, int numParams)
-{
-	return IsEnable_SurvivorTertiary_ExtremeConditioning();
-}
-
-any Native_IsClientConfirm(Handle plugin, int numParams)
-{
-	int client = GetNativeCell(1);
-	return IsClientConfirm(client);
-}
-
-any Native_IsClientSelect_SurvivorPrimary_StoppingPower(Handle plugin, int numParams)
-{
-	int client = GetNativeCell(1);
-	return IsClientSelect_SurvivorPrimary_StoppingPower(client);
-}
-
-any Native_IsClientSelect_SurvivorPrimary_SleightOfHand(Handle plugin, int numParams)
-{
-	int client = GetNativeCell(1);
-	return IsClientSelect_SurvivorPrimary_SleightOfHand(client);
-}
-
-any Native_IsClientSelect_SurvivorPrimary_Pyrotechnician(Handle plugin, int numParams)
-{
-	int client = GetNativeCell(1);
-	return IsClientSelect_SurvivorPrimary_Pyrotechnician(client);
-}
-
-any Native_IsClientSelect_SurvivorPrimary_MartialArtist(Handle plugin, int numParams)
-{
-	int client = GetNativeCell(1);
-	return IsClientSelect_SurvivorPrimary_MartialArtist(client);
-}
-
-any Native_IsClientSelect_SurvivorPrimary_ChristmasGift(Handle plugin, int numParams)
-{
-	int client = GetNativeCell(1);
-	return IsClientSelect_SurvivorPrimary_ChristmasGift(client);
-}
-
-any Native_IsClientSelect_SurvivorSecondary_Unbreakable(Handle plugin, int numParams)
-{
-	int client = GetNativeCell(1);
-	return IsClientSelect_SurvivorSecondary_Unbreakable(client);
-}
-
-any Native_IsClientSelect_SurvivorSecondary_Spirit(Handle plugin, int numParams)
-{
-	int client = GetNativeCell(1);
-	return IsClientSelect_SurvivorSecondary_Spirit(client);
-}
-
-any Native_IsClientSelect_SurvivorSecondary_HelpingHand(Handle plugin, int numParams)
-{
-	int client = GetNativeCell(1);
-	return IsClientSelect_SurvivorSecondary_HelpingHand(client);
-}
-
-any Native_IsClientSelect_SurvivorSecondary_PackCat(Handle plugin, int numParams)
-{
-	int client = GetNativeCell(1);
-	return IsClientSelect_SurvivorSecondary_PackCat(client);
-}
-
-any Native_IsClientSelect_SurvivorTertiary_PackRat(Handle plugin, int numParams)
-{
-	int client = GetNativeCell(1);
-	return IsClientSelect_SurvivorTertiary_PackRat(client);
-}
-
-any Native_IsClientSelect_SurvivorTertiary_ChemReliant(Handle plugin, int numParams)
-{
-	int client = GetNativeCell(1);
-	return IsClientSelect_SurvivorTertiary_ChemReliant(client);
-}
-
-any Native_IsClientSelect_SurvivorTertiary_HardToKill(Handle plugin, int numParams)
-{
-	int client = GetNativeCell(1);
-	return IsClientSelect_SurvivorTertiary_HardToKill(client);
-}
-
-any Native_IsClientSelect_SurvivorTertiary_ExtremeConditioning(Handle plugin, int numParams)
-{
-	int client = GetNativeCell(1);
-	return IsClientSelect_SurvivorTertiary_ExtremeConditioning(client);
-}
-
-any Native_IsExist_SurvivorPrimary_StoppingPower(Handle plugin, int numParams)
-{
-	return IsExist_SurvivorPrimary_StoppingPower();
-}
-
-any Native_IsExist_SurvivorPrimary_SleightOfHand(Handle plugin, int numParams)
-{
-	return IsExist_SurvivorPrimary_SleightOfHand();
-}
-
-any Native_IsExist_SurvivorPrimary_Pyrotechnician(Handle plugin, int numParams)
-{
-	return IsExist_SurvivorPrimary_Pyrotechnician();
-}
-
-any Native_IsExist_SurvivorPrimary_MartialArtist(Handle plugin, int numParams)
-{
-	return IsExist_SurvivorPrimary_MartialArtist();
-}
-
-any Native_IsExist_SurvivorPrimary_ChristmasGift(Handle plugin, int numParams)
-{
-	return IsExist_SurvivorPrimary_ChristmasGift();
-}
-
-any Native_IsExist_SurvivorSecondary_Unbreakable(Handle plugin, int numParams)
-{
-	return IsExist_SurvivorSecondary_Unbreakable();
-}
-
-any Native_IsExist_SurvivorSecondary_Spirit(Handle plugin, int numParams)
-{
-	return IsExist_SurvivorSecondary_Spirit();
-}
-
-any Native_IsExist_SurvivorSecondary_HelpingHand(Handle plugin, int numParams)
-{
-	return IsExist_SurvivorSecondary_HelpingHand();
-}
-
-any Native_IsExist_SurvivorSecondary_PackCat(Handle plugin, int numParams)
-{
-	return IsExist_SurvivorSecondary_PackCat();
-}
-
-any Native_IsExist_SurvivorTertiary_PackRat(Handle plugin, int numParams)
-{
-	return IsExist_SurvivorTertiary_PackRat();
-}
-
-any Native_IsExist_SurvivorTertiary_ChemReliant(Handle plugin, int numParams)
-{
-	return IsExist_SurvivorTertiary_ChemReliant();
-}
-
-any Native_IsExist_SurvivorTertiary_HardToKill(Handle plugin, int numParams)
-{
-	return IsExist_SurvivorTertiary_HardToKill();
-}
-
-any Native_IsExist_SurvivorTertiary_ExtremeConditioning(Handle plugin, int numParams)
-{
-	return IsExist_SurvivorTertiary_ExtremeConditioning();
-}
 
 any Native_Pyro_OnWeaponFire(Handle plugin, int numParams)
 {

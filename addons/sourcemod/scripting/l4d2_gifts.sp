@@ -1104,7 +1104,7 @@ void TryOpenGift(int gift, int client)
 
 Action WeaponCanUse(int client, int weapon)
 {
-	if(!g_bGiftEnable || !g_bCvarBlockSwitch) return Plugin_Continue;
+	if(!g_bCvarBlockSwitch) return Plugin_Continue;
 
 	if(IsClientInGame(client) && GetClientTeam(client) == 2)
 	{
