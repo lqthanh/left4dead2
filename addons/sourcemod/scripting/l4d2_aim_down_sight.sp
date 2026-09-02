@@ -392,8 +392,22 @@ public void OnConfigsExecuted()
 // Events
 void HookEvents()
 {
+	HookEvent("weapon_zoom", Event_WeaponZoom, EventHookMode_Post);
 	HookEvent("weapon_drop", Event_WeaponDrop, EventHookMode_Post);
 	HookEvent("round_start", Event_RoundStart, EventHookMode_PostNoCopy);
+}
+
+void Event_WeaponZoom(Event event, const char[] name, bool dontBroadcast)
+{
+	int client = GetClientOfUserId(event.GetInt("userid"));
+	if (client <= 0)
+		return;
+	
+	bool zoomed = GetEntProp(client, Prop_Send, "m_iFOV") != 0;
+	if (zoomed)
+	{
+		ClearInspectHelpingHand(GetPlayerWeapon(client));
+	}
 }
 
 void Event_WeaponDrop(Event event, const char[] name, bool dontBroadcast)
@@ -504,6 +518,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 			// Allow ADS if: not a sniper
 			if (activeWeapon != -1 && !CanZoom(activeWeapon))
 			{
+				ClearInspectHelpingHand(activeWeapon);
 				SetupZoom(client, activeWeapon, !player[client].bZoom);
 			}
 		}
@@ -720,6 +735,11 @@ public Action OnCustomWeaponReload(int weapon)
 			{
 				// Play inspect animation (ACT_VM_FIDGET = 184)
 				SendWeaponAnim(weapon, 184);
+				// Hide the crosshair for the whole inspect: the engine only lets a shove
+				// (ACT_VM_MELEE) replace the playing view-model layer while it is hidden.
+				// ads_v1.982 gets this for free by parking m_helpingHandState on 7 until
+				// hide_effects_until expires; without it the fidget swallows the shove.
+				SetWeaponHelpingHandState(weapon, 7);
 				return Plugin_Handled;
 			}
 		}
@@ -879,6 +899,38 @@ int GetWeaponClip(int weapon)
 void SetWeaponHelpingHandState(int weapon, int state)
 {
 	SetEntProp(weapon, Prop_Send, "m_helpingHandState", state);
+}
+
+// Undoes the state 7 that OnCustomWeaponReload parks on the weapon for an inspect, and
+// drops the fidget off the view-model layer. State 7 doubles as the "inspecting" flag,
+// so no per-player bookkeeping is needed: 7 is only ever set here and ADS uses 6.
+// Only needed where no new weapon anim is played - anything that does play one (shove,
+// attack, reload, deploy) already resets both on its own.
+void ClearInspectHelpingHand(int weapon)
+{
+	if (weapon < 1 || !IsValidEntity(weapon))
+		return;
+
+	if (GetEntProp(weapon, Prop_Send, "m_helpingHandState") != 7)
+		return;
+
+	SetWeaponHelpingHandState(weapon, 0);
+	if (HasEntProp(weapon, Prop_Send, "m_helpingHandTarget"))
+		SetEntProp(weapon, Prop_Send, "m_helpingHandTarget", -1);
+
+	int owner = GetWeaponOwner(weapon);
+	if (owner < 1 || owner > MaxClients || !IsClientInGame(owner))
+		return;
+
+	int viewModel = GetEntPropEnt(owner, Prop_Send, "m_hViewModel");
+	if (viewModel < 1 || !IsValidEntity(viewModel))
+		return;
+
+	// Same cancel as ads_v1.982's SetViewAnimation(viewModel, -1, 0, Time): the fidget
+	// rides on m_nLayerSequence, so dropping the layer leaves the base idle playing.
+	SetEntProp(viewModel, Prop_Send, "m_nLayerSequence", -1);
+	SetEntProp(viewModel, Prop_Send, "m_nLayer", 0);
+	SetEntPropFloat(viewModel, Prop_Send, "m_flLayerStartTime", GetGameTime());
 }
 
 // #endregion
