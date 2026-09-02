@@ -72,8 +72,10 @@ enum struct PlayerData
 	bool pendingDisableAdsBySecondary;
 	float primaryattacktime;
 
-	bool isPistol;
 	float cycleTime;
+
+	char weaponClass[48];
+	bool attrValid;
 }
 PlayerData
 	player[MAXPLAYERS + 1];
@@ -82,16 +84,40 @@ ConVar
 	cvar_ads_debug,
 	cvar_ads_key,
 	cvar_ads_cycletime_mul,
-	cvar_ads_cycletime_scar;
+	cvar_ads_cycletime_scar,
+	cvar_ads_attribute_mul;
 enum struct GlobalConVar
 {
 	bool ads_debug;
 	int ads_key;
 	float ads_cycletime_mul;
 	float ads_cycletime_scar;
+	float ads_attribute_mul;
 }
 GlobalConVar
 	cvar;
+
+L4D2FloatWeaponAttributes
+	WP_ATTRS[] =
+{
+	L4D2FWA_MaxSpread
+	//  L4D2FWA_SpreadPerShot
+	// ,L4D2FWA_MaxSpread
+	// ,L4D2FWA_MinDuckingSpread
+	// ,L4D2FWA_MinStandingSpread
+	// ,L4D2FWA_MinInAirSpread
+	// ,L4D2FWA_MaxMovementSpread
+	// ,L4D2FWA_VerticalPunch
+	// ,L4D2FWA_HorizontalPunch
+	// ,L4D2FWA_PelletScatterPitch
+	// ,L4D2FWA_PelletScatterYaw
+};
+
+float
+	g_SavedAttributes[sizeof(WP_ATTRS)];
+
+bool
+	g_bAttributeApplied;
 
 // int currentActivity[MAXPLAYERS + 1];
 
@@ -139,8 +165,10 @@ public void OnClientConnected(int client)
 	player[client].pendingDisableAdsBySecondary = false;
 	player[client].primaryattacktime			= 0.0;
 
-	player[client].isPistol						= false;
 	player[client].cycleTime					= 0.0;
+
+	player[client].weaponClass[0]				= '\0';
+	player[client].attrValid					= false;
 }
 
 public void OnClientPutInServer(int client)
@@ -332,10 +360,12 @@ void LoadConVars()
 	cvar_ads_key = 				CreateConVar("ads_key", "0", "Key to activate ADS. 0 = Zoom key (MOUSE 3), 1 = Walk key (SHIFT), 2 = Duck key (CTRL)");
 	cvar_ads_cycletime_mul = 	CreateConVar("ads_cycletime_mul", "1.1", "ADS cycle-time multiplier. > 1.0 makes ADS slower, 1.0 keeps default.", FCVAR_NONE, true, 1.0);
 	cvar_ads_cycletime_scar = 	CreateConVar("ads_cycletime_scar", "0.12", "Override cycle time for SCAR");
+	cvar_ads_attribute_mul = 		CreateConVar("ads_attribute_mul", "0.5", "Bullet spread multiplier while ADS is active. 1.0 = unchanged, 0.0 = perfect accuracy.", FCVAR_NONE, true, 0.0, true, 1.0);
 	cvar_ads_debug.AddChangeHook(OnConVarChanged);
 	cvar_ads_key.AddChangeHook(OnConVarChanged);
 	cvar_ads_cycletime_mul.AddChangeHook(OnConVarChanged);
 	cvar_ads_cycletime_scar.AddChangeHook(OnConVarChanged);
+	cvar_ads_attribute_mul.AddChangeHook(OnConVarChanged);
 	GetConVars();
 	AutoExecConfig(true, "l4d2_aim_down_sight");
 }
@@ -346,6 +376,7 @@ void GetConVars()
 	cvar.ads_key = cvar_ads_key.IntValue;
 	cvar.ads_cycletime_mul = cvar_ads_cycletime_mul.FloatValue;
 	cvar.ads_cycletime_scar = cvar_ads_cycletime_scar.FloatValue;
+	cvar.ads_attribute_mul = cvar_ads_attribute_mul.FloatValue;
 }
 
 public void OnConVarChanged(ConVar convar, const char[] oldValue, const char[] newValue)
@@ -627,7 +658,9 @@ MRESReturn DhookCallback_ItemPostFrame(int weapon)
 		if(currenttime > player[client].primaryattacktime)
 		{
 			SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", currenttime);
+			ApplyAdsAttributes(client);
 			SDKCall(g_SDKCall_PrimaryAttack, weapon);
+			RestoreAdsAttributes(client);
 			SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", currenttime + 100.0);
 			player[client].primaryattacktime = currenttime + player[client].cycleTime;
 		}
@@ -636,7 +669,7 @@ MRESReturn DhookCallback_ItemPostFrame(int weapon)
 
 	int reserverammo = L4D_GetReserveAmmo(client, weapon);
 	
-	if((button & IN_RELOAD) || (clip == 0 && (reserverammo > 0 || player[client].isPistol)))
+	if((button & IN_RELOAD) || (clip == 0 && (reserverammo > 0 || (StrContains(player[client].weaponClass, "pistol", false) != -1))))
 	{
 		player[client].pendingDisableAdsFix = true;
 		return MRES_Ignored;
@@ -878,9 +911,8 @@ void LoadPlayerWeaponAttributes(int client, int weapon)
 	// Get weapon classname
 	char classname[64];
 	GetEntityClassname(weapon, classname, sizeof(classname));
-	
-	// Load attributes using Left4DHooks
-	player[client].isPistol = StrContains(classname, "pistol", false) != -1;
+	strcopy(player[client].weaponClass, sizeof(player[].weaponClass), classname);
+	player[client].attrValid = L4D2_IsValidWeapon(classname);
 
 	float cycleTime = SDKCall(g_SDKCall_GetRateOfFire, weapon);
 
@@ -890,6 +922,47 @@ void LoadPlayerWeaponAttributes(int client, int weapon)
 	player[client].cycleTime = cycleTime;
 	float currentTime = GetGameTime();
 	player[client].primaryattacktime = currentTime + cycleTime;
+}
+
+// Scales down recoil / spread / pellet scatter for exactly one shot.
+// Safe despite the weapon-info database being global: the override window is the single
+// SDKCall below, inside this client's own ItemPostFrame, and the game re-reads these
+// fields at fire time. Values are read right before writing so we never fight another
+// plugin (or a weapon_reparse) with a stale cached original.
+void ApplyAdsAttributes(int client)
+{
+	g_bAttributeApplied	= false;
+
+	if (!player[client].attrValid)
+		return;
+
+	char classname[48];
+	strcopy(classname, sizeof(classname), player[client].weaponClass);
+
+	if (cvar.ads_attribute_mul != 1.0)
+	{
+		for (int i = 0; i < sizeof(WP_ATTRS); i++)
+		{
+			g_SavedAttributes[i] = L4D2_GetFloatWeaponAttribute(classname, WP_ATTRS[i]);
+			L4D2_SetFloatWeaponAttribute(classname, WP_ATTRS[i], g_SavedAttributes[i] * cvar.ads_attribute_mul);
+		}
+		g_bAttributeApplied = true;
+	}
+}
+
+void RestoreAdsAttributes(int client)
+{
+	if (!g_bAttributeApplied) return;
+
+	char classname[48];
+	strcopy(classname, sizeof(classname), player[client].weaponClass);
+
+	if (g_bAttributeApplied)
+	{
+		for (int i = 0; i < sizeof(WP_ATTRS); i++)
+			L4D2_SetFloatWeaponAttribute(classname, WP_ATTRS[i], g_SavedAttributes[i]);
+		g_bAttributeApplied = false;
+	}
 }
 
 void ToggleAdsFix(int client, int weapon, bool enable)
