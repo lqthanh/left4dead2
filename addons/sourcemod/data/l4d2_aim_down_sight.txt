@@ -71,6 +71,7 @@
 		"Animation"
 		{
 			"ACT_PRIMARY_VM_IDLE_TO_LOWERED" "0"
+			"ACT_VM_FIDGET" "20"
 		}
 	}
 
