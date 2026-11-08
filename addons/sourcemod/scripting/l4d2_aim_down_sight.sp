@@ -28,6 +28,29 @@ public Plugin myinfo =
 
 #define DEFAULT_ATTACK2_TIME 	0.7
 #define SCAR_WORLD_MODEL 		"models/w_models/weapons/w_desert_rifle.mdl"
+#define ATTRIBUTE_MUL_PATH		"data/l4d2_aim_down_sight/l4d2_aim_down_sight_attribute_mul.txt"
+
+#define WP_ATTR_COUNT			2	// = sizeof(WP_ATTRS)
+
+// ACT_PRIMARY_VM_DRAW .. ACT_PRIMARY_VM_LOWERED_TO_IDLE (ads_1st). The ACT_SECONDARY_VM_*
+// block (ads_2nd) mirrors it 1:1, 11 ids higher (see data/left4dhooks.l4d2.cfg).
+#define ACT_PRIMARY_VM_FIRST	1871
+#define ACT_PRIMARY_VM_LAST		1881
+#define ACT_PRIMARY_VM_IDLE		1873
+#define ACT_SECONDARY_OFFSET	11
+
+#define AIM_MODE_1ST			0
+#define AIM_MODE_2ND			1
+
+// studiohdr_t / mstudio*_t layout (MDL v48/v49), same as ads_v1.987 reads through the engine
+#define MDL_NUMLOCALANIM		0xB4
+#define MDL_NUMLOCALSEQ			0xBC
+#define MDL_NUMBODYPARTS		0xE8
+#define MDL_SIZEOF_BODYPART		16
+#define MDL_SIZEOF_MODEL		148
+#define MDL_SIZEOF_SEQDESC		212
+#define MDL_SIZEOF_ANIMDESC		100
+#define MDL_SEQ_ANIMINDEXINDEX	0x3C
 
 // #endregion
 // ============================================================================
@@ -64,6 +87,37 @@ DynamicHook
 StringMap
 	g_WeaponHookAdsFixIds;
 
+// View model scope bodygroup ("scope_transform" / "scope_variable") plus the custom
+// MIXED / IDLE_TO_NEXT activities, which have no fixed id and must be found by name.
+enum struct ModelScope
+{
+	int base;					// bodypart base, m_nBody = sum(part * base)
+	int numParts;
+	int offOff;					// mixed_off_scope_off
+	int offOn;					// mixed_off_scope_on
+	int onOff;					// mixed_on_scope_off
+	int onOn;					// mixed_on_scope_on
+	int fixOffOff;				// part set at once when the flip-open anim starts
+	int fixOnOff;				// part set at once when the flip-close anim starts (hip / ads_2nd)
+	int fixOnOn;				// part set at once when the flip-close anim starts (ads_1st)
+	float offDelay;				// share of the MIXED_OFF anim before the steady part is set
+	float onDelay;				// share of the MIXED_ON anim before the steady part is set
+	bool magnifier;				// has MIXED_ON and MIXED_OFF animations
+	StringMap sequences;		// activity name -> sequence, "<activity>#d" -> duration
+}
+
+ArrayList
+	g_ModelScopes;				// ModelScope
+
+StringMap
+	g_ModelScopeIds;			// view model path -> index in g_ModelScopes, -1 = no scope bodygroup
+
+int
+	g_ModelIndexScopeId[4096] = {-2, ...};	// model precache index -> g_ModelScopes index, -2 = not resolved yet
+
+bool
+	g_WeaponMixed[2049];		// scope flipped away (mixed on), kept on the weapon like ads_v1.987
+
 enum struct PlayerData
 {
 	bool bZoom;
@@ -72,10 +126,19 @@ enum struct PlayerData
 	bool pendingDisableAdsBySecondary;
 	float primaryattacktime;
 
+	int aimMode;				// AIM_MODE_*, kept across ADS on/off, reset on weapon switch
+	bool combinePressed;
+	float combinePressTime;
+
+	int scopeWeapon;			// entref of the weapon the scope state below belongs to
+	int scopePart;				// bodygroup part we want on the view model
+	float scopeDelaySwitch;		// apply scopePart at this time, 0 = nothing pending
+	float scopeTransformEnd;	// flip animation end
+
 	float cycleTime;
 
 	char weaponClass[48];
-	bool attrValid;
+	float attrMul[WP_ATTR_COUNT];	// attribute_mul of weaponClass, cached on ADS enable
 }
 PlayerData
 	player[MAXPLAYERS + 1];
@@ -83,38 +146,53 @@ PlayerData
 ConVar
 	cvar_ads_debug,
 	cvar_ads_key,
-	cvar_ads_cycletime_mul,
-	cvar_ads_cycletime_scar,
-	cvar_ads_attribute_mul;
+	cvar_ads_combine_key,
+	cvar_ads_combine_hold;
 enum struct GlobalConVar
 {
 	bool ads_debug;
 	int ads_key;
-	float ads_cycletime_mul;
-	float ads_cycletime_scar;
-	float ads_attribute_mul;
+	int ads_combine_key;
+	float ads_combine_hold;
 }
 GlobalConVar
 	cvar;
 
+// Weapon-info attributes scaled around the ADS shot, with their key names in the attribute_mul config.
+// "CycleTime" is handled separately: it scales the plugin's own ADS fire interval.
 L4D2FloatWeaponAttributes
-	WP_ATTRS[] =
+	WP_ATTRS[WP_ATTR_COUNT] =
 {
-	L4D2FWA_MaxSpread
-	//  L4D2FWA_SpreadPerShot
-	// ,L4D2FWA_MaxSpread
-	// ,L4D2FWA_MinDuckingSpread
-	// ,L4D2FWA_MinStandingSpread
-	// ,L4D2FWA_MinInAirSpread
-	// ,L4D2FWA_MaxMovementSpread
-	// ,L4D2FWA_VerticalPunch
-	// ,L4D2FWA_HorizontalPunch
-	// ,L4D2FWA_PelletScatterPitch
-	// ,L4D2FWA_PelletScatterYaw
+	 L4D2FWA_SpreadPerShot
+	,L4D2FWA_MaxSpread
 };
 
+char
+	WP_ATTR_NAMES[WP_ATTR_COUNT][] =
+{
+	 "SpreadPerShot"
+	,"MaxSpread"
+};
+
+// Multipliers applied while ADS. 1.0 = untouched.
+enum struct AttributeMul
+{
+	float cycleTime;
+	float attr[WP_ATTR_COUNT];
+
+	void Reset()
+	{
+		this.cycleTime = 1.0;
+		for (int i = 0; i < WP_ATTR_COUNT; i++)
+			this.attr[i] = 1.0;
+	}
+}
+
+StringMap
+	g_AttributeMulMap;		// weapon classname -> AttributeMul
+
 float
-	g_SavedAttributes[sizeof(WP_ATTRS)];
+	g_SavedAttributes[WP_ATTR_COUNT];
 
 bool
 	g_bAttributeApplied;
@@ -144,15 +222,32 @@ public void OnPluginStart()
 	LoadGameData();
 	LoadActivityList();
 	LoadWeaponData();
+	LoadAttributeMulData();
 	LoadConVars();
 	HookEvents();
 
+	RegAdminCmd("sm_ads_reload", Cmd_AdsReload, ADMFLAG_CONFIG, "Reload ADS sequence override and attribute multiplier configs");
+
 	g_WeaponHookAdsFixIds = new StringMap();
+	g_ModelScopes = new ArrayList(sizeof(ModelScope));
+	g_ModelScopeIds = new StringMap();
+}
+
+Action Cmd_AdsReload(int client, int args)
+{
+	LoadWeaponData();
+	LoadAttributeMulData();
+	ReplyToCommand(client, "[ADS] Configs reloaded (%d weapon attribute entries).", g_AttributeMulMap.Size);
+	return Plugin_Handled;
 }
 
 public void OnMapStart()
 {
 	g_scar_precache_index = PrecacheModel(SCAR_WORLD_MODEL);
+
+	// precache indices change per map
+	for (int i = 0; i < sizeof(g_ModelIndexScopeId); i++)
+		g_ModelIndexScopeId[i] = -2;
 }
 
 public void OnClientConnected(int client)
@@ -165,10 +260,20 @@ public void OnClientConnected(int client)
 	player[client].pendingDisableAdsBySecondary = false;
 	player[client].primaryattacktime			= 0.0;
 
+	player[client].aimMode						= AIM_MODE_1ST;
+	player[client].combinePressed				= false;
+	player[client].combinePressTime				= 0.0;
+
+	player[client].scopeWeapon					= INVALID_ENT_REFERENCE;
+	player[client].scopePart					= -1;
+	player[client].scopeDelaySwitch				= 0.0;
+	player[client].scopeTransformEnd			= 0.0;
+
 	player[client].cycleTime					= 0.0;
 
 	player[client].weaponClass[0]				= '\0';
-	player[client].attrValid					= false;
+	for (int i = 0; i < WP_ATTR_COUNT; i++)
+		player[client].attrMul[i]				= 1.0;
 }
 
 public void OnClientPutInServer(int client)
@@ -181,7 +286,9 @@ public void OnEntityCreated(int entity, const char[] classname)
 {
 	if (!IsValidEntityIndex(entity))
 		return;
-	
+
+	g_WeaponMixed[entity] = false;
+
 	if (classname[0] == 'w' 
 		&& StrContains(classname, "weapon_") == 0 
 		&& (StrContains(classname, "pistol") != -1
@@ -344,12 +451,89 @@ void LoadWeaponData()
 	delete hWeaponData;
 	hWeaponData = new KeyValues("");
 	char buffer[PLATFORM_MAX_PATH];
-	BuildPath(Path_SM, buffer, sizeof(buffer), "data/l4d2_aim_down_sight.txt");
+	BuildPath(Path_SM, buffer, sizeof(buffer), "data/l4d2_aim_down_sight/l4d2_aim_down_sight_sequence_override.txt");
 	
 	if (!hWeaponData.ImportFromFile(buffer))
 	{
 		LogError("[ADS] Failed to load weapon data from %s", buffer);
 	}
+}
+
+// Missing keys and unlisted weapons = 1.0 (no change).
+void LoadAttributeMulData()
+{
+	if (g_AttributeMulMap == null)
+		g_AttributeMulMap = new StringMap();
+	else
+		g_AttributeMulMap.Clear();
+
+	char buffer[PLATFORM_MAX_PATH];
+	BuildPath(Path_SM, buffer, sizeof(buffer), ATTRIBUTE_MUL_PATH);
+
+	KeyValues kv = new KeyValues("Weapon");
+	if (!kv.ImportFromFile(buffer))
+	{
+		LogError("[ADS] Failed to load attribute multipliers from %s", buffer);
+		delete kv;
+		return;
+	}
+
+	char weaponClass[48], key[32];
+	AttributeMul mul;
+	if (kv.GotoFirstSubKey())
+	{
+		do
+		{
+			kv.GetSectionName(weaponClass, sizeof(weaponClass));
+			mul.Reset();
+
+			if (kv.GotoFirstSubKey(false))
+			{
+				do
+				{
+					kv.GetSectionName(key, sizeof(key));
+					float value = kv.GetFloat(NULL_STRING, 1.0);
+					if (value < 0.0 || (value == 0.0 && strcmp(key, "CycleTime", false) == 0))
+						LogError("[ADS] %s: invalid value %.3f for \"%s\", ignored", weaponClass, value, key);
+					else if (!SetAttributeMul(mul, key, value))
+						LogError("[ADS] %s: unknown attribute \"%s\", ignored", weaponClass, key);
+				}
+				while (kv.GotoNextKey(false));
+				kv.GoBack();
+			}
+
+			g_AttributeMulMap.SetArray(weaponClass, mul, sizeof(mul));
+		}
+		while (kv.GotoNextKey());
+	}
+
+	delete kv;
+}
+
+bool SetAttributeMul(AttributeMul mul, const char[] key, float value)
+{
+	if (strcmp(key, "CycleTime", false) == 0)
+	{
+		mul.cycleTime = value;
+		return true;
+	}
+
+	for (int i = 0; i < WP_ATTR_COUNT; i++)
+	{
+		if (strcmp(key, WP_ATTR_NAMES[i], false) == 0)
+		{
+			mul.attr[i] = value;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void GetAttributeMul(const char[] classname, AttributeMul mul)
+{
+	if (!g_AttributeMulMap.GetArray(classname, mul, sizeof(mul)))
+		mul.Reset();
 }
 
 // Cvars
@@ -358,14 +542,12 @@ void LoadConVars()
 	// Create ConVars
 	cvar_ads_debug = 			CreateConVar("ads_debug", "0", "Enable debug messages for ADS plugin");
 	cvar_ads_key = 				CreateConVar("ads_key", "0", "Key to activate ADS. 0 = Zoom key (MOUSE 3), 1 = Walk key (SHIFT), 2 = Duck key (CTRL)");
-	cvar_ads_cycletime_mul = 	CreateConVar("ads_cycletime_mul", "1.1", "ADS cycle-time multiplier. > 1.0 makes ADS slower, 1.0 keeps default.", FCVAR_NONE, true, 1.0);
-	cvar_ads_cycletime_scar = 	CreateConVar("ads_cycletime_scar", "0.12", "Override cycle time for SCAR");
-	cvar_ads_attribute_mul = 		CreateConVar("ads_attribute_mul", "0.5", "Bullet spread multiplier while ADS is active. 1.0 = unchanged, 0.0 = perfect accuracy.", FCVAR_NONE, true, 0.0, true, 1.0);
+	cvar_ads_combine_key =		CreateConVar("ads_combine_key", "32", "Button bitmask that switches aim mode (ads_1st <-> ads_2nd) while ADS. 32 = USE (E), 0 = disabled. Model support required.");
+	cvar_ads_combine_hold = 	CreateConVar("ads_combine_hold", "0.5", "Holding ads_combine_key this many seconds flips the scope (model support required); a shorter press switches aim mode.", FCVAR_NONE, true, 0.0);
 	cvar_ads_debug.AddChangeHook(OnConVarChanged);
 	cvar_ads_key.AddChangeHook(OnConVarChanged);
-	cvar_ads_cycletime_mul.AddChangeHook(OnConVarChanged);
-	cvar_ads_cycletime_scar.AddChangeHook(OnConVarChanged);
-	cvar_ads_attribute_mul.AddChangeHook(OnConVarChanged);
+	cvar_ads_combine_key.AddChangeHook(OnConVarChanged);
+	cvar_ads_combine_hold.AddChangeHook(OnConVarChanged);
 	GetConVars();
 	AutoExecConfig(true, "l4d2_aim_down_sight");
 }
@@ -374,9 +556,8 @@ void GetConVars()
 {
 	cvar.ads_debug = cvar_ads_debug.BoolValue;
 	cvar.ads_key = cvar_ads_key.IntValue;
-	cvar.ads_cycletime_mul = cvar_ads_cycletime_mul.FloatValue;
-	cvar.ads_cycletime_scar = cvar_ads_cycletime_scar.FloatValue;
-	cvar.ads_attribute_mul = cvar_ads_attribute_mul.FloatValue;
+	cvar.ads_combine_key = cvar_ads_combine_key.IntValue;
+	cvar.ads_combine_hold = cvar_ads_combine_hold.FloatValue;
 }
 
 public void OnConVarChanged(ConVar convar, const char[] oldValue, const char[] newValue)
@@ -467,6 +648,8 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 		player[client].pendingDisableAdsFix = false;
 	}
 
+	HandleCombineButton(client, buttons, activeWeapon);
+
 	// if (cvar.ads_debug)
 	// {
 	// 	int viewModel = GetEntPropEnt(client, Prop_Send, "m_hViewModel");
@@ -527,13 +710,17 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 	{
 		player[client].onbutton &= ~adsButton;
 	}
-	
+
 	return Plugin_Continue;
 }
 
 public void OnPlayerRunCmdPost(int client, int buttons)
 {
+	if (!IsClientInGame(client) || GetClientTeam(client) != 2 || IsFakeClient(client))
+		return;
 
+	// After the ADS toggle of this command, so the scope part follows bZoom on the same tick.
+	UpdateScopeBodygroup(client, GetPlayerWeapon(client));
 }
 
 // #endregion
@@ -603,10 +790,26 @@ public MRESReturn DH_OnSelectWeightedSequence(int weapon, Handle hReturn, Handle
 				}
 			}
 			if (owner > 0)
+			{
 				player[owner].bZoom = false;
+				player[owner].aimMode = AIM_MODE_1ST;
+			}
 		}
 	}
-	
+
+	// ads_2nd: swap the ads_1st activity (ours or the engine's) for its ACT_SECONDARY_VM_*
+	// twin. Falls through to ads_1st when the model has no such sequence.
+	if (owner > 0 && player[owner].aimMode == AIM_MODE_2ND
+		&& ACT_PRIMARY_VM_FIRST <= activity <= ACT_PRIMARY_VM_LAST)
+	{
+		sequence = FindWeaponSequence(weapon, activity + ACT_SECONDARY_OFFSET);
+		if (sequence != -1)
+		{
+			DHookSetReturn(hReturn, sequence);
+			return MRES_Supercede;
+		}
+	}
+
 	// if (cvar.ads_debug)
 	// {
 	// 	// Track activity for owner
@@ -701,6 +904,8 @@ public MRESReturn DH_OnGunHolsterPost(int weapon)
 	{
 		SetupZoom(owner, weapon, false);
 	}
+	if (owner > 0)
+		player[owner].aimMode = AIM_MODE_1ST;
 	return MRES_Ignored;
 }
 
@@ -880,6 +1085,87 @@ bool CanZoom(int weapon)
 	        StrContains(classname[13], "sg552", false) != -1);
 }
 
+// Data-file override first, then the model itself. bPass keeps our own hook out of the lookup.
+int FindWeaponSequence(int weapon, int activity)
+{
+	int sequence = GetCustomWeaponAnim(weapon, activity);
+	if (sequence != -1)
+		return sequence;
+
+	bPass = true;
+	sequence = SelectWeightedSequence(weapon, activity);
+	bPass = false;
+	return sequence;
+}
+
+// Same click/hold split as ads_v1.987's SwitchCombine: a press released before
+// ads_combine_hold is a click and switches aim mode; holding that long flips the scope once.
+// combinePressTime = 0 marks a press already used by the hold.
+void HandleCombineButton(int client, int buttons, int weapon)
+{
+	if (cvar.ads_combine_key == 0)
+		return;
+
+	float currentTime = GetGameTime();
+	if (buttons & cvar.ads_combine_key)
+	{
+		if (!player[client].combinePressed)
+		{
+			player[client].combinePressed = true;
+			player[client].combinePressTime = currentTime;
+		}
+		else if (player[client].combinePressTime > 0.0
+			&& currentTime - player[client].combinePressTime >= cvar.ads_combine_hold)
+		{
+			player[client].combinePressTime = 0.0;
+			HandleScopeFlip(client, weapon);
+		}
+		return;
+	}
+
+	if (!player[client].combinePressed)
+		return;
+	player[client].combinePressed = false;
+
+	if (player[client].combinePressTime <= 0.0
+		|| currentTime - player[client].combinePressTime >= cvar.ads_combine_hold)
+		return;
+
+	if (!player[client].bZoom || weapon < 1 || !IsValidEntity(weapon))
+		return;
+
+	if (GetEntProp(weapon, Prop_Send, "m_bInReload") != 0)
+		return;
+
+	SwitchAimMode(client, weapon);
+}
+
+// ads_1st -> ads_2nd -> ads_1st. Only goes to ads_2nd when the model has ACT_SECONDARY_VM_IDLE.
+void SwitchAimMode(int client, int weapon)
+{
+	int mode = AIM_MODE_1ST;
+	if (player[client].aimMode == AIM_MODE_1ST
+		&& FindWeaponSequence(weapon, ACT_PRIMARY_VM_IDLE + ACT_SECONDARY_OFFSET) != -1)
+	{
+		mode = AIM_MODE_2ND;
+	}
+
+	if (mode == player[client].aimMode)
+		return;
+
+	player[client].aimMode = mode;
+
+	// Like SetupZoom: snap the view model onto the new mode's idle. Not under bPass, so
+	// DH_OnSelectWeightedSequence remaps ACT_PRIMARY_VM_IDLE for the new mode.
+	int sequence = SelectWeightedSequence(weapon, ACT_PRIMARY_VM_IDLE);
+	int viewModel = GetEntPropEnt(client, Prop_Send, "m_hViewModel");
+	if (sequence != -1 && viewModel > 0)
+		SetEntProp(viewModel, Prop_Send, "m_nSequence", sequence);
+
+	if (cvar.ads_debug)
+		PrintToServer("[ADS] %N switched aim mode to ads_%s (sequence %d)", client, mode == AIM_MODE_2ND ? "2nd" : "1st", sequence);
+}
+
 int GetPlayerWeapon(int client)
 {
 	return GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
@@ -937,6 +1223,401 @@ void ClearInspectHelpingHand(int weapon)
 // ============================================================================
 
 // ============================================================================
+// #region Helper Scope
+
+// The client's view model if it is showing this weapon (it can lag a tick behind a switch).
+int GetWeaponViewModel(int client, int weapon)
+{
+	if (weapon < 1 || !IsValidEntity(weapon))
+		return -1;
+
+	int viewModel = GetEntPropEnt(client, Prop_Send, "m_hViewModel");
+	if (viewModel < 1 || !IsValidEntity(viewModel) || GetEntPropEnt(viewModel, Prop_Send, "m_hWeapon") != weapon)
+		return -1;
+
+	return viewModel;
+}
+
+// ModelScope index for the view model's model, -1 if it has no scope bodygroup.
+// Each model file is parsed once per plugin load, the model index lookup once per map.
+int GetViewModelScopeId(int viewModel)
+{
+	int index = GetEntProp(viewModel, Prop_Send, "m_nModelIndex");
+	if (index < 0 || index >= sizeof(g_ModelIndexScopeId))
+		return -1;
+
+	if (g_ModelIndexScopeId[index] != -2)
+		return g_ModelIndexScopeId[index];
+
+	char model[PLATFORM_MAX_PATH];
+	GetEntPropString(viewModel, Prop_Data, "m_ModelName", model, sizeof(model));
+	if (model[0] == '\0')
+		return -1;
+
+	int id;
+	if (!g_ModelScopeIds.GetValue(model, id))
+	{
+		id = LoadModelScope(model);
+		g_ModelScopeIds.SetValue(model, id);
+	}
+
+	g_ModelIndexScopeId[index] = id;
+	return id;
+}
+
+int LoadModelScope(const char[] model)
+{
+	File file = OpenFile(model, "rb", true);
+	if (file == null)
+		return -1;
+
+	int id = -1;
+	ModelScope scope;
+	int version = MdlReadInt(file, 4);
+	if ((version == 48 || version == 49) && ReadScopeBodygroup(file, scope))
+	{
+		scope.sequences = new StringMap();
+		ReadScopeSequences(file, scope.sequences);
+
+		float duration;
+		scope.magnifier = (FindScopeSequence(scope, "ACT_VM_MIXED_ON", duration) != -1 && FindScopeSequence(scope, "ACT_VM_MIXED_OFF", duration) != -1)
+			|| (FindScopeSequence(scope, "ACT_PRIMARY_VM_MIXED_ON", duration) != -1 && FindScopeSequence(scope, "ACT_PRIMARY_VM_MIXED_OFF", duration) != -1);
+
+		id = g_ModelScopes.PushArray(scope);
+	}
+	delete file;
+
+	if (cvar.ads_debug)
+		PrintToServer("[ADS] %s: %s", model, id == -1 ? "no scope bodygroup" : (scope.magnifier ? "scope bodygroup + flip anims" : "scope bodygroup"));
+
+	return id;
+}
+
+// Port of ads_v1.987's GetBodyGroupScope + SetMixedDelay.
+bool ReadScopeBodygroup(File file, ModelScope scope)
+{
+	int numBodyparts = MdlReadInt(file, MDL_NUMBODYPARTS);
+	int bodypartIndex = MdlReadInt(file, MDL_NUMBODYPARTS + 4);
+
+	char name[64];
+	for (int b = 0; b < numBodyparts; b++)
+	{
+		int offset = bodypartIndex + b * MDL_SIZEOF_BODYPART;
+		MdlReadString(file, offset + MdlReadInt(file, offset), name, sizeof(name));
+
+		bool transform = StrEqual(name, "scope_transform");
+		if (!transform && !StrEqual(name, "scope_variable"))
+			continue;
+
+		scope.numParts = MdlReadInt(file, offset + 4);
+		scope.base = MdlReadInt(file, offset + 8);
+		if (scope.numParts < 2 || scope.base < 1)
+			return false;
+
+		int delayCount, delayMax;
+		if (transform)
+		{
+			scope.offOff = 0;
+			scope.offOn = 1;
+			scope.onOff = 2;
+			scope.onOn = 3;
+			scope.offDelay = 0.5;
+			scope.onDelay = 0.3;
+			scope.fixOffOff = scope.offOff;
+			scope.fixOnOff = scope.onOff;
+			scope.fixOnOn = scope.onOn;
+			delayCount = 3;
+			delayMax = 1;
+		}
+		else
+		{
+			scope.offOff = 0;	// mixed_off_scope_x1
+			scope.onOn = 1;		// mixed_on_scope_x4
+			scope.offOn = 0;	// mixed_off_scope_x4
+			scope.onOff = 1;	// mixed_on_scope_x1
+			scope.offDelay = 0.5;
+			scope.onDelay = 0.5;
+			scope.fixOffOff = scope.onOn;
+			scope.fixOnOff = scope.offOff;
+			scope.fixOnOn = scope.offOff;
+			if (scope.numParts > 3)
+			{
+				scope.fixOffOff = 2;	// mixed_off_scope_on
+				scope.fixOnOff = 3;		// mixed_on_scope_off
+				scope.fixOnOn = 3;		// mixed_on_scope_off
+			}
+			delayCount = 1;
+			delayMax = 0;
+		}
+
+		// "mixed_off_scope_off_50.smd": the number is the switch point in % of the anim
+		int modelIndex = MdlReadInt(file, offset + 12);
+		for (int i = 0; i <= delayCount && i < scope.numParts; i++)
+		{
+			MdlReadString(file, offset + modelIndex + i * MDL_SIZEOF_MODEL, name, sizeof(name));
+			for (int c = 0; name[c] != '\0'; c++)
+			{
+				if (name[c] == '_' && IsCharNumeric(name[c + 1]))
+				{
+					float delay = StringToInt(name[c + 1]) * 0.01;
+					if (i <= delayMax)
+						scope.offDelay = delay;
+					else
+						scope.onDelay = delay;
+					break;
+				}
+			}
+		}
+		return true;
+	}
+	return false;
+}
+
+// Only the custom activities the engine has no id for: *MIXED_* and *IDLE_TO_NEXT.
+void ReadScopeSequences(File file, StringMap sequences)
+{
+	int animIndex = MdlReadInt(file, MDL_NUMLOCALANIM + 4);
+	int numSeq = MdlReadInt(file, MDL_NUMLOCALSEQ);
+	int seqIndex = MdlReadInt(file, MDL_NUMLOCALSEQ + 4);
+
+	char activity[64], key[72];
+	for (int s = 0; s < numSeq; s++)
+	{
+		int offset = seqIndex + s * MDL_SIZEOF_SEQDESC;
+		MdlReadString(file, offset + MdlReadInt(file, offset + 8), activity, sizeof(activity));
+		StrToUpper(activity);
+
+		if (StrContains(activity, "MIXED_") == -1 && StrContains(activity, "IDLE_TO_NEXT") == -1)
+			continue;
+		if (sequences.ContainsKey(activity))
+			continue;
+
+		// duration of the sequence's first animation, like CBaseAnimating::SequenceDuration
+		int anim;
+		file.Seek(offset + MdlReadInt(file, offset + MDL_SEQ_ANIMINDEXINDEX), SEEK_SET);
+		file.ReadInt16(anim);
+		int animOffset = animIndex + anim * MDL_SIZEOF_ANIMDESC;
+		float fps = view_as<float>(MdlReadInt(file, animOffset + 8));
+		int frames = MdlReadInt(file, animOffset + 16);
+
+		sequences.SetValue(activity, s);
+		FormatEx(key, sizeof(key), "%s#d", activity);
+		sequences.SetValue(key, (frames > 1 && fps > 0.0) ? (frames - 1) / fps : 0.0);
+	}
+}
+
+int MdlReadInt(File file, int offset)
+{
+	int value;
+	file.Seek(offset, SEEK_SET);
+	file.ReadInt32(value);
+	return value;
+}
+
+void MdlReadString(File file, int offset, char[] buffer, int maxlength)
+{
+	file.Seek(offset, SEEK_SET);
+	file.ReadString(buffer, maxlength, -1);
+}
+
+void StrToUpper(char[] buffer)
+{
+	for (int i = 0; buffer[i] != '\0'; i++)
+		buffer[i] = CharToUpper(buffer[i]);
+}
+
+// "_LAYER" first, like ads_v1.987's LookupAnimations.
+int FindScopeSequence(ModelScope scope, const char[] activity, float &duration)
+{
+	char key[72];
+	int sequence;
+	FormatEx(key, sizeof(key), "%s_LAYER", activity);
+	if (!scope.sequences.GetValue(key, sequence))
+	{
+		strcopy(key, sizeof(key), activity);
+		if (!scope.sequences.GetValue(key, sequence))
+			return -1;
+	}
+
+	StrCat(key, sizeof(key), "#d");
+	scope.sequences.GetValue(key, duration);
+	return sequence;
+}
+
+// Current aim mode's anim, then ads_1st, then hip.
+int FindFlipSequence(int client, ModelScope scope, bool open, float &duration)
+{
+	char activity[48];
+	char suffix[16];
+	strcopy(suffix, sizeof(suffix), open ? "MIXED_OFF" : "MIXED_ON");
+
+	int sequence = -1;
+	if (player[client].bZoom)
+	{
+		if (player[client].aimMode == AIM_MODE_2ND)
+		{
+			FormatEx(activity, sizeof(activity), "ACT_SECONDARY_VM_%s", suffix);
+			sequence = FindScopeSequence(scope, activity, duration);
+		}
+		if (sequence == -1)
+		{
+			FormatEx(activity, sizeof(activity), "ACT_PRIMARY_VM_%s", suffix);
+			sequence = FindScopeSequence(scope, activity, duration);
+		}
+	}
+	if (sequence == -1)
+	{
+		FormatEx(activity, sizeof(activity), "ACT_VM_%s", suffix);
+		sequence = FindScopeSequence(scope, activity, duration);
+	}
+	return sequence;
+}
+
+// Part the scope rests on outside a flip.
+int GetSteadyScopePart(int client, int weapon, ModelScope scope)
+{
+	if (g_WeaponMixed[weapon])
+		return scope.onOff;
+
+	if (player[client].bZoom && player[client].aimMode == AIM_MODE_1ST)
+		return scope.offOn;
+
+	return scope.offOff;
+}
+
+void SetBodygroupPart(int entity, ModelScope scope, int part)
+{
+	int body = GetEntProp(entity, Prop_Send, "m_nBody");
+	int current = (body / scope.base) % scope.numParts;
+	if (current != part)
+		SetEntProp(entity, Prop_Send, "m_nBody", body + (part - current) * scope.base);
+}
+
+// ads_v1.987 sets the part on both the weapon and the view model.
+void SetScopePart(int weapon, int viewModel, ModelScope scope, int part)
+{
+	SetBodygroupPart(viewModel, scope, part);
+	SetBodygroupPart(weapon, scope, part);
+}
+
+// Keeps the scope bodygroup on the part for hip / ads_1st / ads_2nd / flipped. A pending
+// switch (ADS enter, mid-flip) waits for scopeDelaySwitch; otherwise the part is enforced
+// every tick, so an engine reset of m_nBody (deploy) is undone at once.
+void UpdateScopeBodygroup(int client, int weapon)
+{
+	int viewModel = GetWeaponViewModel(client, weapon);
+	if (viewModel == -1)
+		return;
+
+	int id = GetViewModelScopeId(viewModel);
+	if (id < 0)
+		return;
+
+	ModelScope scope;
+	g_ModelScopes.GetArray(id, scope);
+
+	float currentTime = GetGameTime();
+	int ref = EntIndexToEntRef(weapon);
+	if (player[client].scopeWeapon != ref)
+	{
+		player[client].scopeWeapon = ref;
+		player[client].scopePart = -1;
+		player[client].scopeDelaySwitch = 0.0;
+		player[client].scopeTransformEnd = 0.0;
+	}
+
+	int target = GetSteadyScopePart(client, weapon, scope);
+	if (target != player[client].scopePart)
+	{
+		if (player[client].scopeDelaySwitch <= 0.0)
+		{
+			bool enterAds = player[client].bZoom && player[client].scopePart != -1;
+			player[client].scopeDelaySwitch = currentTime + (enterAds ? 0.1 : 0.0);
+		}
+		player[client].scopePart = target;
+	}
+
+	if (player[client].scopeDelaySwitch > 0.0)
+	{
+		if (currentTime < player[client].scopeDelaySwitch)
+			return;
+		player[client].scopeDelaySwitch = 0.0;
+	}
+
+	SetScopePart(weapon, viewModel, scope, target);
+}
+
+// Port of ads_v1.987's ScopeTransform. Does nothing while reloading, firing or mid-flip.
+void HandleScopeFlip(int client, int weapon)
+{
+	int viewModel = GetWeaponViewModel(client, weapon);
+	if (viewModel == -1)
+		return;
+
+	int id = GetViewModelScopeId(viewModel);
+	if (id < 0)
+		return;
+
+	ModelScope scope;
+	g_ModelScopes.GetArray(id, scope);
+	if (!scope.magnifier)
+		return;
+
+	float currentTime = GetGameTime();
+	if (GetEntProp(weapon, Prop_Send, "m_bInReload") != 0 || currentTime < player[client].scopeTransformEnd)
+		return;
+
+	// While ADS the plugin parks m_flNextPrimaryAttack far ahead and fires on primaryattacktime.
+	float nextAttack = player[client].bZoom ? player[client].primaryattacktime : GetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack");
+	if (currentTime < nextAttack)
+		return;
+
+	bool open = g_WeaponMixed[weapon];	// flipped away now -> MIXED_OFF brings the scope back
+	float duration;
+	int sequence = FindFlipSequence(client, scope, open, duration);
+	if (sequence == -1)
+		return;
+
+	SetEntProp(viewModel, Prop_Send, "m_nLayerSequence", sequence);
+	SetEntProp(viewModel, Prop_Send, "m_nLayer", 0);
+	SetEntPropFloat(viewModel, Prop_Send, "m_flLayerStartTime", currentTime);
+
+	g_WeaponMixed[weapon] = !open;
+	player[client].scopeWeapon = EntIndexToEntRef(weapon);
+	player[client].scopeTransformEnd = currentTime + duration;
+
+	// Switch at once to avoid animation issues, then UpdateScopeBodygroup sets the steady
+	// part at the point the part name asks for (e.g. _30 = 30% into the anim).
+	int part;
+	if (open)
+		part = scope.fixOffOff;
+	else
+		part = (player[client].bZoom && player[client].aimMode == AIM_MODE_1ST) ? scope.fixOnOn : scope.fixOnOff;
+	SetScopePart(weapon, viewModel, scope, part);
+	player[client].scopePart = part;
+	player[client].scopeDelaySwitch = currentTime + duration * (open ? scope.offDelay : scope.onDelay);
+
+	// no firing until the flip anim ends
+	if (player[client].bZoom)
+	{
+		if (player[client].primaryattacktime < player[client].scopeTransformEnd)
+			player[client].primaryattacktime = player[client].scopeTransformEnd;
+	}
+	else
+	{
+		SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", player[client].scopeTransformEnd);
+	}
+
+	if (cvar.ads_debug)
+		PrintToServer("[ADS] %N flip scope %s (sequence %d, %.2fs)", client, open ? "on" : "off", sequence, duration);
+
+	return;
+}
+
+// #endregion
+// ============================================================================
+
+// ============================================================================
 // #region Helper ADS Fix
 
 bool CanAttack(int client, int clip = -1)
@@ -964,19 +1645,25 @@ void LoadPlayerWeaponAttributes(int client, int weapon)
 	char classname[64];
 	GetEntityClassname(weapon, classname, sizeof(classname));
 	strcopy(player[client].weaponClass, sizeof(player[].weaponClass), classname);
-	player[client].attrValid = L4D2_IsValidWeapon(classname);
 
-	float cycleTime = SDKCall(g_SDKCall_GetRateOfFire, weapon);
+	AttributeMul mul;
+	GetAttributeMul(classname, mul);
+	for (int i = 0; i < WP_ATTR_COUNT; i++)
+		player[client].attrMul[i] = mul.attr[i];
 
-	if (cvar.ads_cycletime_scar > 0.0 && GetEntProp(weapon, Prop_Send, "m_iWorldModelIndex") == g_scar_precache_index) cycleTime = cvar.ads_cycletime_scar;
-	if (cvar.ads_cycletime_mul > 1.0) cycleTime *= cvar.ads_cycletime_mul;
+	float cycleTime = 0.0;
+
+	if (GetEntProp(weapon, Prop_Send, "m_iWorldModelIndex") == g_scar_precache_index) 
+		cycleTime = mul.cycleTime;
+	else
+    	cycleTime = view_as<float>(SDKCall(g_SDKCall_GetRateOfFire, weapon)) * mul.cycleTime;
 
 	player[client].cycleTime = cycleTime;
 	float currentTime = GetGameTime();
 	player[client].primaryattacktime = currentTime + cycleTime;
 }
 
-// Scales down recoil / spread / pellet scatter for exactly one shot.
+// Scales the weapon's attributes (per the attribute_mul config) for exactly one shot.
 // Safe despite the weapon-info database being global: the override window is the single
 // SDKCall below, inside this client's own ItemPostFrame, and the game re-reads these
 // fields at fire time. Values are read right before writing so we never fight another
@@ -985,19 +1672,13 @@ void ApplyAdsAttributes(int client)
 {
 	g_bAttributeApplied	= false;
 
-	if (!player[client].attrValid)
-		return;
-
-	char classname[48];
-	strcopy(classname, sizeof(classname), player[client].weaponClass);
-
-	if (cvar.ads_attribute_mul != 1.0)
+	for (int i = 0; i < WP_ATTR_COUNT; i++)
 	{
-		for (int i = 0; i < sizeof(WP_ATTRS); i++)
-		{
-			g_SavedAttributes[i] = L4D2_GetFloatWeaponAttribute(classname, WP_ATTRS[i]);
-			L4D2_SetFloatWeaponAttribute(classname, WP_ATTRS[i], g_SavedAttributes[i] * cvar.ads_attribute_mul);
-		}
+		if (player[client].attrMul[i] == 1.0)
+			continue;
+
+		g_SavedAttributes[i] = L4D2_GetFloatWeaponAttribute(player[client].weaponClass, WP_ATTRS[i]);
+		L4D2_SetFloatWeaponAttribute(player[client].weaponClass, WP_ATTRS[i], g_SavedAttributes[i] * player[client].attrMul[i]);
 		g_bAttributeApplied = true;
 	}
 }
@@ -1006,15 +1687,13 @@ void RestoreAdsAttributes(int client)
 {
 	if (!g_bAttributeApplied) return;
 
-	char classname[48];
-	strcopy(classname, sizeof(classname), player[client].weaponClass);
-
-	if (g_bAttributeApplied)
+	for (int i = 0; i < WP_ATTR_COUNT; i++)
 	{
-		for (int i = 0; i < sizeof(WP_ATTRS); i++)
-			L4D2_SetFloatWeaponAttribute(classname, WP_ATTRS[i], g_SavedAttributes[i]);
-		g_bAttributeApplied = false;
+		if (player[client].attrMul[i] != 1.0)
+			L4D2_SetFloatWeaponAttribute(player[client].weaponClass, WP_ATTRS[i], g_SavedAttributes[i]);
 	}
+
+	g_bAttributeApplied = false;
 }
 
 void ToggleAdsFix(int client, int weapon, bool enable)
